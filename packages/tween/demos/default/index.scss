@@ -1,0 +1,22 @@
+@import "demo";
+
+.box {
+  width: 80px;
+  height: 80px;
+  background-color: #0C0C0C;
+  margin: 5px 0;
+  text-align: center;
+  color: white;
+  line-height: 80px;
+  font-size: rem(8px);
+}
+
+.box-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+
+  .box-wrapper {
+    margin-right: 200px;
+  }
+}

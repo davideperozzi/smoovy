@@ -1,0 +1,28 @@
+{
+  "name": "@smoovy/ticker",
+  "version": "0.0.0",
+  "description": "Simple and easy-to-use ticker",
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "types": "dist/typings/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "test": "NAME=$(basename \"$PWD\") && cd ../../ && npm run test:package $NAME",
+    "build": "NAME=$(basename \"$PWD\") && cd ../../ && npm run build:package $NAME",
+    "serve": "NAME=$(basename \"$PWD\") && cd ../../ && npm run serve:package $NAME $1"
+  },
+  "keywords": [
+    "smoovy",
+    "ticker",
+    "raf",
+    "fps"
+  ],
+  "author": "Davide Perozzi",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {
+    "tslib": "^1.9.3"
+  }
+}

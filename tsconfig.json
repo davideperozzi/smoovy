@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "noEmitHelpers": true,
+		"sourceMap": true,
+		"importHelpers": true,
+    "strict": true,
+    "declaration": true,
+    "preserveSymlinks": true,
+    "strictPropertyInitialization": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": ["es2015", "es2016", "es2017", "dom"],
+  }
+}

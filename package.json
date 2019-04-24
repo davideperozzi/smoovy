@@ -1,0 +1,28 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "build:package": "scripty",
+    "test:package": "scripty",
+    "serve:package": "scripty"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "@dorfjungs/scss-base": "^1.1.0",
+    "@types/jest": "^24.0.11",
+    "babel-jest": "^24.7.1",
+    "jest": "^24.7.1",
+    "lerna": "^3.13.3",
+    "parcel-bundler": "^1.12.3",
+    "rollup": "^1.10.1",
+    "rollup-plugin-auto-external": "^2.0.0",
+    "rollup-plugin-local-resolve": "^1.0.7",
+    "rollup-plugin-terser": "^4.0.4",
+    "rollup-plugin-typescript2": "^0.20.1",
+    "sass": "^1.19.0",
+    "scripty": "^1.9.1",
+    "tslib": "^1.9.3",
+    "typescript": "^3.4.4"
+  }
+}
