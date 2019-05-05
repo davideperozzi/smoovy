@@ -15,5 +15,3 @@ for (const name in easingsMap) {
     easingsFlatMap[`${name}.${type}`] = easingsMap[name][type];
   }
 }
-
-

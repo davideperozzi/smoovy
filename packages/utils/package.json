@@ -1,0 +1,29 @@
+{
+  "name": "@smoovy/utils",
+  "version": "0.0.0",
+  "description": "Some basic functionality to make better websites",
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "types": "dist/typings/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "test": "NAME=$(basename \"$PWD\") && cd ../../ && npm run test:package $NAME",
+    "build": "NAME=$(basename \"$PWD\") && cd ../../ && npm run build:package $NAME",
+    "serve": "NAME=$(basename \"$PWD\") && cd ../../ && npm run serve:package $NAME $1"
+  },
+  "keywords": [
+    "smoovy",
+    "utils"
+  ],
+  "author": "Davide Perozzi",
+  "license": "ISC",
+  "dependencies": {
+    "@smoovy/ticker": "^0.0.0",
+    "tslib": "^1.9.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.3"
+  }
+}

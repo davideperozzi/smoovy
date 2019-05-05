@@ -2,6 +2,8 @@
   "name": "root",
   "private": true,
   "scripts": {
+    "build:all": "lerna exec --concurrency 1 -- npm run build",
+    "test:all": "lerna exec --concurrency 1 -- npm run test",
     "build:package": "scripty",
     "test:package": "scripty",
     "serve:package": "scripty"

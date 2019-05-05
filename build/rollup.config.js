@@ -15,9 +15,9 @@ const outputName = path.basename(pkgConfig.main)
 
 const defaultExternals = (id) => {
   return autoExternal({ packagePath: pkgConfigPath})
-  .options({ external: [] })
-  .external
-  .includes(id);
+    .options({ external: [] })
+    .external
+    .includes(id);
 }
 
 const defaultPlugins = [

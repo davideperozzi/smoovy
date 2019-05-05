@@ -21,12 +21,23 @@ function injectControls<T, R>(
 
   playBtn.classList.add('demo-play-btn');
   playBtn.addEventListener('click', () => {
-    if (controls.reset && ! firstPlay) {
-      controls.reset.call(undefined, data);
-    }
+    new Promise((resolve, reject) => {
+      if (controls.reset && ! firstPlay) {
+        const resetRet: any = controls.reset.call(undefined, data);
 
-    firstPlay = false;
-    data = controls.play.call(undefined, ctx);
+        if (resetRet instanceof Promise) {
+          resetRet.then(() => resolve(), () => reject());
+        } else {
+          resolve();
+        }
+      } else {
+        resolve();
+      }
+
+    }).then(() => {
+      firstPlay = false;
+      data = controls.play.call(undefined, ctx);
+    });
   }, false);
 
   demo.appendChild(playBtn);
