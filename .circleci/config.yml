@@ -13,13 +13,16 @@ jobs:
           name: "Install node modules"
           command: 'npm install'
       - run:
-          name: linter
+          name: "Link all packages"
+          command: "npm run link:all"
+      - run:
+          name: "Run TSLinter on all packages"
           command: "npm run lint:all"
       - run:
-          name: build
+          name: "Build all packages"
           command: "npm run build:all"
       - run:
-          name: jest
+          name: "Run Jest on all packages"
           command: "npm run test:all"
 workflows:
   test:
