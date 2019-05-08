@@ -3,12 +3,12 @@ jobs:
   test:
     working_directory: ~
     docker:
-      - image: circleci/node:4.8.2
+      - image: circleci/node:11.10.1-browsers
     steps:
       - checkout
       - run:
           name: update-npm
-          command: 'sudo npm install -g npm@11.10.1'
+          command: 'sudo npm install -g npm@latest'
       - run:
           name: linter
           command: "npm run lint:all"
