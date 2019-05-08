@@ -74,12 +74,14 @@ export class Tween<T = any> implements Tweenable {
 
       if (msPassed > 0) {
         for (const prop in changes) {
-          target[prop as string] = easing(
-            msPassed,
-            stableTarget[prop],
-            changes[prop] as number,
-            duration
-          );
+          if (changes.hasOwnProperty(prop)) {
+            target[prop as string] = easing(
+              msPassed,
+              stableTarget[prop],
+              changes[prop] as number,
+              duration
+            );
+          }
         }
 
         if (options.update) {
@@ -89,7 +91,9 @@ export class Tween<T = any> implements Tweenable {
 
       if (msPassed >= 0 && msPassed >= duration) {
         for (const prop in changes) {
-          target[prop as string] = toValues[prop];
+          if (changes.hasOwnProperty(prop)) {
+            target[prop as string] = toValues[prop];
+          }
         }
 
         if (options.update) {

@@ -1,4 +1,6 @@
-type DefaultObject = { [id: string]: any };
+interface DefaultObject {
+  [id: string]: any;
+}
 
 export function isObject(item: any): boolean {
   return (item && typeof item === 'object' &&
@@ -37,9 +39,9 @@ export function objectDeepClone<T extends DefaultObject>(obj: T): T {
   if (isObject(obj)) {
     const copy: { [attr: string]: any } = {};
 
-    for (var attr in obj) {
+    for (const attr in obj) {
       if (obj.hasOwnProperty(attr)) {
-        copy[attr] = objectDeepClone(obj[attr])
+        copy[attr] = objectDeepClone(obj[attr]);
       }
     }
 
@@ -58,7 +60,7 @@ export function objectValueByPath<T extends DefaultObject>(
   let last = obj;
 
   while (keys.length > 0) {
-    let key = keys.shift();
+    const key = keys.shift();
 
     if (typeof last === 'object' && key) {
       last = last[key];

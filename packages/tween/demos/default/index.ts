@@ -1,6 +1,6 @@
-import { Tween, easings } from "../../src/index";
 import { demo } from '../../../../demos/demo';
 import { EasingImplementation } from '../../dist/typings/easing';
+import { easings, Tween } from '../../src/index';
 
 demo('counter', ({ counterEl }) => ({
   play: () => ({
@@ -46,7 +46,7 @@ demo('easings', ({ boxEls }) => ({
       name: string;
       el: HTMLElement;
       fn: EasingImplementation;
-    };
+    }
 
     const easingEls: EasingElement[] = [
       { name: 'Circ.out', fn: easings.Circ.out, el: boxEls[0] },
@@ -76,7 +76,7 @@ demo('easings', ({ boxEls }) => ({
               easing.el.style.transform = `translate3d(${x}px, 0, 0)`;
             }
           }
-        )
+        );
       })
     };
   },

@@ -16,7 +16,7 @@ demo('clock', ({ clockEl }) => ({
 
         (clockEl as HTMLElement).textContent = `
           ${ticker.minFPS}/${ticker.maxFPS}FPS
-          | ${Math.floor(passedMs/1000)}s (${passedMs}ms)
+          | ${Math.floor(passedMs / 1000)}s (${passedMs}ms)
           | ▲ ${delta}ms
         `;
       })

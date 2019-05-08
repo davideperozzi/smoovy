@@ -6,7 +6,7 @@ export const Linear = {
   none: (t: number, b: number, c: number, d: number): number => {
     return c * t / d + b;
   }
-}
+};
 
 export const Quad = {
   in: (t: number, b: number, c: number, d: number): number => {
@@ -24,7 +24,7 @@ export const Cubic = {
   out: (t: number, b: number, c: number, d: number): number => {
     return c * ((t = t / d - 1) * t * t + 1) + b;
   }
-}
+};
 
 export const Quart = {
   in: (t: number, b: number, c: number, d: number): number => {
@@ -33,7 +33,7 @@ export const Quart = {
   out: (t: number, b: number, c: number, d: number): number => {
     return -c * ((t = t / d - 1) * t * t * t - 1) + b;
   }
-}
+};
 
 export const Quint = {
   in: (t: number, b: number, c: number, d: number): number => {
@@ -42,7 +42,7 @@ export const Quint = {
   out: (t: number, b: number, c: number, d: number): number => {
     return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
   }
-}
+};
 
 export const Sine = {
   in: (t: number, b: number, c: number, d: number): number => {
@@ -51,16 +51,16 @@ export const Sine = {
   out: (t: number, b: number, c: number, d: number): number => {
     return c * Math.sin(t / d * (Math.PI / 2)) + b;
   }
-}
+};
 
 export const Expo = {
   in: (t: number, b: number, c: number, d: number): number => {
-    return (t == 0) ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
+    return (t === 0) ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
   },
   out: (t: number, b: number, c: number, d: number): number => {
-    return (t == d) ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
+    return (t === d) ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
   }
-}
+};
 
 export const Circ = {
   in: (t: number, b: number, c: number, d: number): number => {
@@ -69,16 +69,28 @@ export const Circ = {
   out: (t: number, b: number, c: number, d: number): number => {
     return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
   }
-}
+};
 
 export const Back = {
-  in: (t: number, b: number, c: number, d: number, s: number = 1.70158): number => {
+  in: (
+    t: number,
+    b: number,
+    c: number,
+    d: number,
+    s: number = 1.70158
+  ): number => {
     return c * (t /= d) * t * ((s + 1) * t - s) + b;
   },
-  out: (t: number, b: number, c: number, d: number, s: number = 1.70158): number => {
+  out: (
+    t: number,
+    b: number,
+    c: number,
+    d: number,
+    s: number = 1.70158
+  ): number => {
     return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
   }
-}
+};
 
 export const Bounce = {
   in: (t: number, b: number, c: number, d: number): number => {
@@ -95,4 +107,4 @@ export const Bounce = {
         return c * (7.5625 * (t -= (2.625 / 2.75)) * t + .984375) + b;
     }
   }
-}
+};

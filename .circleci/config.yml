@@ -1,0 +1,14 @@
+version: 2.1
+orbs:
+  node: circleci/node@1.0.1
+workflows:
+  node_tests:
+    jobs:
+      - tslint:
+          name: "TSLinter"
+          steps:
+            - run: npm run lint:all
+      - jest:
+          name: "Jest (Unit testing)"
+          steps:
+            - run: npm run test:all

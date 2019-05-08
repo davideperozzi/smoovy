@@ -9,6 +9,7 @@
     "dist/**"
   ],
   "scripts": {
+    "lint": "NAME=$(basename \"$PWD\") && cd ../../ && npm run lint:package $NAME",
     "test": "NAME=$(basename \"$PWD\") && cd ../../ && npm run test:package $NAME",
     "build": "NAME=$(basename \"$PWD\") && cd ../../ && npm run build:package $NAME",
     "serve": "NAME=$(basename \"$PWD\") && cd ../../ && npm run serve:package $NAME $1"

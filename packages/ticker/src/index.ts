@@ -29,6 +29,16 @@ export class Ticker {
   private minDeltaMs: number = 0;
   private maxDeltaMs: number = 1000 / 10;
 
+  public static requestAnimationFrame(callback: FrameRequestCallback) {
+    return window.requestAnimationFrame
+      ? window.requestAnimationFrame(callback)
+      : window.setTimeout(callback, 1000 / 60);
+  }
+
+  public static now(): number {
+    return (window.performance || Date).now();
+  }
+
   public setMinFPS(fps: number) {
     const minFPS = Math.max(Math.min(fps, this.maxFPS), 0);
 
@@ -53,16 +63,6 @@ export class Ticker {
     return this.minDeltaMs > 0
       ? 1000 / this.minDeltaMs
       : this.intervalMs * 1000;
-  }
-
-  public static requestAnimationFrame(callback: FrameRequestCallback) {
-    return window.requestAnimationFrame
-      ? window.requestAnimationFrame(callback)
-      : window.setTimeout(callback, 1000 / 60);
-  }
-
-  public static now(): number {
-    return (window.performance || Date).now();
   }
 
   public tick(delta: number, time: number = Ticker.now()) {

@@ -1,5 +1,5 @@
 interface DemoElements {
-  [name: string]: HTMLElement|HTMLElement[]
+  [name: string]: HTMLElement|HTMLElement[];
 }
 
 export interface DemoControls<T, R = any> {
@@ -9,11 +9,11 @@ export interface DemoControls<T, R = any> {
 }
 
 function injectControls<T, R>(
-  demo: HTMLElement,
+  demoEl: HTMLElement,
   controls: DemoControls<T, R>
 ) {
   const playBtn = document.createElement('button');
-  const ctx = controls.init ? controls.init.call(undefined) : {} as T
+  const ctx = controls.init ? controls.init.call(undefined) : {} as T;
   let data = {} as R;
   let firstPlay = true;
 
@@ -40,7 +40,7 @@ function injectControls<T, R>(
     });
   }, false);
 
-  demo.appendChild(playBtn);
+  demoEl.appendChild(playBtn);
 
   return demo;
 }

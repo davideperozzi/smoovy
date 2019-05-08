@@ -2,8 +2,10 @@
   "name": "root",
   "private": true,
   "scripts": {
+    "lint:all": "lerna exec --concurrency 1 -- npm run lint",
     "build:all": "lerna exec --concurrency 1 -- npm run build",
     "test:all": "lerna exec --concurrency 1 -- npm run test",
+    "lint:package": "scripty",
     "build:package": "scripty",
     "test:package": "scripty",
     "serve:package": "scripty"
@@ -25,6 +27,7 @@
     "sass": "^1.19.0",
     "scripty": "^1.9.1",
     "tslib": "^1.9.3",
+    "tslint": "^5.16.0",
     "typescript": "^3.4.4"
   }
 }

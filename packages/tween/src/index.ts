@@ -2,7 +2,6 @@ import * as _easings from './easing';
 
 export * from './tween';
 export { _easings as easings };
-export { easingsFlatMap };
 
 export const easingsMap: {
   [id: string]: { [type: string]: _easings.EasingImplementation }
@@ -11,7 +10,13 @@ export const easingsMap: {
 const easingsFlatMap: { [path: string]: _easings.EasingImplementation } = {};
 
 for (const name in easingsMap) {
-  for (const type in easingsMap[name]) {
-    easingsFlatMap[`${name}.${type}`] = easingsMap[name][type];
+  if (easingsMap.hasOwnProperty(name)) {
+    for (const type in easingsMap[name]) {
+      if (easingsMap[name].hasOwnProperty(type)) {
+        easingsFlatMap[`${name}.${type}`] = easingsMap[name][type];
+      }
+    }
   }
 }
+
+export { easingsFlatMap };
