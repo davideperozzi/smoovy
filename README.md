@@ -1,7 +1,5 @@
 # smoovy
 
-**Short description**: A lightweight JS library
-
-**Long description**: A lightweight JavaScript library :trollface:
+[![CircleCI](https://circleci.com/gh/davideperozzi/smoovy/tree/master.svg?style=svg)](https://circleci.com/gh/davideperozzi/smoovy/tree/master)
 
 **Documentation coming soon!**
