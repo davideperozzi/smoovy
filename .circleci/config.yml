@@ -7,14 +7,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: update-npm
+          name: "Update npm"
           command: 'sudo npm install -g npm@latest'
       - run:
-          name: install-deps
+          name: "Install node modules"
           command: 'npm install'
       - run:
           name: linter
           command: "npm run lint:all"
+      - run:
+          name: build
+          command: "npm run build:all"
       - run:
           name: jest
           command: "npm run test:all"
