@@ -1,10 +1,17 @@
 version: 2.1
-orbs:
-  node: circleci/node@1.0.1
 jobs:
-  lint:
-    steps:
-      - run: npm run lint:all
   test:
+    working_directory: ~
+    docker:
+      - image: circleci/node:4.8.2
     steps:
-      - run: npm run test:all
+      - checkout
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@11.10.1'
+      - run:
+          name: linter
+          command: "npm run lint:all"
+      - run:
+          name: jest
+          command: "npm run test:all"
