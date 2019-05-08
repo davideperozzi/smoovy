@@ -15,3 +15,7 @@ jobs:
       - run:
           name: jest
           command: "npm run test:all"
+workflows:
+  test:
+    jobs:
+      - test
