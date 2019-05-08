@@ -10,6 +10,9 @@ jobs:
           name: update-npm
           command: 'sudo npm install -g npm@latest'
       - run:
+          name: install-deps
+          command: 'npm install'
+      - run:
           name: linter
           command: "npm run lint:all"
       - run:
