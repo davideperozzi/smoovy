@@ -84,4 +84,4 @@ workflows:
             - build_test
       - build_deploy:
           requires:
-            - approval
+            - approve_deploy
