@@ -85,6 +85,6 @@ workflows:
             - test
       - deploy:
           requires:
-            - hold
+            - approval
             - build
             - test
