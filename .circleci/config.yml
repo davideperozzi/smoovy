@@ -32,7 +32,7 @@ references:
     run:
       name: "Run TSLinter on all packages"
       command: "npm run lint:all"
-  test_pacakges: &test_packages
+  test_packages: &test_packages
     run:
       name: "Run Jest on all packages"
       command: "npm run test:all"
@@ -55,7 +55,7 @@ jobs:
       - *link_packages
       - *build_packages
       - *lint_packages
-      - *test_pacakges
+      - *test_packages
   build_deploy:
     <<: *defaults
     steps:
