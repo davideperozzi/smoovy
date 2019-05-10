@@ -5,6 +5,9 @@
   "main": "dist/index.js",
   "source": "src/index.ts",
   "types": "dist/typings/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist/**"
   ],
