@@ -28,6 +28,14 @@ references:
     run:
       name: "Build all packages"
       command: "npm run build:all"
+  lint_packages: &lint_packages
+    run:
+      name: "Run TSLinter on all packages"
+      command: "npm run lint:all"
+  test_pacakges: &test_packages
+    run:
+      name: "Run Jest on all packages"
+      command: "npm run test:all"
 
 jobs:
   build:
@@ -38,7 +46,7 @@ jobs:
       - *install_node_modules
       - *link_packages
       - *build_packages
-  test:
+  build_test:
     <<: *defaults
     steps:
       - checkout
@@ -46,45 +54,34 @@ jobs:
       - *install_node_modules
       - *link_packages
       - *build_packages
-      - run:
-          name: "Run TSLinter on all packages"
-          command: "npm run lint:all"
-      - run:
-          name: "Run Jest on all packages"
-          command: "npm run test:all"
-  deploy:
+      - *lint_packages
+      - *test_pacakges
+  build_deploy:
     <<: *defaults
     steps:
       - checkout
       - *update_npm
       - *install_node_modules
       - *link_packages
-      - run: echo "Deploy to npm..."
+      - *build_packages
+      - run: npm run lerna -- publish from-git --yes
 
 workflows:
   build_test:
     jobs:
-      - build
-      - test:
-          requires:
-            - build
-  deploy:
+      - build_test
+  build_test_deploy:
     jobs:
-      - build:
+      - build_test:
           filters:
             branches:
               ignore: /.*/
             tags:
-              only: /^@smoovy\/.*/
-      - test:
-          requires:
-            - build
+              only: /^@.*\/.*/
       - approval:
           type: approval
           requires:
-            - test
-      - deploy:
+            - build_test
+      - build_deploy:
           requires:
             - approval
-            - build
-            - test

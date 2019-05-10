@@ -5,6 +5,8 @@
   "main": "dist/index.js",
   "source": "src/index.ts",
   "types": "dist/typings/index.d.ts",
+  "homepage": "https://github.com/davideperozzi/smoovy",
+  "repository": "https://github.com/davideperozzi/smoovy",
   "publishConfig": {
     "access": "public"
   },
