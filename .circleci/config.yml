@@ -12,30 +12,37 @@ references:
     working_directory: ~
     docker:
       - image: circleci/node:11.10.1-browsers
-  npm_setup_steps: &npm_setup_steps
-    - checkout
-    - run:
-        name: "Update npm"
-        command: 'sudo npm install -g npm@latest'
-    - run:
-        name: "Install node modules"
-        command: 'npm install'
-    - run:
-        name: "Link all packages"
-        command: "npm run link:all"
+  update_npm: &update_npm
+    run:
+      name: "Update npm"
+      command: 'sudo npm install -g npm@latest'
+  install_node_modules: &install_node_modules
+    run:
+      name: "Install node modules"
+      command: 'npm install'
+  link_packages: &link_packages
+    run:
+      name: "Link all packages"
+      command: "npm run link:all"
 
 jobs:
   build:
     <<: *defaults
     steps:
-      - *npm_setup_steps
+      - checkout
+      - *update_npm
+      - *install_node_modules
+      - *link_packages
       - run:
           name: "Build all packages"
           command: "npm run build:all"
   test:
     <<: *defaults
     steps:
-      - *npm_setup_steps
+      - checkout
+      - *update_npm
+      - *install_node_modules
+      - *link_packages
       - run:
           name: "Run TSLinter on all packages"
           command: "npm run lint:all"
@@ -45,7 +52,10 @@ jobs:
   deploy:
     <<: *defaults
     steps:
-      - *npm_setup_steps
+      - checkout
+      - *update_npm
+      - *install_node_modules
+      - *link_packages
       - run: echo "Deploy to npm..."
 
 workflows:
