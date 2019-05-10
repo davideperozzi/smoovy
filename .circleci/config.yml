@@ -24,7 +24,7 @@ references:
     run:
       name: "Link all packages"
       command: "npm run link:all"
-  build_packages:
+  build_packages: &build_packages
     run:
       name: "Build all packages"
       command: "npm run build:all"
