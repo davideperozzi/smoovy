@@ -71,9 +71,9 @@ workflows:
   deploy:
     jobs:
       - build:
-          branches:
-            ignore: /.*/
           filters:
+            branches:
+              ignore: /.*/
             tags:
               only: /^@smoovy\/.*/
       - test:
