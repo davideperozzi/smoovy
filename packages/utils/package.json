@@ -22,12 +22,13 @@
     "utils"
   ],
   "author": "Davide Perozzi",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@smoovy/ticker": "^0.0.2",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3"
-  }
+  },
+  "gitHead": "8aec1c21483db613a51382dd502ddba2311d1b40"
 }

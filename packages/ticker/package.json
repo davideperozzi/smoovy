@@ -24,8 +24,9 @@
     "fps"
   ],
   "author": "Davide Perozzi",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "tslib": "^1.9.3"
-  }
+  },
+  "gitHead": "8aec1c21483db613a51382dd502ddba2311d1b40"
 }
