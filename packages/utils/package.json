@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/utils",
-  "version": "0.0.10",
+  "version": "0.0.2",
   "description": "Some basic functionality to make better websites",
   "main": "dist/index.js",
   "source": "src/index.ts",
