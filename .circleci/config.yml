@@ -59,10 +59,7 @@ jobs:
       - run: echo "Deploy to npm..."
 
 workflows:
-  build:
-    jobs:
-      - build
-  test:
+  build_test:
     jobs:
       - build
       - test:
@@ -70,16 +67,17 @@ workflows:
             - build
   deploy:
     jobs:
-      - build
-      - test
-      - tag_test:
+      - build:
           filters:
             tags:
               only: /^@smoovy\/.*/
+      - test:
+          requires:
+            - build
       - hold:
           type: approval
           requires:
-            - tag_test
+            - test
       - deploy:
           requires:
             - hold
