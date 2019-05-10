@@ -24,6 +24,10 @@ references:
     run:
       name: "Link all packages"
       command: "npm run link:all"
+  build_packages:
+    run:
+      name: "Build all packages"
+      command: "npm run build:all"
 
 jobs:
   build:
@@ -33,9 +37,7 @@ jobs:
       - *update_npm
       - *install_node_modules
       - *link_packages
-      - run:
-          name: "Build all packages"
-          command: "npm run build:all"
+      - *build_packages
   test:
     <<: *defaults
     steps:
@@ -43,6 +45,7 @@ jobs:
       - *update_npm
       - *install_node_modules
       - *link_packages
+      - *build_packages
       - run:
           name: "Run TSLinter on all packages"
           command: "npm run lint:all"
@@ -68,13 +71,15 @@ workflows:
   deploy:
     jobs:
       - build:
+          branches:
+            ignore: /.*/
           filters:
             tags:
               only: /^@smoovy\/.*/
       - test:
           requires:
             - build
-      - hold:
+      - approval:
           type: approval
           requires:
             - test
