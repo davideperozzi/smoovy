@@ -82,6 +82,12 @@ workflows:
           type: approval
           requires:
             - build_test
+          filters:
+            tags:
+              only: /^@smoovy\/.*/
       - build_deploy:
           requires:
             - approve_deploy
+          filters:
+            tags:
+              only: /^@smoovy\/.*/
