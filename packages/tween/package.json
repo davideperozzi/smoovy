@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/tween",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Simple and easy-to-use tween lib + ticker",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -27,7 +27,7 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/ticker": "^0.0.8",
+    "@smoovy/ticker": "^0.0.9",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
