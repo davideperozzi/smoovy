@@ -64,7 +64,12 @@ jobs:
       - *install_node_modules
       - *link_packages
       - *build_packages
-      - run: npm run lerna -- publish from-git --yes
+      - run:
+          name: "Add npm token"
+          command: "echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc"
+      - run:
+          name: "Publish from git tags"
+          command: "npm run lerna -- publish from-git --yes"
 
 workflows:
   build_test:
@@ -78,16 +83,9 @@ workflows:
               ignore: /.*/
             tags:
               only: /^@smoovy\/.*/
-      - approve_deploy:
-          type: approval
-          requires:
-            - build_test
-          filters:
-            tags:
-              only: /^@smoovy\/.*/
       - build_deploy:
           requires:
-            - approve_deploy
+            - build_test
           filters:
             tags:
               only: /^@smoovy\/.*/
