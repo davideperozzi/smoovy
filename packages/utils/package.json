@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/utils",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Some basic functionality to make better websites",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -24,7 +24,7 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/ticker": "^0.0.2",
+    "@smoovy/ticker": "^0.0.3",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
