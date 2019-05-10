@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+if [ ! -z "$CI" ];
+then
+  TAG=$1
+  PKG_NAME=$(echo $TAG | cut -d'/' -f 2 | cut -d'@' -f 1)
+  PKG_PATH=$(pwd)/packages/$PKG_NAME
+
+  if [ -d "$PKG_PATH" ];
+  then
+    cd $PKG_PATH && npm publish
+  else
+    echo "The package \"$PKG_NAME\" does not exist in \"$PKG_PATH\"" && exit 1
+  fi
+else
+  echo "Invalid environment (needs CI to be enabled)" && exit 1
+fi
