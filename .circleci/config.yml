@@ -77,8 +77,8 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /^@.*\/.*/
-      - approval:
+              only: /^@smoovy\/.*/
+      - approve_deploy:
           type: approval
           requires:
             - build_test
