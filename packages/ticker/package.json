@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/ticker",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Simple and easy-to-use ticker",
   "main": "dist/index.js",
   "source": "src/index.ts",
