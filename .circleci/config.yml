@@ -1,30 +1,77 @@
 version: 2.1
-jobs:
-  test:
+
+general:
+  branches:
+    only:
+     - master
+     - develop
+     - /feature/.*/
+
+references:
+  defaults: &defaults
     working_directory: ~
     docker:
       - image: circleci/node:11.10.1-browsers
+  npm_setup_steps: &npm_setup_steps
+    - checkout
+    - run:
+        name: "Update npm"
+        command: 'sudo npm install -g npm@latest'
+    - run:
+        name: "Install node modules"
+        command: 'npm install'
+    - run:
+        name: "Link all packages"
+        command: "npm run link:all"
+
+jobs:
+  build:
+    <<: *defaults
     steps:
-      - checkout
+      - *npm_setup_steps
       - run:
-          name: "Update npm"
-          command: 'sudo npm install -g npm@latest'
-      - run:
-          name: "Install node modules"
-          command: 'npm install'
-      - run:
-          name: "Link all packages"
-          command: "npm run link:all"
+          name: "Build all packages"
+          command: "npm run build:all"
+  test:
+    <<: *defaults
+    steps:
+      - *npm_setup_steps
       - run:
           name: "Run TSLinter on all packages"
           command: "npm run lint:all"
       - run:
-          name: "Build all packages"
-          command: "npm run build:all"
-      - run:
           name: "Run Jest on all packages"
           command: "npm run test:all"
+  deploy:
+    <<: *defaults
+    steps:
+      - *npm_setup_steps
+      - run: echo "Deploy to npm..."
+
 workflows:
+  build:
+    jobs:
+      - build
   test:
     jobs:
+      - build
+      - test:
+          requires:
+            - build
+  deploy:
+    jobs:
+      - build
       - test
+      - tag_test:
+          filters:
+            tags:
+              only: /^@smoovy\/.*/
+      - hold:
+          type: approval
+          requires:
+            - tag_test
+      - deploy:
+          requires:
+            - hold
+            - build
+            - test
