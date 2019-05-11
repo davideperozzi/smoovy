@@ -3,18 +3,8 @@ PKG=$(pwd)/packages/$1
 
 rm -rf $PKG/dist
 
-if [ $? -eq 0 ]; then
-  tput reset
-  echo "Building package: \x1b[32m$1\x1b[0m \n"
-  echo "Bundling and optimizing: ..."
-  rollup \
-    -c $(pwd)/build/rollup.config.js \
-    --environment PACKAGE:$PKG \
-    --silent
-
-  if [ $? -eq 0 ]; then
-    tput reset
-    echo "Building package: \x1b[32m$1\x1b[0m \n"
-    echo "Bundling and optimizing: Done!"
-  fi
-fi
+echo "Building package \"$1\""
+rollup \
+  -c $(pwd)/build/rollup.config.js \
+  --environment PACKAGE:$PKG \
+  --silent

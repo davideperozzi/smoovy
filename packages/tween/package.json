@@ -27,7 +27,7 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/ticker": "^0.0.10",
+    "@smoovy/ticker": "^0.0.2",
     "tslib": "^1.9.3"
   },
   "devDependencies": {

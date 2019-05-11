@@ -8,11 +8,11 @@
 **smoovy** is just a collection of small and useful js packages preventing copy & paste. The goal is to use as minimum dependencies as possible to guarantee a **small final bundle**. Also to keep the code clean, small and simple.
 
 ## Packages
-| Name           | Version | Size | 
-| -------------- | ------- | ---- |
-| [@smoovy/tween](./packages/tween/README.MD) | [![Version](https://flat.badgen.net/npm/v/@smoovy/tween)](https://www.npmjs.com/package/@smoovy/tween) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/tween)
-| [@smoovy/ticker](./packages/ticker/README.MD) | [![Version](https://flat.badgen.net/npm/v/@smoovy/ticker)](https://www.npmjs.com/package/@smoovy/ticker) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/ticker)
-| [@smoovy/utils](./packages/utils/README.MD) | [![Version](https://flat.badgen.net/npm/v/@smoovy/utils)](https://www.npmjs.com/package/@smoovy/utils) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/utils)
+| Name| Version | Size |
+| --- | --- | --- |
+| [@smoovy/tween](./packages/tween/README.MD) | [![Version](https://flat.badgen.net/npm/v/@smoovy/tween)](https://www.npmjs.com/package/@smoovy/tween) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/tween) |
+| [@smoovy/ticker](./packages/ticker/README.MD) | [![Version](https://flat.badgen.net/npm/v/@smoovy/ticker)](https://www.npmjs.com/package/@smoovy/ticker) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/ticker) |
+| [@smoovy/utils](./packages/utils/README.MD) | [![Version](https://flat.badgen.net/npm/v/@smoovy/utils)](https://www.npmjs.com/package/@smoovy/utils) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/utils) |
 
 ## Getting started
 Choose a package you want and install. Easy as that:
