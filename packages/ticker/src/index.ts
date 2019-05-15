@@ -29,6 +29,17 @@ export class Ticker {
   private minDeltaMs: number = 0;
   private maxDeltaMs: number = 1000 / 10;
 
+  public constructor(minMaxFps?: number | [ number, number ]) {
+    if (minMaxFps instanceof Array && minMaxFps.length === 2) {
+      this.setMinFPS(minMaxFps[0]);
+      this.setMaxFPS(minMaxFps[1]);
+    }
+
+    if (typeof minMaxFps === 'number') {
+      this.setMaxFPS(minMaxFps);
+    }
+  }
+
   public static requestAnimationFrame(callback: FrameRequestCallback) {
     return window.requestAnimationFrame
       ? window.requestAnimationFrame(callback)
