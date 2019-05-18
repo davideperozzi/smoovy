@@ -1,0 +1,38 @@
+{
+  "name": "@smoovy/scroller",
+  "version": "0.0.0",
+  "description": "Smooth scrolling for the world",
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "types": "dist/typings/index.d.ts",
+  "homepage": "https://github.com/davideperozzi/smoovy",
+  "repository": "https://github.com/davideperozzi/smoovy",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "lint": "NAME=$(basename \"$PWD\") && cd ../../ && npm run lint:package $NAME",
+    "test": "NAME=$(basename \"$PWD\") && cd ../../ && npm run test:package $NAME",
+    "build": "NAME=$(basename \"$PWD\") && cd ../../ && npm run build:package $NAME",
+    "serve": "NAME=$(basename \"$PWD\") && cd ../../ && npm run serve:package $NAME $1"
+  },
+  "keywords": [
+    "smoovy",
+    "tween",
+    "scroller",
+    "smooth",
+    "scrolling",
+    "raf"
+  ],
+  "author": "Davide Perozzi",
+  "license": "MIT",
+  "dependencies": {
+    "@smoovy/tween": "^0.1.0",
+    "@smoovy/utils": "^0.1.0",
+    "tslib": "^1.9.3"
+  },
+  "gitHead": "8aec1c21483db613a51382dd502ddba2311d1b40"
+}
