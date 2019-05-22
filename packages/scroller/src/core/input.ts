@@ -1,13 +1,10 @@
-import { Coordinate, Browser, objectDeepMerge } from '@smoovy/utils';
+import { Coordinate, objectDeepMerge } from '@smoovy/utils';
 
-export enum ScrollerInputType {
-  DELTA = 1,
-  ABSOLUTE = 2
-}
+import { ScrollerTransformer } from '../../dist/typings/core/transformer';
+import { ScrollerDom } from './dom';
 
 export interface ScrollerInputEvent {
-  mode: ScrollerInputType;
-  data: Coordinate;
+  delta: Coordinate;
 }
 
 export interface ScrollerInputConfig { }
@@ -20,7 +17,7 @@ export abstract class ScrollerInput<
   private subscriptions: ScrollerInputSubscription[] = [];
 
   public constructor(
-    protected target: HTMLElement,
+    protected dom: ScrollerDom,
     config?: C
   ) {
     if (config) {
@@ -43,54 +40,5 @@ export abstract class ScrollerInput<
 
   public unsubscribeAll() {
     this.subscriptions = [];
-  }
-}
-
-export interface MouseScrollerInputConfig extends ScrollerInputConfig {
-  multiplier: number;
-  multiplierFirefox: number;
-}
-
-export class MouseScrollerInput<
-  C extends MouseScrollerInputConfig = MouseScrollerInputConfig
-> extends ScrollerInput<C> {
-  protected config = {
-    multiplier: 0.45,
-    multiplierFirefox: 20
-  } as C;
-  private wheelCb = (event: WheelEvent) => this.handleWheel(event);
-
-  public attach() {
-    if (Browser.wheelEvent) {
-      console.log(this.target);
-      this.target.addEventListener(
-        'wheel',
-        this.wheelCb,
-        false
-      );
-    }
-  }
-
-  public detach() {
-    this.target.removeEventListener('wheel', this.wheelCb);
-  }
-
-  private handleWheel(event: WheelEvent) {
-    event.preventDefault();
-
-    const data = { x: 0, y: 0 };
-
-    data.x = (event as any).wheelDeltaX || event.deltaX * -1;
-    data.y = (event as any).wheelDeltaY || event.deltaY * -1;
-
-    data.x *= this.config.multiplier;
-    data.y *= this.config.multiplier;
-
-    if (Browser.firefox && event.deltaMode === 1) {
-      data.x *= this.config.multiplierFirefox;
-      data.y *= this.config.multiplierFirefox;
-    }
-
-    this.emit({ mode: ScrollerInputType.DELTA, data });
   }
 }
