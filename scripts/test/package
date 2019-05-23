@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 PKG=$(pwd)/packages/$1
 
-jest --roots $PKG
+jest --passWithNoTests --roots $PKG
