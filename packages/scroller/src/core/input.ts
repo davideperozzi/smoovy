@@ -1,36 +1,41 @@
-import { Coordinate, objectDeepMerge } from '@smoovy/utils';
+import { Coordinate, objectDeepClone, objectDeepMerge } from '@smoovy/utils';
 
-import { ScrollerTransformer } from '../../dist/typings/core/transformer';
 import { ScrollerDom } from './dom';
 
-export interface ScrollerInputEvent {
+export interface ScrollerInputState {
   delta: Coordinate;
 }
 
-export interface ScrollerInputConfig { }
-export type ScrollerInputSubscription = (event: ScrollerInputEvent) => void;
+export interface ScrollerInputConfig {}
+export type ScrollerInputSubscription = (event: ScrollerInputState) => void;
 
 export abstract class ScrollerInput<
   C extends ScrollerInputConfig = ScrollerInputConfig
 > {
-  protected config: C = {} as C;
+  protected config = { } as C;
   private subscriptions: ScrollerInputSubscription[] = [];
 
   public constructor(
     protected dom: ScrollerDom,
-    config?: C
+    config?: Partial<C>
   ) {
+    this.config = objectDeepClone(this.defaultConfig);
+
     if (config) {
-      objectDeepMerge(this.config, config);
+      this.config = objectDeepMerge(this.defaultConfig, config);
     }
+  }
+
+  public get defaultConfig(): C {
+    return {  } as C;
   }
 
   public abstract attach(): void;
   public abstract detach(): void;
 
-  protected emit(event: ScrollerInputEvent) {
+  protected emit(state: ScrollerInputState) {
     for (let i = 0, len = this.subscriptions.length; i < len; i++) {
-      this.subscriptions[i].call(this, event);
+      this.subscriptions[i].call(this, state);
     }
   }
 

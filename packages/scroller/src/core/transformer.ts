@@ -1,14 +1,35 @@
+import { Coordinate, objectDeepClone, objectDeepMerge } from '@smoovy/utils';
+
 import { ScrollerDom } from './dom';
-import { Coordinate } from '@smoovy/utils';
 
-export abstract class ScrollerTransformer {
+export interface ScrollerTransformerConfig {}
+
+export abstract class ScrollerTransformer<
+  C extends ScrollerTransformerConfig = ScrollerTransformerConfig
+> {
+  protected config: C = {} as C;
+
   public constructor(
-    protected dom: ScrollerDom
-  ) {}
+    protected dom: ScrollerDom,
+    config?: Partial<C>
+  ) {
+    this.config = objectDeepClone(this.defaultConfig);
 
-  public abstract transform(
-    scrollPos: Coordinate,
-    virtualPos: Coordinate,
+    if (config) {
+      objectDeepMerge(this.config, config);
+    }
+  }
+
+  public get defaultConfig(): C {
+    return {  } as C;
+  }
+
+  public abstract virtualTransform(
+    position: Coordinate
+  ): void;
+
+  public abstract outputTransform(
+    position: Coordinate,
     update: () => void
   ): void;
 }

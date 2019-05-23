@@ -1,20 +1,41 @@
+import { easings, Tween } from '@smoovy/tween';
 import { Coordinate } from '@smoovy/utils';
-import { Tween, easings } from '@smoovy/tween';
 
-import { ScrollerTransformer } from '../core/transformer';
+import {
+  ScrollerTransformer, ScrollerTransformerConfig,
+} from '../core/transformer';
 
-export class TweenTransformer extends ScrollerTransformer {
-  public transform(
-    scrollPos: Coordinate,
-    virtualPos: Coordinate,
+export interface TweenTransformerConfig extends ScrollerTransformerConfig {
+  duration: number;
+  easing: easings.EasingImplementation;
+}
+
+export class TweenTransformer<
+  C extends TweenTransformerConfig = TweenTransformerConfig
+> extends ScrollerTransformer<C> {
+  private virtualPosition: Coordinate = { x: 0, y: 0 };
+
+  public get defaultConfig() {
+    return {
+      duration: 1000,
+      easing: easings.Expo.out
+    } as C;
+  }
+
+  public virtualTransform(position: Coordinate) {
+    this.virtualPosition = position;
+  }
+
+  public outputTransform(
+    position: Coordinate,
     update: () => void
   ) {
     Tween.fromTo(
-      scrollPos,
-      virtualPos,
+      position,
+      this.virtualPosition,
       {
-        duration: 1000,
-        easing: easings.Expo.out,
+        duration: this.config.duration,
+        easing: this.config.easing,
         update: () => update()
       }
     );

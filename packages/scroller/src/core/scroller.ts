@@ -1,82 +1,68 @@
 import { Coordinate, objectDeepMerge } from '@smoovy/utils';
-import { Ticker } from '@smoovy/ticker';
 
-import { MouseScrollerInput } from '../inputs/mouse-input';
-import { ClampTransformer } from '../transformers/clamp-transformer';
-import { TweenTransformer } from '../transformers/tween-transformer';
 import { ScrollerDom } from './dom';
-import { ScrollerInput, ScrollerInputEvent } from './input';
-import { ScrollerTransformer } from './transformer';
+import { ScrollerModule, ScrollerModuleConfig } from './module';
+import { DefaultModule } from './modules/default-module';
 
-export interface ScrollerConfig {
-  mobileEnabled: boolean;
-  mobileBypass: boolean;
+export interface ScrollerConfig<
+  C extends ScrollerModuleConfig = any,
+  M = any
+> extends ScrollerModuleConfig<
+  Partial<C['input']>,
+  Partial<C['output']>,
+  Partial<C['transformer']>
+> {
+  module: M;
 }
 
 const defaultConfig: ScrollerConfig = {
-  mobileEnabled: false,
-  mobileBypass: false
+  module: DefaultModule,
+  transformer: {},
+  input: {},
+  output: {}
 };
 
-export class Scroller {
+export class Scroller<M extends ScrollerModule = DefaultModule> {
   private dom: ScrollerDom;
   private config = defaultConfig;
-  private scrollPosition: Coordinate = { x: 0, y: 0 };
+  private module: ScrollerModule;
+  private outputPosition: Coordinate = { x: 0, y: 0 };
   private virtualPosition: Coordinate = { x: 0, y: 0 };
-  private inputs: ScrollerInput[] = [];
-  private transformers: ScrollerTransformer[] = [];
 
   public constructor(
     private target: HTMLElement,
-    config?: ScrollerConfig
+    config?: Partial<ScrollerConfig<M['config']>>
   ) {
     if (config) {
       this.config = objectDeepMerge(this.config, config);
     }
 
     this.dom = new ScrollerDom(this.target);
-
-    this.inputs.push(new MouseScrollerInput(this.dom));
-    this.transformers.push(new ClampTransformer(this.dom));
-    this.transformers.push(new TweenTransformer(this.dom));
+    this.module = new this.config.module(this.dom, {
+      input: this.config.input,
+      output: this.config.output,
+      transformer: this.config.transformer
+    });
 
     this.dom.create();
+    this.module.init();
+
     this.attach();
   }
 
   private attach() {
-    this.inputs.forEach((input) => {
-      input.subscribe(event => this.handleInput(event));
-      input.attach();
-    });
+    this.module.attach(
+      this.virtualPosition,
+      this.outputPosition
+    );
   }
 
   private detach() {
-    this.inputs.forEach((input) => {
-      input.unsubscribeAll();
-      input.detach();
-    });
+    this.module.detach();
   }
 
   public destroy() {
     this.dom.destroy();
     this.detach();
-  }
-
-  private handleInput(event: ScrollerInputEvent) {
-    this.virtualPosition.x -= event.delta.x;
-    this.virtualPosition.y -= event.delta.y;
-
-    for (let i = 0, len = this.transformers.length; i < len; i++) {
-      this.transformers[i].transform(
-        this.scrollPosition,
-        this.virtualPosition,
-        () => {
-          this.dom.wrapper.style.transform = `
-            translate3d(0, ${-this.scrollPosition.y}px, 0)
-          `;
-        }
-      );
-    }
   }
 }

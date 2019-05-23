@@ -10,11 +10,14 @@ export interface MouseScrollerInputConfig extends ScrollerInputConfig {
 export class MouseScrollerInput<
   C extends MouseScrollerInputConfig = MouseScrollerInputConfig
 > extends ScrollerInput<C> {
-  protected config = {
-    multiplier: 0.5,
-    multiplierFirefox: 20
-  } as C;
   private wheelCb = (event: WheelEvent) => this.handleWheel(event);
+
+  public get defaultConfig() {
+    return {
+      multiplier: 0.5,
+      multiplierFirefox: 25
+    } as C;
+  }
 
   public attach() {
     if (Browser.wheelEvent) {
