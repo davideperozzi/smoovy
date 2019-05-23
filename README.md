@@ -1,6 +1,6 @@
 # smoovy
 
-[![CircleCI](https://flat.badgen.net/circleci/github/davideperozzi/smoovy)](https://circleci.com/gh/davideperozzi/smoovy/tree/master)
+[![CircleCI](https://flat.badgen.net/circleci/github/davideperozzi/smoovy/master)](https://circleci.com/gh/davideperozzi/smoovy/tree/master)
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat-square)
 [![License](https://flat.badgen.net/badge/license/MIT/blue)](./LICENSE)
 
@@ -22,7 +22,7 @@ npm install --save @smoovy/<package>
 
 ## Roadmap 2019
 - [ ] 📦 Migrate `@smoovy/scroller`
-- [ ] 🧪 Integrate e2e tests with BrowserStack
+- [ ] 💡 Integrate e2e tests with BrowserStack
 - [ ] 📦 Create `@smoovy/parallax` (parallax effect math)
 - [ ] 📦 Create `@smoovy/timeline` (timeline for tweens)
 - [ ] 📦 Create `@smoovy/el-state` (element state watcher)
