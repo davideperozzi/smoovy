@@ -1,4 +1,4 @@
-import { Coordinate, objectDeepMerge } from '@smoovy/utils';
+import { Coordinate, objectDeepMerge, Browser } from '@smoovy/utils';
 
 import { ScrollerDom } from './dom';
 import { ScrollerModule, ScrollerModuleConfig } from './module';
@@ -8,15 +8,17 @@ export interface ScrollerConfig<
   C extends ScrollerModuleConfig = any,
   M = any
 > extends ScrollerModuleConfig<
-  Partial<C['input']>,
-  Partial<C['output']>,
-  Partial<C['transformer']>
+  C['input'],
+  C['output'],
+  C['transformer']
 > {
   module: M;
+  observeDom: boolean;
 }
 
 const defaultConfig: ScrollerConfig = {
   module: DefaultModule,
+  observeDom: Browser.mutationObserver,
   transformer: {},
   input: {},
   output: {}
@@ -25,9 +27,9 @@ const defaultConfig: ScrollerConfig = {
 export class Scroller<M extends ScrollerModule = DefaultModule> {
   private dom: ScrollerDom;
   private config = defaultConfig;
-  private module: ScrollerModule;
   private outputPosition: Coordinate = { x: 0, y: 0 };
   private virtualPosition: Coordinate = { x: 0, y: 0 };
+  public module: ScrollerModule;
 
   public constructor(
     private target: HTMLElement,
@@ -37,12 +39,15 @@ export class Scroller<M extends ScrollerModule = DefaultModule> {
       this.config = objectDeepMerge(this.config, config);
     }
 
-    this.dom = new ScrollerDom(this.target);
-    this.module = new this.config.module(this.dom, {
-      input: this.config.input,
-      output: this.config.output,
-      transformer: this.config.transformer
-    });
+    this.dom = new ScrollerDom(this.target, this.config.observeDom);
+    this.module = new this.config.module(
+      this.dom,
+      {
+        input: this.config.input,
+        output: this.config.output,
+        transformer: this.config.transformer
+      }
+    );
 
     this.dom.create();
     this.module.init();

@@ -29,6 +29,7 @@ npm-debug.log
 yarn-error.log
 testem.log
 .r*_cache*
+/coverage
 
 # System Files
 .DS_Store

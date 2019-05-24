@@ -87,4 +87,8 @@ export class Browser {
   public static get touchDevice() {
     return 'ontouchstart' in window;
   }
+
+  public static get mutationObserver() {
+    return 'MutationObserver' in window;
+  }
 }

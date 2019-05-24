@@ -6,8 +6,8 @@ export class ClampTransformer extends ScrollerTransformer {
   public virtualTransform(position: Coordinate) {
     const wrapperSize = this.dom.getWrapperSize();
     const containerSize = this.dom.getContainerSize();
-    const maxScrollX = wrapperSize.width - containerSize.width;
-    const maxScrollY = wrapperSize.height - containerSize.height;
+    const maxScrollX = Math.max(wrapperSize.width - containerSize.width, 0);
+    const maxScrollY = Math.max(wrapperSize.height - containerSize.height, 0);
 
     position.x = clamp(position.x, 0, maxScrollX);
     position.y = clamp(position.y, 0, maxScrollY);

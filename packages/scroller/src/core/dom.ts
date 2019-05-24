@@ -8,9 +8,11 @@ export enum ScrollerDomClasslist {
 export class ScrollerDom {
   public wrapper: HTMLElement;
   public container: HTMLElement;
+  private mutations?: MutationObserver;
 
   public constructor(
-    protected root: HTMLElement
+    protected root: HTMLElement,
+    observeDom: boolean
   ) {
     this.container = document.createElement('div');
     this.wrapper = document.createElement('div');
@@ -19,20 +21,41 @@ export class ScrollerDom {
     this.wrapper.className = ScrollerDomClasslist.WRAPPER;
 
     this.container.appendChild(this.wrapper);
+
+    if (observeDom) {
+      this.mutations = new MutationObserver((mutations) => {
+        console.log(mutations);
+      });
+    }
   }
 
   public create() {
-    const children = Array.from(this.root.children);
+    const children = Array.from(this.root.childNodes);
 
     this.root.appendChild(this.container);
-    children.forEach(child => this.wrapper.appendChild(child));
+    this.wrapper.append(...children);
+
+    if (this.mutations) {
+      this.mutations.observe(
+        this.container,
+        {
+          characterData: true,
+          childList: true,
+          subtree: true
+        }
+      );
+    }
   }
 
   public destroy() {
-    const children = Array.from(this.wrapper.children);
+    const children = Array.from(this.wrapper.childNodes);
 
-    children.forEach(child => this.root.appendChild(child));
+    this.root.append(...children);
     this.root.removeChild(this.container);
+
+    if (this.mutations) {
+      this.mutations.disconnect();
+    }
   }
 
   public getWrapperSize(): Size {
@@ -45,5 +68,9 @@ export class ScrollerDom {
     const { width, height } = this.container.getBoundingClientRect();
 
     return { width, height };
+  }
+
+  public querySelectorAll(selector: string) {
+    return Array.from(this.container.querySelectorAll(selector));
   }
 }

@@ -2,13 +2,13 @@ import { Browser } from '@smoovy/utils';
 
 import { ScrollerInput, ScrollerInputConfig } from '../core/input';
 
-export interface MouseScrollerInputConfig extends ScrollerInputConfig {
+export interface MouseWheelInputConfig extends ScrollerInputConfig {
   multiplier: number;
   multiplierFirefox: number;
 }
 
-export class MouseScrollerInput<
-  C extends MouseScrollerInputConfig = MouseScrollerInputConfig
+export class MouseWheelInput<
+  C extends MouseWheelInputConfig = MouseWheelInputConfig
 > extends ScrollerInput<C> {
   private wheelCb = (event: WheelEvent) => this.handleWheel(event);
 

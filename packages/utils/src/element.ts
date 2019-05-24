@@ -5,8 +5,8 @@ export function getElementOffset(element: HTMLElement): Coordinate {
   let y = 0;
 
   do {
-    x += element.offsetTop || 0;
-    y += element.offsetLeft || 0;
+    x += element.offsetLeft || 0;
+    y += element.offsetTop || 0;
     element = element.offsetParent as HTMLElement;
   } while (element);
 

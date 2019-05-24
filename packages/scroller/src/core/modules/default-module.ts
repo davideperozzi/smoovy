@@ -1,4 +1,4 @@
-import { MouseScrollerInput } from '../../inputs/mouse-input';
+import { MouseWheelInput } from '../../inputs/mouse-wheel-input';
 import { CssTransformOutput } from '../../outputs/css-transform-output';
 import { ClampTransformer } from '../../transformers/clamp-transformer';
 import { TweenTransformer } from '../../transformers/tween-transformer';
@@ -6,7 +6,7 @@ import { ScrollerModule } from '../module';
 
 interface DefaultModuleConfig {
   input: {
-    mouse: Partial<MouseScrollerInput['config']>
+    mouse: Partial<MouseWheelInput['config']>
   };
   output: {
     cssTransform: Partial<CssTransformOutput['config']>
@@ -19,7 +19,7 @@ interface DefaultModuleConfig {
 
 export class DefaultModule extends ScrollerModule<DefaultModuleConfig> {
   public inputs = [
-    new MouseScrollerInput(this.dom, this.config.input.mouse)
+    new MouseWheelInput(this.dom, this.config.input.mouse)
   ];
 
   public outputs = [
