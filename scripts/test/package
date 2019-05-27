@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 PKG=$(pwd)/packages/$1
 
-jest --passWithNoTests --coverage --roots $PKG
+jest --passWithNoTests --coverage --coverageReporters=text-lcov --roots $PKG | coveralls
