@@ -39,7 +39,11 @@ export class Scroller<M extends ScrollerModule = DefaultModule> {
       this.config = objectDeepMerge(this.config, config);
     }
 
-    this.dom = new ScrollerDom(this.target, this.config.observeDom);
+    this.dom = new ScrollerDom(
+      this.target,
+      this.config.observeDom
+    );
+
     this.module = new this.config.module(
       this.dom,
       {
@@ -51,6 +55,9 @@ export class Scroller<M extends ScrollerModule = DefaultModule> {
 
     this.dom.create();
     this.module.init();
+    this.dom.onUpdate(() => {
+      this.module.recalc();
+    });
 
     this.attach();
   }

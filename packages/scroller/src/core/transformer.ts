@@ -24,10 +24,8 @@ export abstract class ScrollerTransformer<
     return {  } as C;
   }
 
-  public abstract virtualTransform(
-    position: Coordinate
-  ): void;
-
+  public abstract recalc(): void;
+  public abstract virtualTransform(position: Coordinate): void;
   public abstract outputTransform(
     position: Coordinate,
     update: () => void

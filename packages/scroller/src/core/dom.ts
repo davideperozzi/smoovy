@@ -9,6 +9,7 @@ export class ScrollerDom {
   public wrapper: HTMLElement;
   public container: HTMLElement;
   private mutations?: MutationObserver;
+  private updateCbs: (() => void)[] = [];
 
   public constructor(
     protected root: HTMLElement,
@@ -24,9 +25,17 @@ export class ScrollerDom {
 
     if (observeDom) {
       this.mutations = new MutationObserver((mutations) => {
-        console.log(mutations);
+        this.update();
       });
     }
+  }
+
+  private update() {
+    this.updateCbs.forEach((cb) => cb.call(this));
+  }
+
+  public onUpdate(cb: () => void) {
+    this.updateCbs.push(cb);
   }
 
   public create() {
@@ -56,6 +65,8 @@ export class ScrollerDom {
     if (this.mutations) {
       this.mutations.disconnect();
     }
+
+    this.updateCbs = [];
   }
 
   public getWrapperSize(): Size {

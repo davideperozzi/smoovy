@@ -3,6 +3,8 @@ import { clamp, Coordinate } from '@smoovy/utils';
 import { ScrollerTransformer } from '../core/transformer';
 
 export class ClampTransformer extends ScrollerTransformer {
+  public recalc() {}
+
   public virtualTransform(position: Coordinate) {
     const wrapperSize = this.dom.getWrapperSize();
     const containerSize = this.dom.getContainerSize();

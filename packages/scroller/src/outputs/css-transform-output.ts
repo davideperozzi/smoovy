@@ -67,6 +67,10 @@ export class CssTransformOutput<
     }
   }
 
+  public recalc() {
+    this.updateSections();
+  }
+
   private updateSectionPosition(position: Coordinate) {
     const containerSize = this.dom.getContainerSize();
     const sectionPadding = this.config.sectionPadding;

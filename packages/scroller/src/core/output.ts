@@ -26,5 +26,6 @@ C extends ScrollerOutputConfig = ScrollerOutputConfig
 
   public abstract attach(): void;
   public abstract detach(): void;
+  public abstract recalc(): void;
   public abstract update(position: Coordinate): void;
 }

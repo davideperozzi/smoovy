@@ -33,6 +33,8 @@ export class MouseWheelInput<
     this.dom.container.removeEventListener('wheel', this.wheelCb);
   }
 
+  public recalc() {}
+
   private handleWheel(event: WheelEvent) {
     event.preventDefault();
 

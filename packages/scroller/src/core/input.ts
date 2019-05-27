@@ -32,12 +32,7 @@ export abstract class ScrollerInput<
 
   public abstract attach(): void;
   public abstract detach(): void;
-
-  protected emit(state: ScrollerInputState) {
-    for (let i = 0, len = this.subscriptions.length; i < len; i++) {
-      this.subscriptions[i].call(this, state);
-    }
-  }
+  public abstract recalc(): void;
 
   public subscribe(cb: ScrollerInputSubscription) {
     this.subscriptions.push(cb);
@@ -45,5 +40,11 @@ export abstract class ScrollerInput<
 
   public unsubscribeAll() {
     this.subscriptions = [];
+  }
+
+  protected emit(state: ScrollerInputState) {
+    for (let i = 0, len = this.subscriptions.length; i < len; i++) {
+      this.subscriptions[i].call(this, state);
+    }
   }
 }

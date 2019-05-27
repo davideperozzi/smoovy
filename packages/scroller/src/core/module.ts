@@ -84,6 +84,14 @@ export class ScrollerModule<
     return transformer as any as T;
   }
 
+  public recalc() {
+    this.updateInput({ delta: { x: 0, y: 0 } });
+    this.inputs.forEach((input) => input.recalc());
+    this.outputs.forEach((output) => output.recalc());
+    this.transformers.forEach((transformer) => transformer.recalc());
+    this.updateInput({ delta: { x: 0, y: 0 } });
+  }
+
   protected updateInput(state: ScrollerInputState) {
     this.virtualPosition.x -= state.delta.x;
     this.virtualPosition.y -= state.delta.y;

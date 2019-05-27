@@ -22,6 +22,8 @@ export class TweenTransformer<
     } as C;
   }
 
+  public recalc() {}
+
   public virtualTransform(position: Coordinate) {
     this.virtualPosition = position;
   }
