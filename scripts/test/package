@@ -1,4 +1,8 @@
 #!/usr/bin/env sh
 PKG=$(pwd)/packages/$1
 
+if [ $(find "$PKG/tests" -mindepth 1 -print -quit 2>/dev/null) ]; then
 jest --passWithNoTests --coverage --coverageReporters=text-lcov --roots $PKG | coveralls
+else
+echo "Skipping jest tests"
+fi

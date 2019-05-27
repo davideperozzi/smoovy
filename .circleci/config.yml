@@ -35,7 +35,7 @@ references:
   test_packages: &test_packages
     run:
       name: "Run Jest on all packages"
-      command: "npm run test:all && bash <(curl -s https://codecov.io/bash)"
+      command: "npm run test:all"
 
 jobs:
   build:
