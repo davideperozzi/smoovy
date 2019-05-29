@@ -6,3 +6,5 @@ export * from './element';
 export * from './dimension';
 export * from './range';
 export * from './resolver';
+export * from './uid';
+

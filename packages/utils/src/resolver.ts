@@ -1,8 +1,8 @@
 export class Resolver<T = void, E = T> {
   public promise: Promise<T>;
-  private _resolve!: (value: T) => void;
-  private _reject!: (error: any) => void;
-  private _completed!: boolean;
+  private _resolve: (value: T) => void;
+  private _reject: (error: any) => void;
+  private _completed: boolean = false;
 
   public constructor() {
     this.promise = new Promise<T>((resolve, reject) => {
@@ -18,6 +18,8 @@ export class Resolver<T = void, E = T> {
 
     this._completed = true;
     this._resolve(value as T);
+
+    return this.promise;
   }
 
   public reject(value?: E) {
@@ -27,6 +29,8 @@ export class Resolver<T = void, E = T> {
 
     this._completed = true;
     this._reject(value);
+
+    return this.promise;
   }
 
   public get completed() {

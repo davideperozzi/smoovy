@@ -39,6 +39,7 @@ describe('general', () => {
   it('should not reject twice', () => {
     const resolver = new Resolver();
 
+    resolver.promise.catch(() => {});
     resolver.reject();
 
     expect(resolver.reject).toThrowError();
