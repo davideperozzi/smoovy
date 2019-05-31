@@ -1,10 +1,16 @@
 #!/usr/bin/env sh
 PKG=$(pwd)/packages/$1
 
-rm -rf $PKG/dist
-
-echo "Building package \"$1\""
+echo "Building and bundling package \"$1\""
+rm -rf $PKG/dist && \
 rollup \
   -c $(pwd)/build/rollup.config.js \
   --environment PACKAGE:$PKG \
   --silent
+
+
+echo "Generating modules for \"$1\""
+rm -rf $PKG/m && \
+tsc \
+  --project $PKG \
+  --outDir $PKG/m

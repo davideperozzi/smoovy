@@ -4,7 +4,7 @@ interface DemoElements {
 
 export interface DemoControls<T, R = any> {
   init?: () => T;
-  play: (ctx: T) => R;
+  play?: (ctx: T) => R;
   reset?: (data: R) => void;
 }
 
@@ -36,11 +36,15 @@ function injectControls<T, R>(
 
     }).then(() => {
       firstPlay = false;
-      data = controls.play.call(undefined, ctx);
+      if (controls.play) {
+        data = controls.play.call(undefined, ctx);
+      }
     });
   }, false);
 
-  demoEl.appendChild(playBtn);
+  if (controls.play) {
+    demoEl.appendChild(playBtn);
+  }
 
   return demo;
 }

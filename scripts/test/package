@@ -2,7 +2,7 @@
 PKG=$(pwd)/packages/$1
 
 if [ $(find "$PKG/tests" -mindepth 1 -print -quit 2>/dev/null) ]; then
-  if [ -n "$CI" ]; then
+  if [ ! -z "$CI" ]; then
     jest --passWithNoTests --coverage --coverageReporters=text-lcov --roots $PKG | coveralls
   else
     jest --passWithNoTests --roots $PKG

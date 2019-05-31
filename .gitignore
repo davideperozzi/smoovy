@@ -37,3 +37,6 @@ Thumbs.db
 
 # Package files
 dist
+
+# Plain module files
+packages/*/m

@@ -19,7 +19,6 @@ demo('counter', ({ counterEl }) => ({
   reset: ({ tween }) => tween.stop()
 }));
 
-
 demo('css-transform', ({ boxEl }) => ({
   play: () => ({
     tween: Tween.fromTo(
@@ -36,7 +35,6 @@ demo('css-transform', ({ boxEl }) => ({
   }),
   reset: ({ tween }) => tween.stop()
 }));
-
 
 demo('easings', ({ boxEls }) => ({
   init: () => {

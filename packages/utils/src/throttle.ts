@@ -6,9 +6,8 @@ export function throttle(
   let lastTime = 0;
   let applyTimeout: any;
 
-  return () => {
+  return (...args) => {
     const now = (performance || Date).now();
-    const args = arguments;
 
     if (lastTime && now < lastTime + ms) {
       clearTimeout(applyTimeout);

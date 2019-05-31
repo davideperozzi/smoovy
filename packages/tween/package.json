@@ -11,7 +11,8 @@
     "access": "public"
   },
   "files": [
-    "dist/**"
+    "dist/**",
+    "m/**"
   ],
   "scripts": {
     "lint": "NAME=$(basename \"$PWD\") && cd ../../ && npm run lint:package $NAME",
