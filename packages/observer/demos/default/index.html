@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <title>@smoovy/observer | demos.default</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="index.scss" />
+  </head>
+  <body>
+    <smoovy-demo-collection data-headline="Observer demos">
+      <smoovy-demo-item
+        data-name="viewport"
+        data-headline="Viewport"
+        data-elements="dimension"
+      >
+        <div class="dimension">0x0</div>
+      </smoovy-demo-item>
+      <smoovy-demo-item
+        data-name="viewportThrottle"
+        data-headline="Viewport with 500ms throttle"
+        data-elements="dimension"
+      >
+        <div class="dimension">0x0</div>
+      </smoovy-demo-item>
+      <smoovy-demo-item
+        data-name="element"
+        data-headline="Element"
+        data-elements="target,page-offset,position,size"
+      >
+        <div class="element target">Resize the browser to see me in action</div>
+        <span>Offset: <span class="page-offset">0x0</span></span><br>
+        <span>Size: <span class="size">0x0</span></span><br>
+      </smoovy-demo-item>
+    </smoovy-demo-collection>
+
+    <!-- Scripts -->
+    <script src="index.ts"></script>
+  </body>
+</html>
