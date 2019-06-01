@@ -1,5 +1,4 @@
 import { Scroller } from '../../src';
-import { CssTransformOutput } from '../../src/outputs/css-transform-output';
 
 const target = document.querySelector('main') as HTMLMainElement;
 const scroller = new Scroller(target, {
@@ -7,7 +6,23 @@ const scroller = new Scroller(target, {
     cssTransform: {
       sectionSelector: 'section'
     }
+  },
+  transformer: {
+    tween: {
+      duration: 1500
+    }
   }
 });
 
-
+setTimeout(() => {
+  scroller.scrollTo(
+    { y: 500 },
+    {
+      transformer: {
+        tween: {
+          duration: 0
+        }
+      }
+    }
+  );
+}, 0);

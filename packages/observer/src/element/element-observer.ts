@@ -85,8 +85,8 @@ export class ElementObserver {
   public static updateState(state: ElementStateImpl) {
     const prevSum = this.getStateSum(state);
 
-    this.updatePageOffset(state);
-    this.updateSizeAndPosition(state);
+    this.updateOffset(state);
+    this.updateSize(state);
 
     if (
       prevSum !== this.getStateSum(state) &&
@@ -107,14 +107,14 @@ export class ElementObserver {
     );
   }
 
-  private static updateSizeAndPosition(state: ElementStateImpl) {
+  private static updateSize(state: ElementStateImpl) {
     const bounds = state.element.getBoundingClientRect();
 
     state.size.width = bounds.width;
     state.size.height = bounds.height;
   }
 
-  private static updatePageOffset(state: ElementStateImpl) {
+  private static updateOffset(state: ElementStateImpl) {
     const offset = getElementOffset(state.element);
 
     state.offset.x = offset.x;

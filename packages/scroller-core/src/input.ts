@@ -7,32 +7,33 @@ export interface ScrollerInputState {
 }
 
 export interface ScrollerInputConfig {}
-export type ScrollerInputSubscription = (event: ScrollerInputState) => void;
+export type ScrollerInputSubscription = (state: ScrollerInputState) => void;
 
 export abstract class ScrollerInput<
   C extends ScrollerInputConfig = ScrollerInputConfig
 > {
-  protected config = { } as C;
+  public config = {} as C;
   private subscriptions: ScrollerInputSubscription[] = [];
 
   public constructor(
     protected dom: ScrollerDom,
-    config?: Partial<C>
+    public userConfig?: Partial<C>
   ) {
     this.config = objectDeepClone(this.defaultConfig);
 
-    if (config) {
-      this.config = objectDeepMerge(this.defaultConfig, config);
+    if (userConfig) {
+      this.config = objectDeepMerge(this.defaultConfig, userConfig);
     }
   }
 
   public get defaultConfig(): C {
-    return {  } as C;
+    return {} as C;
   }
 
   public abstract attach(): void;
   public abstract detach(): void;
-  public abstract recalc(): void;
+
+  public recalc() {}
 
   public subscribe(cb: ScrollerInputSubscription) {
     this.subscriptions.push(cb);

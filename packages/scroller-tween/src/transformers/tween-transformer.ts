@@ -1,18 +1,23 @@
-import { easings, Tween } from '@smoovy/tween';
-import { Coordinate } from '@smoovy/utils';
-
 import {
   ScrollerTransformer, ScrollerTransformerConfig,
-} from '../core/transformer';
+  ScrollerTransformerConfigOverride,
+} from '@smoovy/scroller-core';
+import { easings, Tween } from '@smoovy/tween';
+import { Coordinate } from '@smoovy/utils';
 
 export interface TweenTransformerConfig extends ScrollerTransformerConfig {
   duration: number;
   easing: easings.EasingImplementation;
 }
 
+export interface TweenTransformerConfigOverride
+  extends ScrollerTransformerConfigOverride,
+          TweenTransformerConfig {}
+
 export class TweenTransformer<
-  C extends TweenTransformerConfig = TweenTransformerConfig
-> extends ScrollerTransformer<C> {
+  C extends TweenTransformerConfig = TweenTransformerConfig,
+  O extends TweenTransformerConfigOverride = TweenTransformerConfigOverride
+> extends ScrollerTransformer<C, O> {
   private virtualPosition: Coordinate = { x: 0, y: 0 };
 
   public get defaultConfig() {
@@ -22,15 +27,14 @@ export class TweenTransformer<
     } as C;
   }
 
-  public recalc() {}
-
   public virtualTransform(position: Coordinate) {
     this.virtualPosition = position;
   }
 
   public outputTransform(
     position: Coordinate,
-    update: () => void
+    update: () => void,
+    complete: () => void
   ) {
     Tween.fromTo(
       position,
@@ -38,7 +42,9 @@ export class TweenTransformer<
       {
         duration: this.config.duration,
         easing: this.config.easing,
-        update: () => update()
+        update: () => update(),
+        stop: () => complete(),
+        complete: () => complete()
       }
     );
   }

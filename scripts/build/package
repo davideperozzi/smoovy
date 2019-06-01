@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 PKG=$(pwd)/packages/$1
 
-echo "Building and bundling package \"$1\""
+echo "📦 Building bundle for \"$1\""
 rm -rf $PKG/dist && \
 rollup \
   -c $(pwd)/build/rollup.config.js \
@@ -9,8 +9,11 @@ rollup \
   --silent
 
 
-echo "Generating modules for \"$1\""
-rm -rf $PKG/m && \
-tsc \
-  --project $PKG \
-  --outDir $PKG/m
+if [ -f "$PKG/.modular" ]; then
+  echo "🔔 Found .modular file"
+  echo "📦 Building modules for \"$1\""
+  rm -rf $PKG/m && \
+  tsc \
+    --project $PKG \
+    --outDir $PKG/m
+fi

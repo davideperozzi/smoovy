@@ -1,6 +1,5 @@
-import { Browser } from '@smoovy/utils';
-
-import { ScrollerInput, ScrollerInputConfig } from '../core/input';
+import { ScrollerInput, ScrollerInputConfig } from '@smoovy/scroller-core';
+import { Browser } from '@smoovy/utils/m/browser';
 
 export interface MouseWheelInputConfig extends ScrollerInputConfig {
   multiplier: number;
@@ -21,7 +20,7 @@ export class MouseWheelInput<
 
   public attach() {
     if (Browser.wheelEvent) {
-      this.dom.container.addEventListener(
+      this.dom.container.element.addEventListener(
         'wheel',
         this.wheelCb,
         false
@@ -30,10 +29,8 @@ export class MouseWheelInput<
   }
 
   public detach() {
-    this.dom.container.removeEventListener('wheel', this.wheelCb);
+    this.dom.container.element.removeEventListener('wheel', this.wheelCb);
   }
-
-  public recalc() {}
 
   private handleWheel(event: WheelEvent) {
     event.preventDefault();

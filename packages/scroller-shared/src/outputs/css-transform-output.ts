@@ -1,10 +1,31 @@
-import { Browser, Coordinate, Size, getElementOffset } from '@smoovy/utils';
-
-import { ScrollerOutput, ScrollerOutputConfig } from '../core/output';
+import { ScrollerOutput, ScrollerOutputConfig } from '@smoovy/scroller-core';
+import { Browser, Coordinate, getElementOffset, Size } from '@smoovy/utils';
 
 export interface CssTransformOutputConfig extends ScrollerOutputConfig {
+  /**
+   * If a section selector was passed, instead of animating
+   * the whole content wrapper only the selected sections
+   * will be animated. This gives you a huge performance boost
+   * in most browser, but also comes with a lot to care for.
+   * So use it wisely!
+   */
   sectionSelector?: string;
+
+  /**
+   * Adds a padding to the sections visible rect, so you can extend
+   * the area in which the section will be recognized as visible,
+   * thus tweened outside of the viewport. This can come in handy,
+   * if you have some effects playing in one section overlapping into
+   * another one
+   */
   sectionPadding: number;
+
+  /**
+   * Since firefox has a problem with tweening transforms,
+   * this will add a little trick to prevent firefox from
+   * executing flickering animations by adding a 3d rotation
+   * of 0.01deg to the transform property. Default: true
+   */
   firefoxFix: boolean;
 }
 
@@ -39,7 +60,7 @@ export class CssTransformOutput<
       });
     }
 
-    this.dom.wrapper.style.transform = '';
+    this.dom.wrapper.element.style.transform = '';
   }
 
   public updateSections() {
@@ -72,7 +93,7 @@ export class CssTransformOutput<
   }
 
   private updateSectionPosition(position: Coordinate) {
-    const containerSize = this.dom.getContainerSize();
+    const containerSize = this.dom.container.size;
     const sectionPadding = this.config.sectionPadding;
 
     for (let i = 0, len = this.sections.length; i < len; i++) {
@@ -121,7 +142,7 @@ export class CssTransformOutput<
   }
 
   private updateContainerPosition(position: Coordinate) {
-    this.translateElement(this.dom.wrapper, -position.x, -position.y);
+    this.translateElement(this.dom.wrapper.element, -position.x, -position.y);
   }
 
   private translateElement(

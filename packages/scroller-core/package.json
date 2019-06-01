@@ -1,10 +1,10 @@
 {
-  "name": "@smoovy/scroller",
+  "name": "@smoovy/scroller-core",
   "version": "0.0.0",
-  "description": "Smooth scrolling for the world",
+  "description": "Scroller core",
   "main": "dist/index.js",
   "source": "src/index.ts",
-  "types": "dist/typings/index.d.ts",
+  "types": "dist/types/index.d.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",
   "publishConfig": {
@@ -22,18 +22,15 @@
   },
   "keywords": [
     "smoovy",
-    "tween",
     "scroller",
-    "smooth",
-    "scrolling",
-    "raf"
+    "core",
+    "scrolling"
   ],
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/scroller-core": "^0.0.0",
-    "@smoovy/scroller-tween": "^0.0.0",
+    "@smoovy/utils": "^0.1.0",
+    "@smoovy/observer": "^0.0.0",
     "tslib": "^1.9.3"
-  },
-  "gitHead": "8aec1c21483db613a51382dd502ddba2311d1b40"
+  }
 }
