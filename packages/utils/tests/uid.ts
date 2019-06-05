@@ -1,4 +1,4 @@
-import { Uid } from '../dist';
+import { Uid } from '../';
 
 describe('general', () => {
   beforeEach(() => Uid.reset());

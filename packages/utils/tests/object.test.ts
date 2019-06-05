@@ -3,7 +3,7 @@ import {
   objectDeepClone,
   objectDeepMerge,
   objectValueByPath,
-} from '../dist';
+} from '../';
 
 describe('general', () => {
   it('should assume objects correctly', () => {

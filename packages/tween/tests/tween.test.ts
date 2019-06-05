@@ -1,27 +1,33 @@
-import { Tween } from '../dist';
+import { Tween } from '../';
 
 describe('general', () => {
-  it('should mutate and tween object property from 0 to 100 in 300ms', (done) => {
-    const mutation = { x: 0 };
+  (global as any).window = global;
 
-    Tween.fromTo(mutation, { x: 100 }, { duration: 300 });
+  it('should mutate and tween object property from 0 to 100 in 300ms',
+    (done) => {
+      const mutation = { x: 0 };
 
-    setTimeout(() => {
-      expect(mutation.x).toBe(100);
-      done();
-    }, 500);
-  });
+      Tween.fromTo(mutation, { x: 100 }, { duration: 300 });
 
-  it('shouldn\'t mutate but tween the property from 0 to 100 in 300ms', (done) => {
-    const mutation = { x: 0 };
+      setTimeout(() => {
+        expect(mutation.x).toBe(100);
+        done();
+      }, 500);
+    }
+  );
 
-    Tween.fromTo(mutation, { x: 100 }, { duration: 300, mutate: false });
+  it('shouldn\'t mutate but tween the property from 0 to 100 in 300ms',
+    (done) => {
+      const mutation = { x: 0 };
 
-    setTimeout(() => {
-      expect(mutation.x).toBe(0);
-      done();
-    }, 500);
-  });
+      Tween.fromTo(mutation, { x: 100 }, { duration: 300, mutate: false });
+
+      setTimeout(() => {
+        expect(mutation.x).toBe(0);
+        done();
+      }, 500);
+    }
+  );
 
   it('should stop the tween after 100ms', (done) => {
     const data = { x: 0 };

@@ -31,8 +31,5 @@
     "@smoovy/ticker": "^0.1.0",
     "tslib": "^1.9.3"
   },
-  "devDependencies": {
-    "@babel/core": "^7.4.3"
-  },
   "gitHead": "8aec1c21483db613a51382dd502ddba2311d1b40"
 }

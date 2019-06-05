@@ -1,6 +1,8 @@
-import { Ticker, TickerThread } from '../dist'
+import { Ticker, TickerThread } from '../';
 
 describe('general', () => {
+  (global as any).window = global;
+
   const ticker = new Ticker();
 
   beforeEach(() => {

@@ -1,4 +1,4 @@
-import { throttle } from '../dist';
+import { throttle } from '../';
 
 describe('general', () => {
   it('should throttle function (50ms)', (done) => {

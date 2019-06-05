@@ -1,4 +1,4 @@
-import { Resolver } from '../dist';
+import { Resolver } from '../';
 
 describe('general', () => {
   it('should not resolve', () => {

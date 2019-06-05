@@ -1,7 +1,7 @@
 import { throttle } from '@smoovy/utils/m/throttle';
 import { Resolver } from '@smoovy/utils/m/resolver';
 
-type ChangeListener = (state: ViewportState) => void;
+export type ViewportChangeListener = (state: ViewportState) => void;
 
 export interface ViewportState {
   width: number;
@@ -17,11 +17,11 @@ export class ViewportObserver {
   private static _state: ViewportState = { width: 0, height: 0 };
   private static lastRafId: number = -1;
   private static resizeListener?: EventListenerOrEventListenerObject;
-  private static listeners: ChangeListener[] = [];
+  private static listeners: ViewportChangeListener[] = [];
   private static stateResolver = new Resolver<ViewportState>();
 
   public static changed(
-    listener: ChangeListener,
+    listener: ViewportChangeListener,
     throttleTime: number = 0
   ): ViewportObservable {
     if (throttleTime > 0) {
@@ -36,7 +36,7 @@ export class ViewportObserver {
     };
   }
 
-  private static removeListener(listener: ChangeListener) {
+  private static removeListener(listener: ViewportChangeListener) {
     const index = this.listeners.indexOf(listener);
 
     if (index > -1) {
@@ -72,14 +72,22 @@ export class ViewportObserver {
     }
   }
 
+  private static getStateSum() {
+    return this._state.width + this._state.height;
+  }
+
   private static handleResize()  {
     cancelAnimationFrame(this.lastRafId);
+
+    const prevSum = this.getStateSum();
 
     this.lastRafId = requestAnimationFrame(() => {
       this.update();
 
-      for (let i = 0, len = this.listeners.length; i < len; i++) {
-        this.listeners[i].call(this, this._state);
+      if (prevSum !== this.getStateSum()) {
+        for (let i = 0, len = this.listeners.length; i < len; i++) {
+          this.listeners[i].call(this, this._state);
+        }
       }
     });
   }

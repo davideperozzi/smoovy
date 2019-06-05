@@ -22,13 +22,13 @@ lerna-debug.log
 /.sass-cache
 .cache
 /connect.lock
-/coverage
 /libpeerconnection.log
 npm-debug.log
 .dev
 yarn-error.log
 testem.log
 .r*_cache*
+.coverage
 /coverage
 
 # System Files

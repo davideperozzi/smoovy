@@ -1,4 +1,4 @@
-import { Range } from '../dist';
+import { Range } from '../';
 
 describe('general', () => {
   it('should set start and end properly', () => {
