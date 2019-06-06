@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node --project tsconfig.node.json
+#!/usr/bin/env bin/ts-node-test
 import fs = require('fs');
 import rimraf = require('rimraf');
 import path = require('path');

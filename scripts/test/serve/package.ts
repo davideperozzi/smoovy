@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node --project tsconfig.node.json
+#!/usr/bin/env bin/ts-node-test
 import path = require('path');
 import childProcess = require('child_process');
 
