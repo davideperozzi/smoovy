@@ -1,6 +1,11 @@
 export class Browser {
-  public static uA = navigator.userAgent.toLowerCase();
-  public static pf = navigator.platform.toLowerCase();
+  public static get uA() {
+    return navigator.userAgent.toLowerCase();
+  }
+
+  public static get pf() {
+    return navigator.platform.toLowerCase();
+  }
 
   public static get safari() {
     return (/^((?!chrome|android).)*safari/).test(this.uA);

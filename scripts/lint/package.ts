@@ -7,7 +7,8 @@ if (typeof process.argv[2] === 'string') {
   const pkgPath = path.resolve('packages', pkgName);
 
   console.log(`🔍 Linting code for "${pkgName}"`);
-  childProcess.spawnSync(
+
+  const lintProcess = childProcess.spawnSync(
     `
       tslint \
         --project ${pkgPath}
@@ -17,6 +18,10 @@ if (typeof process.argv[2] === 'string') {
       stdio: 'inherit'
     }
   );
+
+  if (lintProcess.status !== 0) {
+    process.exit(lintProcess.status);
+  }
 } else {
   throw new Error('No package defined');
 }

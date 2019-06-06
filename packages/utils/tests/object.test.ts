@@ -18,7 +18,7 @@ describe('general', () => {
     expect(isObject({})).toBeTruthy();
     expect(isObject({ test: 'test', 1: '12' })).toBeTruthy();
     expect(isObject(new Object)).toBeTruthy();
-    expect(isObject(new class t{})).toBeTruthy();
+    expect(isObject(new class T {})).toBeTruthy();
   });
 });
 
@@ -67,7 +67,7 @@ describe('clone', () => {
     const objNested = { nested: true };
     const obj1 = { test: '1', test2: objNested };
 
-    expect(objectDeepClone(obj1).tet2 !== objNested).toBeTruthy();
+    expect(objectDeepClone(obj1).test2 !== objNested).toBeTruthy();
   });
 });
 

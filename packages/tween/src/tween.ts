@@ -27,7 +27,7 @@ export class Tween<T = any> implements Tweenable {
     Tween.registry.add(this, options.overwrite);
   }
 
-  private static getChanges<T extends TweenTarget>(
+  private static getChanges<T extends TweenTarget = {}>(
     from: T,
     to: Partial<T>
   ): typeof to {
@@ -38,7 +38,7 @@ export class Tween<T = any> implements Tweenable {
         const change = (to[key] as number) - from[key];
 
         if (change !== 0) {
-          changes[key as string] = change;
+          changes[key] = change;
         }
       }
     }

@@ -1,8 +1,6 @@
 import { Tween } from '../';
 
 describe('general', () => {
-  (global as any).window = global;
-
   it('should mutate and tween object property from 0 to 100 in 300ms',
     (done) => {
       const mutation = { x: 0 };

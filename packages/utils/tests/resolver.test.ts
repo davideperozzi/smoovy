@@ -46,7 +46,7 @@ describe('general', () => {
   });
 
   it('should resolve with value', (done) => {
-    const resolver = new Resolver();
+    const resolver = new Resolver<string>();
 
     resolver.promise.then((val) => {
       expect(val).toBe('test');
@@ -57,7 +57,7 @@ describe('general', () => {
   });
 
   it('should reject with value', (done) => {
-    const resolver = new Resolver();
+    const resolver = new Resolver<string>();
 
     resolver.promise.then(() => fail(), (val) => {
       expect(val).toBe('error');

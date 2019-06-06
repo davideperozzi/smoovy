@@ -11,7 +11,8 @@ if (typeof process.argv[2] === 'string') {
 
   if (fs.existsSync(demoPath)) {
     console.log(`🎉 Starting demo "${demoName}" for "${pkgName}"`);
-    childProcess.spawnSync(
+
+    const parcelProcess = childProcess.spawnSync(
       `
         parcel \
           --no-autoinstall ${path.join(demoPath, 'index.html')} \
@@ -23,6 +24,10 @@ if (typeof process.argv[2] === 'string') {
         stdio: 'inherit'
       }
     );
+
+    if (parcelProcess.status !== 0) {
+      process.exit(parcelProcess.status);
+    }
   } else {
     console.log(`The package "${pkgName}" does not have any demos`);
   }

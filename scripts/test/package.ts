@@ -26,7 +26,7 @@ if (typeof process.argv[2] === 'string') {
       process.env.TEST_BROWSER_ROOT = browserTestsPath;
     }
 
-    childProcess.spawnSync(
+    const jestProcess = childProcess.spawnSync(
       ciEnabled
         ? `
           jest \
@@ -50,18 +50,27 @@ if (typeof process.argv[2] === 'string') {
       }
     );
 
+    if (jestProcess.status !== 0) {
+      process.exit(jestProcess.status);
+    }
+
     if (ciEnabled) {
       const coverageStats = fs.statSync(coverageUploadFile);
 
       if (coverageStats.size > 0) {
         console.log('Reporting to coveralls.');
-        childProcess.spawnSync(
+
+        const coverageProcess = childProcess.spawnSync(
           `cat ${coverageUploadFile} | coveralls`,
           {
             shell: true,
             stdio: 'inherit'
           }
         );
+
+        if (coverageProcess.status !== 0) {
+          process.exit(coverageProcess.status);
+        }
       } else {
         console.log('Not reporting to coveralls: lcov is empty.');
       }

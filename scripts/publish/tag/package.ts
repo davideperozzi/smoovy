@@ -18,10 +18,17 @@ if (typeof process.argv[2] === 'string') {
         throw new Error(`Package "${pkgName}" does not exist`);
       }
 
-      childProcess.spawnSync(`cd ${pkgPath} && npm publish`, {
-        shell: true,
-        stdio: 'inherit'
-      });
+      const publishProcess = childProcess.spawnSync(
+        `cd ${pkgPath} && npm publish`,
+        {
+          shell: true,
+          stdio: 'inherit'
+        }
+      );
+
+      if (publishProcess.status !== 0) {
+        process.exit(publishProcess.status);
+      }
     }
   } else {
     throw new Error(`Invalid tag "${tagName}"`);

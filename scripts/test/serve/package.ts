@@ -12,7 +12,7 @@ if (
     ? process.env.TEST_BROWSER_ROOT
     : path.join(pkgPath, 'tests', 'browser');
 
-  childProcess.spawnSync(
+  const parcelProcess = childProcess.spawnSync(
     `
       parcel \
         --port ${process.env.TEST_PORT || 1337} \
@@ -26,6 +26,10 @@ if (
       stdio: 'inherit'
     }
   );
+
+  if (parcelProcess.status !== 0) {
+    process.exit(parcelProcess.status);
+  }
 } else {
   throw new Error(`
     You need to pass the package name as arvg1 or define an environment

@@ -17,7 +17,8 @@ if (typeof process.argv[2] === 'string') {
 
   rimraf.sync(distPath);
   console.log(`📦 Building bundles for "${pkgName}":`);
-  childProcess.spawnSync(
+
+  const buildProcess = childProcess.spawnSync(
     `
       rollup \
         -c ${process.cwd()}/build/rollup.config.js \
@@ -29,11 +30,16 @@ if (typeof process.argv[2] === 'string') {
     }
   );
 
+  if (buildProcess.status !== 0)  {
+    process.exit(buildProcess.status);
+  }
+
   if (fs.existsSync(modularFile)) {
     rimraf.sync(distModulesPath);
     console.log(`🔔 .modular file found!`);
     console.log(`📦 Building modules for "${pkgName}":`);
-    childProcess.spawnSync(
+
+    const buildModulesProcess = childProcess.spawnSync(
       `
         tsc \
           --project ${pkgPath} \
@@ -44,6 +50,10 @@ if (typeof process.argv[2] === 'string') {
         stdio: 'inherit'
       }
     );
+
+    if (buildModulesProcess.status !== 0)  {
+      process.exit(buildModulesProcess.status);
+    }
   }
 } else {
   throw new Error('No package defined');

@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-tail -n +2 $1 | eval ./node_modules/.bin/ts-node --project tsconfig.test.json $@
+./node_modules/.bin/ts-node --project tsconfig.test.json $@
