@@ -1,4 +1,4 @@
-#!/usr/bin/env bin/ts-node-test
+#!/usr/bin/env bin/ts-node
 import fs = require('fs');
 import rimraf = require('rimraf');
 import path = require('path');

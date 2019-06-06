@@ -1,4 +1,4 @@
-#!/usr/bin/env bin/ts-node-test
+#!/usr/bin/env bin/ts-node
 import fs = require('fs');
 import path = require('path');
 import childProcess = require('child_process');

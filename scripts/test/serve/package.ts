@@ -1,9 +1,9 @@
-#!/usr/bin/env bin/ts-node-test
+#!/usr/bin/env bin/ts-node
 import path = require('path');
 import childProcess = require('child_process');
 
 if (
-  typeof process.env.TEST_BROWSER_ROOT === 'string' || 
+  typeof process.env.TEST_BROWSER_ROOT === 'string' ||
   typeof process.argv[2] === 'string'
 ) {
   const pkgName = process.argv[2] || '';

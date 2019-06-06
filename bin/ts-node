@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+./node_modules/.bin/ts-node --project tsconfig.node.json $@
