@@ -11,7 +11,7 @@ if (!!process.env.TEST_BROWSER_ROOT) {
     command: `npm run test:serve:package`,
     port: process.env.TEST_PORT ? parseInt(process.env.TEST_PORT, 10) : 1337,
     usedPortAction: 'kill',
-    launchTimeout: process.env.CI ? 5000 : 10000,
+    launchTimeout: 10000,
     debug
   };
 
