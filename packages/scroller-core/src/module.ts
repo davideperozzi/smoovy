@@ -10,12 +10,24 @@ interface ScrollerModuleItem<T> {
   [key: string]: T;
 }
 
+export type InputListener = (pos: Coordinate) => void;
+export type OutputListener = (pos: Coordinate) => void;
+export type RecalcListener = (
+  virtualPos: Coordinate,
+  outputPos: Coordinate
+) => void;
+
 export interface ScrollerModuleConfig<
   I extends ScrollerModuleItem<ScrollerInput> = {},
   O extends ScrollerModuleItem<ScrollerOutput> = {},
   T extends ScrollerModuleItem<ScrollerTransformer> = {}
 > {
   mapDelta?: (delta: Coordinate) => Coordinate;
+  on?: {
+    input?: InputListener,
+    output?: OutputListener,
+    recalc?: RecalcListener
+  };
   input: Partial<{
     [K in keyof I]: Partial<I[K]['config']>
   }>;
@@ -45,13 +57,31 @@ export class ScrollerModule<
   public inputs: ScrollerModuleItem<ScrollerInput> = {};
   public outputs: ScrollerModuleItem<ScrollerOutput> = {};
   public transformers: ScrollerModuleItem<ScrollerTransformer> = {};
+  private inputListeners: InputListener[] = [];
+  private outputListeners: OutputListener[] = [];
+  private recalcListeners: RecalcListener[] = [];
   private virtualPosition: Coordinate;
   private outputPosition: Coordinate;
+  private inputsDisabled: boolean = false;
 
   public constructor(
     protected dom: ScrollerDom,
     public config: C
-  ) {}
+  ) {
+    if (config.on) {
+      if (typeof config.on.input === 'function') {
+        this.onInput(config.on.input);
+      }
+
+      if (typeof config.on.output === 'function') {
+        this.onOutput(config.on.output);
+      }
+
+      if (typeof config.on.recalc === 'function') {
+        this.onRecalc(config.on.recalc);
+      }
+    }
+  }
 
   public init() {}
 
@@ -100,12 +130,36 @@ export class ScrollerModule<
     );
   }
 
+  public onInput(listener: InputListener) {
+    this.inputListeners.push(listener);
+  }
+
+  public onOutput(listener: OutputListener) {
+    this.outputListeners.push(listener);
+  }
+
+  public onRecalc(listener: RecalcListener) {
+    this.recalcListeners.push(listener);
+  }
+
+  public enableInputs(enabled: boolean = true) {
+    this.inputsDisabled = !enabled;
+  }
+
   public recalc() {
     this.updateInput({ delta: { x: 0, y: 0 } });
     this.eachInput((input) => input.recalc());
     this.eachOutput((output) => output.recalc());
     this.eachTransformer((transformer) => transformer.recalc());
     this.updateInput({ delta: { x: 0, y: 0 } });
+
+    for (let i = 0, len = this.recalcListeners.length; i < len; i++) {
+      this.recalcListeners[i].call(
+        this,
+        this.virtualPosition,
+        this.outputPosition
+      );
+    }
   }
 
   public updatePosition<
@@ -167,6 +221,10 @@ export class ScrollerModule<
       );
     }
 
+    for (let i = 0, len = this.inputListeners.length; i < len; i++) {
+      this.inputListeners[i].call(this, this.virtualPosition);
+    }
+
     let transformersEnded = 0;
 
     for (let i = 0, len = transformerKeys.length; i < len; i++) {
@@ -191,6 +249,10 @@ export class ScrollerModule<
   }
 
   protected updateInput(state: ScrollerInputState) {
+    if (this.inputsDisabled) {
+      return;
+    }
+
     if (typeof this.config.mapDelta === 'function') {
       state.delta = this.config.mapDelta.call(this, state.delta);
     }
@@ -206,6 +268,10 @@ export class ScrollerModule<
 
     for (let i = 0, len = outputKeys.length; i < len; i++) {
       this.outputs[outputKeys[i]].update(this.outputPosition);
+    }
+
+    for (let i = 0, len = this.inputListeners.length; i < len; i++) {
+      this.outputListeners[i].call(this, this.outputPosition);
     }
   }
 }

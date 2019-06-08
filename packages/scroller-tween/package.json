@@ -31,8 +31,8 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/scroller-core": "^0.0.1",
-    "@smoovy/scroller-shared": "^0.0.1",
+    "@smoovy/scroller-core": "0.0.1",
+    "@smoovy/scroller-shared": "0.0.1",
     "@smoovy/tween": "^0.1.1",
     "@smoovy/utils": "^0.1.1",
     "tslib": "^1.9.3"

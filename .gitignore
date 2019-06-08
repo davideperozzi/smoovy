@@ -30,6 +30,7 @@ testem.log
 .r*_cache*
 .coverage
 /coverage
+.tmp
 
 # System Files
 .DS_Store

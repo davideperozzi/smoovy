@@ -20,10 +20,10 @@ export const defaultConfig: ScrollerConfig = {
 };
 
 export class Scroller<M extends ScrollerModule = ScrollerModule> {
-  private dom: ScrollerDom;
   private outputPosition: Coordinate = { x: 0, y: 0 };
   private virtualPosition: Coordinate = { x: 0, y: 0 };
   protected config = defaultConfig;
+  public dom: ScrollerDom;
   public module: M;
 
   public constructor(
@@ -41,7 +41,8 @@ export class Scroller<M extends ScrollerModule = ScrollerModule> {
         input: this.config.input,
         output: this.config.output,
         transformer: this.config.transformer,
-        mapDelta: this.config.mapDelta
+        mapDelta: this.config.mapDelta,
+        on: this.config.on
       }
     ) as M;
 
@@ -74,6 +75,14 @@ export class Scroller<M extends ScrollerModule = ScrollerModule> {
 
   public update() {
     this.module.recalc();
+  }
+
+  public enableInputs(enabled = true) {
+    this.module.enableInputs(enabled);
+  }
+
+  public disableInputs() {
+    this.module.enableInputs(false);
   }
 
   public scrollTo<

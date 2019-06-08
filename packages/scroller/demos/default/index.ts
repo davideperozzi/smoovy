@@ -1,6 +1,6 @@
 import { Scroller } from '../../src';
 
-const target = document.querySelector('main') as HTMLMainElement;
+const target = document.querySelector('main') as HTMLElement;
 const scroller = new Scroller(target, {
   output: {
     cssTransform: {
@@ -14,13 +14,15 @@ const scroller = new Scroller(target, {
   }
 });
 
+
+
 setTimeout(() => {
   scroller.scrollTo(
     { y: 500 },
     {
       transformer: {
         tween: {
-          duration: 0
+          duration: undefined
         }
       }
     }

@@ -1,10 +1,12 @@
-import path from 'path';
+import * as path from 'path';
+import * as fs from 'fs';
 import autoExternal from 'rollup-plugin-auto-external';
 import localResolve from 'rollup-plugin-local-resolve';
-import { terser } from "rollup-plugin-terser";
+import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
 
-const pkgPath = process.env.PACKAGE;
+const pkgPath = process.env.PACKAGE || '';
+const pkgRootPath = path.resolve(pkgPath, '..');
 const pkgConfigPath = path.join(pkgPath, 'package.json');
 const pkgConfig = require(pkgConfigPath);
 const inputFile = path.resolve(pkgPath, pkgConfig.source);
@@ -13,12 +15,39 @@ const outputType = path.extname(pkgConfig.main).replace(/^\./, '');
 const outputName = path.basename(pkgConfig.main)
   .replace(new RegExp(`\.${outputType}$`), '');
 
-const defaultExternals = (id) => {
-  return autoExternal({ packagePath: pkgConfigPath})
+const defaultExternals = (id: string) => {
+  return autoExternal({ packagePath: pkgConfigPath })
     .options({ external: [] })
     .external
     .includes(id);
-}
+};
+
+const camalize = (str: string) => {
+  return str.toLowerCase()
+    .replace(
+      /[^a-zA-Z0-9]+(.)/g,
+      (m: any, chr: string) => chr.toUpperCase()
+    );
+};
+
+const pkgGlobalNamesArr = fs.readdirSync(pkgRootPath)
+  .filter((entry) => {
+    const entryPath = path.resolve(pkgRootPath, entry);
+
+    return fs.lstatSync(entryPath).isDirectory();
+  })
+  .map((entry) => {
+    entry = entry.toLowerCase();
+
+    return [
+      `@smoovy/${entry}`,
+      camalize(`smoovy-${entry}`)
+    ];
+  });
+
+const pkgGlobalNames: { [name: string]: string } = {};
+
+pkgGlobalNamesArr.forEach(entry => pkgGlobalNames[entry[0]] = entry[1]);
 
 const defaultPlugins = [
   typescript({
@@ -31,6 +60,12 @@ const defaultPlugins = [
       }
     },
     tsconfig: path.resolve(pkgPath, 'tsconfig.json'),
+    tsconfigOverride: {
+      compilerOptions: {
+        // Remove paths, since we want to use the dist files here
+        paths: {}
+      }
+    }
   }),
   localResolve(),
   terser({
@@ -58,22 +93,17 @@ const umdConfig = {
   name: pkgConfig.name,
   sourcemap: true,
   globals: {
-    tslib: 'tslib'
+    tslib: 'tslib',
+    ...pkgGlobalNames
   }
 };
 
 export default Promise.resolve(
-  [
-    cjsConfig,
-    esmConfig,
-    umdConfig
-  ].map(
-    output => ({
-      input: inputFile,
-      context: 'window',
-      external: defaultExternals,
-      plugins: [ ...defaultPlugins ],
-      output,
-    })
-  )
+  [ cjsConfig, esmConfig, umdConfig ].map((output) => ({
+    input: inputFile,
+    context: 'window',
+    external: defaultExternals,
+    plugins: [ ...defaultPlugins ],
+    output,
+  }))
 );

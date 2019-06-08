@@ -29,7 +29,7 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/observer": "^0.0.1",
+    "@smoovy/observer": "0.0.1",
     "@smoovy/utils": "^0.1.1",
     "tslib": "^1.9.3"
   }

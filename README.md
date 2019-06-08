@@ -8,33 +8,32 @@
 ## Synopsis
 **smoovy** is just a collection of small and useful js packages preventing copy & paste. The goal is to use as minimum dependencies as possible to guarantee a **small final bundle**. Also to keep the code clean, small and simple.
 
-## Packages
+## Main packages
 | Name| Version | Size |
 | --- | --- | --- |
-| [@smoovy/tween](./packages/tween/README.MD) | [![Version](https://flat.badgen.net/npm/v/@smoovy/tween)](https://www.npmjs.com/package/@smoovy/tween) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/tween) |
-| [@smoovy/ticker](./packages/ticker/README.MD) | [![Version](https://flat.badgen.net/npm/v/@smoovy/ticker)](https://www.npmjs.com/package/@smoovy/ticker) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/ticker) |
-| [@smoovy/utils](./packages/utils/README.MD) | [![Version](https://flat.badgen.net/npm/v/@smoovy/utils)](https://www.npmjs.com/package/@smoovy/utils) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/utils) |
+| [@smoovy/scroller](./packages/scroller) | [![Version](https://flat.badgen.net/npm/v/@smoovy/scroller)](https://www.npmjs.com/package/@smoovy/scroller) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/scroller) |
+| [@smoovy/tween](./packages/tween) | [![Version](https://flat.badgen.net/npm/v/@smoovy/tween)](https://www.npmjs.com/package/@smoovy/tween) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/tween) |
+| [@smoovy/ticker](./packages/ticker) | [![Version](https://flat.badgen.net/npm/v/@smoovy/ticker)](https://www.npmjs.com/package/@smoovy/ticker) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/ticker) |
+| [@smoovy/utils](./packages/utils) | [![Version](https://flat.badgen.net/npm/v/@smoovy/utils)](https://www.npmjs.com/package/@smoovy/utils) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/utils) |
 
 ## Getting started
-Choose a package you want and install. Easy as that:
+Choose a package you want to install. Easy as that:
 ```sh
 npm install --save @smoovy/<package>
 ```
 
 ## Roadmap 2019
-- [ ] 📦 Migrate `@smoovy/scroller`
-- [ ] 💡 Integrate e2e tests with BrowserStack
 - [ ] 📦 Create `@smoovy/parallax` (parallax effect math)
 - [ ] 📦 Create `@smoovy/timeline` (timeline for tweens)
-- [ ] 📦 Create `@smoovy/el-state` (element state watcher)
 - [ ] 📦 Create `@smoovy/text-split` (easy text splitting)
 - [ ] 💡 Improve tween demos
 - [ ] 💡 Improve documentation
 - [ ] 💡 Improve testing
+- [ ] 💡 Improve code coverage
 
 
 ## Workflow
-This is simple monorepo consisting of the packages mentioned above.
+This is simple monorepo consisting of some of the packages mentioned above.
 > Every commands related to a package will be executed from the root directory via `scripty`
 
 ### Building a package
@@ -44,7 +43,7 @@ npm run build:package <name>
 ```
 
 ### Testing a package
-Packages will be tested with `jest`. The dist files will be used for testing.
+Packages will be tested with `jest` and `puppeteer`. The dist files will be used for testing.
 ```sh
 npm run test:package <name>
 ```
