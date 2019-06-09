@@ -67,7 +67,7 @@ scroller_core
 
     transformer -> virtTransform;
     transformer -> outTransform;
-}
+  }
 scroller_core
 </details>
 
