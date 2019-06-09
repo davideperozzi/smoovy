@@ -4,16 +4,17 @@
 The core architecture to implement any scroll experience you want!
 
 ## How it works
-![Architecture](https%3A%2F%2Fg.gravizo.com%2Fsource%2Fscroller_core%3Fhttps%3A%2F%2Fraw.githubusercontent.com%2Fdavideperozzi%2Fsmoovy%2Fpackages%2Fscroller-core%2FREADME.md)
+![Architecture](https://g.gravizo.com/source/scroller_core?https%3A%2F%2Fraw.githubusercontent.com%2Fdavideperozzi%2Fsmoovy%2Fmaster%2Fpackages%2Fscroller-core%2FREADME.md)
 
 <details> 
 <summary></summary>
 scroller_core
   digraph {
-    graph [ranksep=".5", rankdir="TB"];
+    ranksep=".5";
+    rankdir="TB";
 
     subgraph cluster_triggers {
-		color=black;
+		    color=black;
         margin=10;
         dev[shape="octagon", label="Developer"]
         user[shape="octagon", label="User"]
