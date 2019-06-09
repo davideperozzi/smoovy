@@ -9,7 +9,7 @@ The core architecture to implement any scroll experience you want!
 <details> 
 <summary></summary>
 scroller_core
-  digraph {
+  digraph G {
     ranksep=".5";
     rankdir="TB";
 
