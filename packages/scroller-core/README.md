@@ -8,6 +8,96 @@ Core architecture to create any scroll experience you want!
 npm install --save @smoovy/scroller-core
 ```
 
+## Usage
+
+Extend from the base scroller and set your module:
+```js
+import { Scroller } from '@smoovy/scroller-core';
+
+class YourScroller extends Scroller {
+  get moduleCtor() {
+    return YourModuleCtor;
+  }
+}
+```
+
+Create your scroller like this (automatic initialization):
+```js
+const target = document.querySelector('#scroller-target');
+const scroller = new YourScroller(
+  target,
+  {
+    // Optional config
+  }
+);
+```
+> Read more about transformers, inputs and outputs in the architecture explenation below to learn how to configure your scroller properly
+
+### (Re)mapping delta
+Sometimes you want to merge to directions into one. To do so, use the `mapDelta` method in your config:
+```js
+{
+  mapDelta: (delta) => {
+    // This will force both X and Y values to be added onto X.
+    // Also locking Y. No more changes in Y will occur from here
+    delta.x += delta.y;
+    delta.y = 0;
+
+    return delta;
+  }
+}
+```
+
+### Scroll to
+Programmatically scrolling to a specific position is also possible:
+```js
+scroller.scrollTo({ y: 200 });
+```
+
+If your transformers and outpus are supporting temporary overwriting of their config, you can pass it as the second argument.
+
+**As an example:** I want to overwrite the animation speed in my `TweenTransformer` while the programmatic scrolling is processing:
+
+```js
+scroller.scrollTo(
+  { y: 200 },
+  {
+    transformer: {
+      tween: {
+        duration: 1000
+      }
+    }
+  }
+);
+```
+
+> This will overwrite the duration until the transformer tells the module it's finished.
+
+### Trigger an update/recalc
+To tell all the components to update you can simply use this:
+
+```js
+scroller.update();
+```
+> This will automatically be called if DOM mutations or a resizes occur.
+
+### Disabling/Enabling input emission
+To disable or enable all further input emissions:
+
+```js
+scroller.disableInputs();    // Disable
+scroller.enableInputs(false) // Disable
+scroller.enableInputs();     // Enable
+scroller.enableInputs(true); // Enable
+```
+
+### Destroying the scroller
+To throw away your beautiful scroller:
+
+```js
+scroller.destroy();
+```
+
 ## The architecture
 
 <!--- Graphviz (Dot) code:
