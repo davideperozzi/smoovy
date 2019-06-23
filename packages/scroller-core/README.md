@@ -9,7 +9,6 @@ npm install --save @smoovy/scroller-core
 ```
 
 ## Usage
-
 Extend from the base scroller and set your module:
 ```js
 import { Scroller } from '@smoovy/scroller-core';
