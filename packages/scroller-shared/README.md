@@ -9,15 +9,26 @@ npm install --save @smoovy/scroller-shared
 ```
 
 ## Usage
-Choose the component you want to add to your module and simply include it. E.g.:
+Choose the component you want to add to your scroller module and simply include it. E.g.:
 ```js
 import { MouseWheelInput } from '@smoovy/scroller-shared';
 ```
 
 ## Inputs
-| Class | Config | Reference |
+| Class | Config key | Options
 | - | - | - |
-| MouseWheelInput | ``` { multiplier: number, multiplierFirefox: number }```  | Code
+| MouseWheelInput | mouseWheel | `multiplier: number`<br>`multiplierFirefox: number`
+| TouchSwipeInput | touchSwipe | `multiplier: number`
+
+## Transformers
+| Class | Config key | Options
+| - | - | - |
+| ClampTransformer | clamp | -
+
+## Outputs
+| Class | Config key | Options
+| - | - | - |
+| CssTransformOutput | cssTransform | `sectionSelector: string`<br>`sectionPadding: number`<br>`firefoxFix: boolean`
 
 ## Development commands
 ```js

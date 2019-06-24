@@ -20,7 +20,7 @@ describe('browser', () => {
 
     await page.exposeFunction(fncName, (state) => changed(state));
     await page.evaluate((name) => {
-      window.testState1.changed((state) => {
+      window.testState1.changed((state: any) => {
         (window as any)[name](state);
       });
     }, fncName);
@@ -49,6 +49,8 @@ describe('browser', () => {
       element.style.marginTop = '10vh';
       element.style.backgroundColor = 'green';
       element.textContent = 'Test element #1';
+
+      state.update();
 
       window.testEl1 = element;
       window.testState1 = state;

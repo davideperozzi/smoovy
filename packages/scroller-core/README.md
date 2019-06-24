@@ -84,10 +84,10 @@ scroller.update();
 To disable or enable all further input emissions:
 
 ```js
-scroller.disableInputs();    // Disable
-scroller.enableInputs(false) // Disable
-scroller.enableInputs();     // Enable
-scroller.enableInputs(true); // Enable
+scroller.disableInputs();     // Disable
+scroller.enableInputs(false); // Disable
+scroller.enableInputs();      // Enable
+scroller.enableInputs(true);  // Enable
 ```
 
 ### Destroying the scroller
