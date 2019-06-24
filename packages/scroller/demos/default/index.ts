@@ -14,8 +14,6 @@ const scroller = new Scroller(target, {
   }
 });
 
-
-
 setTimeout(() => {
   scroller.scrollTo(
     { y: 500 },

@@ -4,7 +4,7 @@ const launchConfig = {};
 if (!!process.env.TEST_BROWSER_ROOT) {
   const debug = !!!process.env.CI;
 
-  // Setip the server with the script defined by `scripty`.
+  // Setup the server with the script defined by `scripty`.
   // This config needs the environment variable `TEST_BROWSER_ROOT` set
   // to make start the server in the right place
   serverConfig.server = {

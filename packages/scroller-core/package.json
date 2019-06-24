@@ -12,6 +12,7 @@
   },
   "files": [
     "dist/**",
+    "assets/**",
     "m/**"
   ],
   "scripts": {
