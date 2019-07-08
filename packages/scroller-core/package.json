@@ -31,7 +31,6 @@
   "license": "MIT",
   "dependencies": {
     "@smoovy/observer": "^0.0.3",
-    "@smoovy/scroller-shared": "0.0.3",
     "@smoovy/utils": "^0.1.1",
     "tslib": "^1.9.3"
   },
