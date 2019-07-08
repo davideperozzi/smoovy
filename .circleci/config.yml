@@ -20,10 +20,10 @@ references:
     run:
       name: "Install node modules"
       command: 'npm install'
-  link_packages: &link_packages
+  bootstrap_packages: &bootstrap_packages
     run:
-      name: "Link all packages"
-      command: "npm run link:all"
+      name: "Bootstrap packages"
+      command: "npm run bootstrap:all"
   build_packages: &build_packages
     run:
       name: "Build all packages"
@@ -44,7 +44,7 @@ jobs:
       - checkout
       - *update_npm
       - *install_node_modules
-      - *link_packages
+      - *bootstrap_packages
       - *build_packages
   build_test:
     <<: *defaults
@@ -52,7 +52,7 @@ jobs:
       - checkout
       - *update_npm
       - *install_node_modules
-      - *link_packages
+      - *bootstrap_packages
       - *build_packages
       - *lint_packages
       - *test_packages
@@ -62,7 +62,7 @@ jobs:
       - checkout
       - *update_npm
       - *install_node_modules
-      - *link_packages
+      - *bootstrap_packages
       - *build_packages
       - run:
           name: "Add npm token"
@@ -79,15 +79,13 @@ workflows:
     jobs:
       - build_test:
           filters:
-            branches:
-              ignore: /.*/
             tags:
-              only: /^@smoovy\/.*/
+              only: /@smoovy.*/
       - build_deploy:
           requires:
             - build_test
           filters:
             tags:
-              only: /^@smoovy\/.*/
+              only: /@smoovy.*/
             branches:
               ignore: /.*/
