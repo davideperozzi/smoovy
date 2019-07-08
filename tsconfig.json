@@ -20,6 +20,7 @@
       "@smoovy/*": ["*/src"],
       "@smoovy/utils/m/*": ["utils/src/*"],
       "@smoovy/tween/m/*": ["tween/src/*"],
+      "@smoovy/scroller-shared/m/*": ["scroller-shared/src/*"],
     }
   }
 }

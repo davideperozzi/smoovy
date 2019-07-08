@@ -375,7 +375,7 @@ this.dom.wrapper.size.height;
 > The dimensions will be updated via viewport changes, dom mutations or manual updates
 
 ### ⚠️ Attention
-You should always be aware what you're transformers etc. are doing, since there isn't a mechanism to detect collisions.
+You should always be aware what your transformers etc. are doing, since there isn't a mechanism to detect collisions.
 
 ## Development commands
 ```js

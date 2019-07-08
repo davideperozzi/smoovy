@@ -1,6 +1,5 @@
 #!/usr/bin/env bin/ts-node
 import fs = require('fs');
-import os = require('os');
 import rimraf = require('rimraf');
 import path = require('path');
 import childProcess = require('child_process');
@@ -13,8 +12,9 @@ if (typeof process.argv[2] === 'string') {
   const distPath = path.join(pkgPath, 'dist');
   const modularFile = path.join(pkgPath, '.modular');
   const distModulesPath = path.join(pkgPath, 'm');
+  const tmpPath = path.join(rootPath, '.tmp');
   const buildConfigInput = path.join(rootPath, 'build', 'rollup.config.ts');
-  const buildConfigOutput = path.join(rootPath, '.tmp', 'rollup.config.js');
+  const buildConfigOutput = path.join(tmpPath, 'rollup.config.js');
 
   if ( ! fs.existsSync(pkgPath)) {
     throw new Error(`Package ${pkgName} does not exist`);
@@ -70,10 +70,27 @@ if (typeof process.argv[2] === 'string') {
     console.log(`🔔 .modular file found!`);
     console.log(`📦 Building modules for "${pkgName}":`);
 
+    const buildModuleConfigFile = path.join(
+      tmpPath,
+      `tsconfig.${pkgName}.json`
+    );
+
+    const buildModuleConfigContent = {
+      extends: path.join(pkgPath, 'tsconfig.json'),
+      compilerOptions: {
+        paths: {}
+      }
+    };
+
+    fs.writeFileSync(
+      buildModuleConfigFile,
+      JSON.stringify(buildModuleConfigContent)
+    );
+
     const buildModulesProcess = childProcess.spawnSync(
       `
         tsc \
-          --project ${pkgPath} \
+          --project ${buildModuleConfigFile} \
           --outDir ${distModulesPath}
       `,
       {
@@ -81,6 +98,8 @@ if (typeof process.argv[2] === 'string') {
         stdio: 'inherit'
       }
     );
+
+    fs.unlinkSync(buildModuleConfigFile);
 
     if (buildModulesProcess.status !== 0)  {
       process.exit(buildModulesProcess.status);
