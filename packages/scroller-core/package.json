@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller-core",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Scroller core",
   "main": "dist/index.js",
   "source": "src/index.ts",
