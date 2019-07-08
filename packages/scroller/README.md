@@ -6,9 +6,9 @@ Smooth scrolling based on [@smoovy/scroller-core](../scroller-core).
 ## Independent related packages
 | Name| Version | Size |
 | --- | --- | --- |
-| [@smoovy/scroller-core](./packages/scroller-core) | [![Version](https://flat.badgen.net/npm/v/@smoovy/scroller-core)](https://www.npmjs.com/package/@smoovy/scroller-core) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/scroller-core) |
-| [@smoovy/scroller-shared](./packages/scroller-shared) | [![Version](https://flat.badgen.net/npm/v/@smoovy/scroller-shared)](https://www.npmjs.com/package/@smoovy/scroller-shared) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/scroller-shared) |
-| [@smoovy/scroller-tween](./packages/scroller-tween) | [![Version](https://flat.badgen.net/npm/v/@smoovy/scroller-tween)](https://www.npmjs.com/package/@smoovy/scroller-tween) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/scroller-tween) |
+| [@smoovy/scroller-core](../scroller-core) | [![Version](https://flat.badgen.net/npm/v/@smoovy/scroller-core)](https://www.npmjs.com/package/@smoovy/scroller-core) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/scroller-core) |
+| [@smoovy/scroller-shared](../scroller-shared) | [![Version](https://flat.badgen.net/npm/v/@smoovy/scroller-shared)](https://www.npmjs.com/package/@smoovy/scroller-shared) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/scroller-shared) |
+| [@smoovy/scroller-tween](../scroller-tween) | [![Version](https://flat.badgen.net/npm/v/@smoovy/scroller-tween)](https://www.npmjs.com/package/@smoovy/scroller-tween) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/scroller-tween) |
 
 ## Installation
 ```sh

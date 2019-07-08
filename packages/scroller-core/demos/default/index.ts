@@ -1,5 +1,6 @@
 import {
   ClampTransformer, CssTransformOutput, MouseWheelInput,
+  TouchSwipeInput
 } from '@smoovy/scroller-shared';
 
 import { Scroller, ScrollerModule, ScrollerTransformer } from '../../src';
@@ -31,6 +32,10 @@ class MyScrollerModule extends ScrollerModule<any> {
       this.dom,
       this.config.input.mouseWheel
     ),
+    touchSwipe: new TouchSwipeInput(
+      this.dom,
+      this.config.input.touchSwipe
+    )
   };
 
   public outputs = {

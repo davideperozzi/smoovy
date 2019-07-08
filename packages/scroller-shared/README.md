@@ -17,8 +17,8 @@ import { MouseWheelInput } from '@smoovy/scroller-shared';
 ## Inputs
 | Class | Config key | Options
 | - | - | - |
-| MouseWheelInput | mouseWheel | `multiplier: number`<br>`multiplierFirefox: number`
-| TouchSwipeInput | touchSwipe | `multiplier: number`
+| MouseWheelInput | mouseWheel | `target: HTMLElement`<br>`multiplier: number`<br>`multiplierFirefox: number`
+| TouchSwipeInput | touchSwipe | `target: HTMLElement`<br>`multiplier: number`
 
 ## Transformers
 | Class | Config key | Options
