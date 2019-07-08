@@ -80,12 +80,14 @@ workflows:
       - build_test:
           filters:
             tags:
-              only: /@smoovy.*/
+              only: /^@smoovy.*/
+            branches:
+              ignore: /.*/
       - build_deploy:
           requires:
             - build_test
           filters:
             tags:
-              only: /@smoovy.*/
+              only: /^@smoovy.*/
             branches:
               ignore: /.*/
