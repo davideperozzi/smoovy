@@ -96,4 +96,9 @@ export class Browser {
   public static get mutationObserver() {
     return 'MutationObserver' in window;
   }
+
+  public static get client() {
+    return typeof window !== 'undefined' &&
+           typeof window.document !== 'undefined';
+  }
 }

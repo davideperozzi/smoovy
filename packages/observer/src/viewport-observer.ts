@@ -1,5 +1,6 @@
 import { throttle } from '@smoovy/utils/m/throttle';
 import { Resolver } from '@smoovy/utils/m/resolver';
+import { Browser } from '@smoovy/utils/m/browser';
 
 export type ViewportChangeListener = (state: ViewportState) => void;
 
@@ -64,8 +65,10 @@ export class ViewportObserver {
   }
 
   public static update() {
-    this._state.width = window.innerWidth;
-    this._state.height = window.innerHeight;
+    if (Browser.client) {
+      this._state.width = window.innerWidth;
+      this._state.height = window.innerHeight;
+    }
 
     if ( ! this.stateResolver.completed) {
       this.stateResolver.resolve(this._state);
@@ -97,13 +100,17 @@ export class ViewportObserver {
       this.handleResize();
       this.resizeListener = () => this.handleResize();
 
-      window.addEventListener('resize', this.resizeListener, true);
+      if (Browser.client) {
+        window.addEventListener('resize', this.resizeListener, true);
+      }
     }
   }
 
   private static detach() {
     if (this.resizeListener) {
-      window.removeEventListener('resize', this.resizeListener, true);
+      if (Browser.client) {
+        window.removeEventListener('resize', this.resizeListener, true);
+      }
 
       this.resizeListener = undefined;
     }

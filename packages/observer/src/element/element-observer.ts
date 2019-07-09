@@ -50,9 +50,13 @@ export class ElementObserver {
   }
 
   public static updateRaf() {
-    cancelAnimationFrame(this.lastRaf);
+    if (Browser.client) {
+      cancelAnimationFrame(this.lastRaf);
 
-    this.lastRaf = requestAnimationFrame(() => this.update());
+      this.lastRaf = requestAnimationFrame(() => this.update());
+    } else {
+      this.update();
+    }
   }
 
   public static update() {
@@ -108,24 +112,34 @@ export class ElementObserver {
   }
 
   private static updateSize(state: ElementStateImpl) {
-    const bounds = state.element.getBoundingClientRect();
+    if (Browser.client) {
+      const bounds = state.element.getBoundingClientRect();
 
-    state.size.width = bounds.width;
-    state.size.height = bounds.height;
+      state.size.width = bounds.width;
+      state.size.height = bounds.height;
+    } else {
+      state.size.width = 0;
+      state.size.height = 0;
+    }
   }
 
   private static updateOffset(state: ElementStateImpl) {
-    const offset = getElementOffset(state.element);
+    if (Browser.client) {
+      const offset = getElementOffset(state.element);
 
-    state.offset.x = offset.x;
-    state.offset.y = offset.y;
+      state.offset.x = offset.x;
+      state.offset.y = offset.y;
+    } else {
+      state.offset.x = 0;
+      state.offset.y = 0;
+    }
   }
 
   private static attach() {
     this.attached = true;
     this.viewportObserver = ViewportObserver.changed(() => this.update());
 
-    if (Browser.mutationObserver) {
+    if (Browser.client && Browser.mutationObserver) {
       this.mutationObserver = new MutationObserver(() => this.updateRaf());
 
       this.mutationObserver.observe(
@@ -140,18 +154,20 @@ export class ElementObserver {
 
     let domContentLoadedListener: EventListenerOrEventListenerObject;
 
-    document.addEventListener(
-      'DOMContentLoaded',
-      domContentLoadedListener = () => {
-        this.updateRaf();
+    if (Browser.client) {
+      document.addEventListener(
+        'DOMContentLoaded',
+        domContentLoadedListener = () => {
+          this.updateRaf();
 
-        document.removeEventListener(
-          'DOMContentLoaded',
-          domContentLoadedListener
-        );
-      },
-      false
-    );
+          document.removeEventListener(
+            'DOMContentLoaded',
+            domContentLoadedListener
+          );
+        },
+        false
+      );
+    }
 
     this.updateRaf();
   }
