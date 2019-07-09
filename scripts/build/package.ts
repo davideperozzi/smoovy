@@ -90,6 +90,7 @@ if (typeof process.argv[2] === 'string') {
     const buildModulesProcess = childProcess.spawnSync(
       `
         tsc \
+          --module commonjs \
           --project ${buildModuleConfigFile} \
           --outDir ${distModulesPath}
       `,

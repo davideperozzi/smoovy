@@ -134,6 +134,13 @@ interface TweenOptions<Values> {
 }
 ```
 
+## Modularity
+To reduce the final bundle size even more, you can only import the modules you're really using. E.g.:
+
+```js
+import { Cubic } from '@smoovy/tween/m/easing';
+```
+
 ## Development commands
 ```js
 // Serve with parcel

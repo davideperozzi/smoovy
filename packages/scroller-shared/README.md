@@ -30,6 +30,13 @@ import { MouseWheelInput } from '@smoovy/scroller-shared';
 | - | - | - |
 | CssTransformOutput | cssTransform | `sectionSelector: string`<br>`sectionPadding: number`<br>`firefoxFix: boolean`
 
+## Modularity
+To reduce the final bundle size even more, you can only import the components you're really using. E.g.:
+
+```js
+import { MouseWheelInput } from '@smoovy/scroller-shared/m/inputs/mouse-wheel-input';
+```
+
 ## Development commands
 ```js
 // Serve with parcel
