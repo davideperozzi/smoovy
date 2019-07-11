@@ -79,6 +79,8 @@ workflows:
     jobs:
       - build_test:
           filters:
+            branches:
+              ignore: /.*/
             tags:
               only: /.*/
       - build_deploy:
