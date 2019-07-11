@@ -4,6 +4,7 @@ import { Coordinate } from '@smoovy/utils/m/dimension';
 
 export interface TouchSwipeInputConfig extends ScrollerInputConfig {
   target: HTMLElement;
+  passive: boolean;
   multiplier: number;
 }
 
@@ -16,6 +17,7 @@ export class TouchSwipeInput<
 
   public get defaultConfig() {
     return {
+      passive: false,
       target: this.dom.container.element,
       multiplier: 2.5
     } as C;
@@ -32,7 +34,9 @@ export class TouchSwipeInput<
       this.config.target.addEventListener(
         'touchmove',
         this.touchMoveCb,
-        false
+        {
+          passive: this.config.passive
+        }
       );
     }
   }
@@ -54,7 +58,9 @@ export class TouchSwipeInput<
   }
 
   protected handleTouchMove(event: TouchEvent) {
-    event.preventDefault();
+    if ( ! this.config.passive) {
+      event.preventDefault();
+    }
 
     const touch = this.getTouchByEvent(event);
     const delta = { x: 0, y: 0 };
