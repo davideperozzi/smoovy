@@ -3,6 +3,7 @@ import { Browser } from '@smoovy/utils/m/browser';
 
 export interface MouseWheelInputConfig extends ScrollerInputConfig {
   target: HTMLElement;
+  passive: boolean;
   multiplier: number;
   multiplierFirefox: number;
 }
@@ -15,6 +16,7 @@ export class MouseWheelInput<
   public get defaultConfig() {
     return {
       target: this.dom.container.element,
+      passive: false,
       multiplier: 0.5,
       multiplierFirefox: 25
     } as C;
@@ -25,7 +27,9 @@ export class MouseWheelInput<
       this.config.target.addEventListener(
         'wheel',
         this.wheelCb,
-        false
+        {
+          passive: this.config.passive
+        }
       );
     }
   }
@@ -35,7 +39,9 @@ export class MouseWheelInput<
   }
 
   private handleWheel(event: WheelEvent) {
-    event.preventDefault();
+    if ( ! this.config.passive) {
+      event.preventDefault();
+    }
 
     const delta = { x: 0, y: 0 };
 
