@@ -69,7 +69,7 @@ jobs:
           command: "echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc"
       - run:
           name: "Publish from git tags"
-          command: "npm run publish:tag $CIRCLE_TAG"
+          command: "npm run publish:tag:package $CIRCLE_TAG"
 
 workflows:
   build_test:
