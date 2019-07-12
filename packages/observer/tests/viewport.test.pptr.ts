@@ -50,7 +50,7 @@ describe('browser', () => {
   });
 
   it('should call the changed method', async () => {
-    const changed = await viewportChanged(jest.fn((state) => {}));
+    const changed = await viewportChanged(jest.fn(() => {}));
 
     expect(changed).toBeCalledTimes(0);
 
@@ -70,4 +70,71 @@ describe('browser', () => {
       }, 250);
     });
   });
+
+  it('should not trigger if nothing has changed', async () => {
+    const changed = await viewportChanged(jest.fn(() => {}));
+
+    expect(changed).toBeCalledTimes(0);
+
+    await new Promise((resolve) => {
+      setTimeout(async () => {
+        await page.evaluate(() => window.ViewportObserver.update());
+        resolve();
+      }, 50);
+    });
+
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        expect(changed).toBeCalledTimes(0);
+        resolve();
+      }, 250);
+    });
+  });
+
+  it('should trigger if update is forced and nothing has changed', async () => {
+    const changed = await viewportChanged(jest.fn(() => {}));
+
+    expect(changed).toBeCalledTimes(0);
+
+    await new Promise((resolve) => {
+      setTimeout(async () => {
+        await page.evaluate(() => window.ViewportObserver.update(true));
+        resolve();
+      }, 50);
+    });
+
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        expect(changed).toBeCalledTimes(1);
+        resolve();
+      }, 250);
+    });
+  });
+
+  it(
+    `should not trigger because of a
+    silent update, event if the size has chnaged`,
+    async () => {
+      const changed = await viewportChanged(jest.fn(() => {}));
+
+      expect(changed).toBeCalledTimes(0);
+
+      await page.setViewport({ width: 1337, height: 1337 });
+
+      await new Promise((resolve) => {
+        setTimeout(async () => {
+          await page.evaluate(() => {
+            window.ViewportObserver.update(true, true);
+          });
+          resolve();
+        }, 50);
+      });
+
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          expect(changed).toBeCalledTimes(1);
+          resolve();
+        }, 250);
+      });
+    });
 });

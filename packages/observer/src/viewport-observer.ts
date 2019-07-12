@@ -64,7 +64,10 @@ export class ViewportObserver {
     return this.stateResolver.promise;
   }
 
-  public static update() {
+  public static update(
+    force: boolean = false,
+    silent: boolean = false
+  ) {
     if (Browser.client) {
       this._state.width = window.innerWidth;
       this._state.height = window.innerHeight;
@@ -73,13 +76,17 @@ export class ViewportObserver {
     if ( ! this.stateResolver.completed) {
       this.stateResolver.resolve(this._state);
     }
+
+    if ( ! silent) {
+      this.handleResize(force);
+    }
   }
 
   private static getStateSum() {
     return this._state.width + this._state.height;
   }
 
-  private static handleResize()  {
+  private static handleResize(force: boolean = false)  {
     cancelAnimationFrame(this.lastRafId);
 
     const prevSum = this.getStateSum();
@@ -87,7 +94,7 @@ export class ViewportObserver {
     this.lastRafId = requestAnimationFrame(() => {
       this.update();
 
-      if (prevSum !== this.getStateSum()) {
+      if (prevSum !== this.getStateSum() || true === force) {
         for (let i = 0, len = this.listeners.length; i < len; i++) {
           this.listeners[i].call(this, this._state);
         }
