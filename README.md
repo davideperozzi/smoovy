@@ -1,7 +1,7 @@
 # smoovy
 
 [![CircleCI](https://flat.badgen.net/circleci/github/davideperozzi/smoovy/master)](https://circleci.com/gh/davideperozzi/smoovy/tree/master)
-[![Coveralls](https://img.shields.io/coveralls/github/davideperozzi/smoovy/master.svg?style=flat-square)](https://coveralls.io/github/davideperozzi/smoovy)
+[![Codecov](https://img.shields.io/codecov/c/gh/davideperozzi/smoovy.svg?style=flat-square)](https://codecov.io/gh/davideperozzi/smoovy)
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat-square)
 [![License](https://flat.badgen.net/badge/license/MIT/blue)](./LICENSE)
 

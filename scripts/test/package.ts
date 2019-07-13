@@ -11,6 +11,8 @@ if (typeof process.argv[2] === 'string') {
   const ciEnabled = !!process.env.CI;
   const pkgName = process.argv[2];
   const pkgPath = path.resolve('packages', pkgName);
+  const rootPath = path.resolve(__dirname, '../../');
+  const codecov = path.join(rootPath, 'node_modules/.bin/codecov');
   const testsPath = path.join(pkgPath, 'tests');
   const srcPath = path.join(pkgPath, 'src/**/*.ts');
   const browserTestsPath = path.join(testsPath, 'browser');
@@ -51,10 +53,10 @@ if (typeof process.argv[2] === 'string') {
       const coverageStats = fs.statSync(coverageUploadFile);
 
       if (coverageStats.size > 0) {
-        console.log('Reporting to coveralls.');
+        console.log('Reporting to codecov.');
 
         const coverageProcess = childProcess.spawnSync(
-          `cat ${coverageUploadFile} | coveralls`,
+          `cd ${rootPath} && ${codecov}`,
           {
             shell: true,
             stdio: 'inherit'
@@ -65,7 +67,7 @@ if (typeof process.argv[2] === 'string') {
           process.exit(coverageProcess.status);
         }
       } else {
-        console.log('Not reporting to coveralls: lcov is empty.');
+        console.log('Not reporting to codecov: lcov is empty.');
       }
 
       rimraf.sync(coverageDirectory);
