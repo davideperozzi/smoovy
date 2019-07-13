@@ -1,4 +1,4 @@
-import { Resolver } from '../';
+import { Resolver } from '../src';
 
 describe('general', () => {
   it('should not resolve', () => {
@@ -65,5 +65,19 @@ describe('general', () => {
     });
 
     resolver.reject('error');
+  });
+
+  it('should fail on two resolved', (done) => {
+    const resolver = new Resolver<string>();
+
+    resolver.promise.then((val) => {
+      expect(val).toBe('test');
+      setTimeout(() => done(), 50);
+    }, () => fail());
+
+    resolver.resolve('test');
+
+    expect(() => resolver.resolve('test')).toThrowError();
+    expect(() => resolver.reject()).toThrowError();
   });
 });

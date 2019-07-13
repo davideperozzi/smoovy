@@ -3,18 +3,7 @@ import { Tweenable, TweenTarget } from './tweenable';
 export class TweenRegistry {
   private entries: Tweenable[] = [];
 
-  public add(
-    tween: Tweenable,
-    overwrite: boolean = true
-  ): number {
-    if (overwrite) {
-      const contains = this.contains(tween.target);
-
-      if (contains > -1) {
-        this.remove(tween);
-      }
-    }
-
+  public add(tween: Tweenable): number {
     return this.entries.push(tween);
   }
 

@@ -1,6 +1,9 @@
 import { Coordinate, Size } from '@smoovy/utils/m/dimension';
 
 export type StateChangeListener = (state: ElementStateImpl) => void;
+export interface StateChangeObservable {
+  remove: () => void;
+}
 
 export interface ElementStateImpl {
   element: HTMLElement;
@@ -9,5 +12,8 @@ export interface ElementStateImpl {
 
   update: () => void;
   destroy: () => void;
-  changed: (listener: StateChangeListener, throttleTime?: number) => void;
+  changed: (
+    listener: StateChangeListener,
+    throttleTime?: number
+  ) => StateChangeObservable;
 }

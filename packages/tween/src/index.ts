@@ -10,8 +10,10 @@ export const easingsMap: {
 const easingsFlatMap: { [path: string]: _easings.EasingImplementation } = {};
 
 for (const name in easingsMap) {
+  /* istanbul ignore else */
   if (easingsMap.hasOwnProperty(name)) {
     for (const type in easingsMap[name]) {
+      /* istanbul ignore else */
       if (easingsMap[name].hasOwnProperty(type)) {
         easingsFlatMap[`${name}.${type}`] = easingsMap[name][type];
       }

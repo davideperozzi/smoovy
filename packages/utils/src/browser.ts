@@ -21,8 +21,8 @@ export class Browser {
     return this.uA.indexOf('firefox') > -1;
   }
 
-  public static chrome() {
-    return (/chrome/).test(this.uA) && (/google inc/).test(this.uA);
+  public static get chrome() {
+    return (/chrome/).test(this.uA);
   }
 
   public static get ie() {
@@ -33,7 +33,7 @@ export class Browser {
     return (/iemobile/).test(this.uA);
   }
 
-  public static webkit() {
+  public static get webkit() {
     return (/webkit/).test(this.uA);
   }
 
@@ -46,7 +46,7 @@ export class Browser {
   }
 
   public static get ios() {
-    return (/^ip(hone|[ao]d)/).test(this.uA);
+    return (/ip(hone|[ao]d)/).test(this.uA);
   }
 
   public static get mac() {
@@ -70,33 +70,39 @@ export class Browser {
   }
 
   public static get mobile() {
-    return this.blackberry ||
+    return this.ieMobile ||
+           this.blackberry ||
            this.androidMobile ||
            this.ios ||
-           this.operaMini ||
-           this.ieMobile;
+           this.operaMini;
   }
 
+  /* istanbul ignore next */
   public static get mouseWheelEvent() {
     return 'onmousewheel' in document;
   }
 
+  /* istanbul ignore next */
   public static get wheelEvent() {
     return 'onwheel' in document;
   }
 
+  /* istanbul ignore next */
   public static get keydownEvent() {
     return 'onkeydown' in document;
   }
 
+  /* istanbul ignore next */
   public static get touchDevice() {
     return 'ontouchstart' in window;
   }
 
+  /* istanbul ignore next */
   public static get mutationObserver() {
     return 'MutationObserver' in window;
   }
 
+  /* istanbul ignore next */
   public static get client() {
     return typeof window !== 'undefined' &&
            typeof window.document !== 'undefined';

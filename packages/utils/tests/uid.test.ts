@@ -1,4 +1,4 @@
-import { Uid } from '../';
+import { Uid } from '../src';
 
 describe('general', () => {
   beforeEach(() => Uid.reset());

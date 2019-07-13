@@ -2,12 +2,14 @@ export type EasingImplementation =
   ((t: number, b: number, c: number, d: number) => number) |
   ((t: number, b: number, c: number, d: number, s?: number) => number);
 
+/* istanbul ignore next */
 export const Linear = {
   none: (t: number, b: number, c: number, d: number): number => {
     return c * t / d + b;
   }
 };
 
+/* istanbul ignore next */
 export const Quad = {
   in: (t: number, b: number, c: number, d: number): number => {
     return c * (t /= d) * t + b;
@@ -17,6 +19,7 @@ export const Quad = {
   }
 };
 
+/* istanbul ignore next */
 export const Cubic = {
   in: (t: number, b: number, c: number, d: number): number => {
     return c * (t /= d) * t * t + b;
@@ -26,6 +29,7 @@ export const Cubic = {
   }
 };
 
+/* istanbul ignore next */
 export const Quart = {
   in: (t: number, b: number, c: number, d: number): number => {
     return c * (t /= d) * t * t * t + b;
@@ -35,6 +39,7 @@ export const Quart = {
   }
 };
 
+/* istanbul ignore next */
 export const Quint = {
   in: (t: number, b: number, c: number, d: number): number => {
     return c * (t /= d) * t * t * t * t + b;
@@ -44,6 +49,7 @@ export const Quint = {
   }
 };
 
+/* istanbul ignore next */
 export const Sine = {
   in: (t: number, b: number, c: number, d: number): number => {
     return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
@@ -53,6 +59,7 @@ export const Sine = {
   }
 };
 
+/* istanbul ignore next */
 export const Expo = {
   in: (t: number, b: number, c: number, d: number): number => {
     return (t === 0) ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
@@ -62,6 +69,7 @@ export const Expo = {
   }
 };
 
+/* istanbul ignore next */
 export const Circ = {
   in: (t: number, b: number, c: number, d: number): number => {
     return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
@@ -71,6 +79,7 @@ export const Circ = {
   }
 };
 
+/* istanbul ignore next */
 export const Back = {
   in: (
     t: number,
@@ -92,6 +101,7 @@ export const Back = {
   }
 };
 
+/* istanbul ignore next */
 export const Bounce = {
   in: (t: number, b: number, c: number, d: number): number => {
     return c - Bounce.out(d - t, 0, c, d) + b;

@@ -1,4 +1,4 @@
-import { Range } from '../';
+import { Range } from '../src';
 
 describe('general', () => {
   it('should set start and end properly', () => {
@@ -15,5 +15,11 @@ describe('general', () => {
     const range = new Range(-100, 100);
 
     expect(range.mapTo(0, 0, 1)).toBe(0.5);
+  });
+
+  it('should have default mapTo values 0,1', () => {
+    const range = new Range(-100, 100);
+
+    expect(range.mapTo(0)).toBe(0.5);
   });
 });

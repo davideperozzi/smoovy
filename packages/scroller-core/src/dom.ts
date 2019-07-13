@@ -1,4 +1,6 @@
-import { ElementObserver, ElementStateImpl } from '@smoovy/observer';
+import {
+  ElementObserver, ElementStateImpl, StateChangeListener, StateChangeObservable,
+} from '@smoovy/observer';
 
 export enum ScrollerDomClasslist {
   WRAPPER = 'smoovy-wrapper',
@@ -9,16 +11,30 @@ export class ScrollerDom {
   public wrapper: ElementStateImpl;
   public container: ElementStateImpl;
   private updateCbs: (() => void)[] = [];
+  private wrapperObserver?: StateChangeObservable;
 
-  public constructor(protected root: HTMLElement) {
-    this.container = ElementObserver.observe(document.createElement('div'));
-    this.wrapper = ElementObserver.observe(document.createElement('div'));
+  public constructor(
+    protected root: HTMLElement,
+    private containerEl?: HTMLElement,
+    private wrapperEl?: HTMLElement
+  ) {
+    this.container = ElementObserver.observe(
+      this.containerEl || document.createElement('div')
+    );
 
-    this.container.element.className = ScrollerDomClasslist.CONTAINER;
-    this.wrapper.element.className = ScrollerDomClasslist.WRAPPER;
+    this.wrapper = ElementObserver.observe(
+      this.wrapperEl || document.createElement('div')
+    );
 
-    this.container.element.appendChild(this.wrapper.element);
-    this.wrapper.changed(() => this.update());
+    if (this.dynamic) {
+      this.wrapper.element.className = ScrollerDomClasslist.WRAPPER;
+      this.container.element.className = ScrollerDomClasslist.CONTAINER;
+      this.container.element.appendChild(this.wrapper.element);
+    }
+  }
+
+  protected get dynamic() {
+    return ! this.wrapperEl && ! this.containerEl;
   }
 
   private update() {
@@ -30,19 +46,30 @@ export class ScrollerDom {
   }
 
   public create() {
-    const children = Array.from(this.root.childNodes);
+    if (this.dynamic) {
+      const children = Array.from(this.root.childNodes);
 
-    this.root.appendChild(this.container.element);
-    this.wrapper.element.append(...children);
+      this.root.appendChild(this.container.element);
+      this.wrapper.element.append(...children);
+    }
+
+    this.wrapperObserver = this.wrapper.changed(() => this.update());
   }
 
   public destroy() {
-    const children = Array.from(this.wrapper.element.childNodes);
+    if (this.dynamic) {
+      const children = Array.from(this.wrapper.element.childNodes);
 
-    this.root.append(...children);
-    this.root.removeChild(this.container.element);
+      this.root.append(...children);
+      this.root.removeChild(this.container.element);
+    }
 
     this.updateCbs = [];
+
+    if (this.wrapperObserver) {
+      this.wrapperObserver.remove();
+      this.wrapperObserver = undefined;
+    }
   }
 
   public querySelectorAll(selector: string) {

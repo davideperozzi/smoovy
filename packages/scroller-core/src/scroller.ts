@@ -11,7 +11,12 @@ export interface ScrollerConfig<
   M['inputs'],
   M['outputs'],
   M['transformers']
-> {}
+> {
+  dom?: {
+    container: HTMLElement;
+    wrapper: HTMLElement;
+  };
+}
 
 export const defaultConfig: ScrollerConfig = {
   transformer: {},
@@ -34,7 +39,12 @@ export class Scroller<M extends ScrollerModule = ScrollerModule> {
       this.config = objectDeepMerge(this.config, config);
     }
 
-    this.dom = new ScrollerDom(this.target);
+    this.dom = new ScrollerDom(
+      this.target,
+      this.config.dom ? this.config.dom.container : undefined,
+      this.config.dom ? this.config.dom.wrapper : undefined
+    );
+
     this.module = new this.moduleCtor(
       this.dom,
       {

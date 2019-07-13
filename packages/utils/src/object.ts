@@ -40,6 +40,7 @@ export function objectDeepClone<T extends DefaultObject>(obj: T): T {
     const copy: { [attr: string]: any } = {};
 
     for (const attr in obj) {
+      /* istanbul ignore else */
       if (obj.hasOwnProperty(attr)) {
         copy[attr] = objectDeepClone(obj[attr]);
       }

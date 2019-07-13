@@ -1,4 +1,4 @@
-import { Ticker, TickerThread } from '../';
+import { Ticker, TickerThread } from '../src';
 
 describe('general', () => {
   (global as any).window = global;
@@ -70,11 +70,67 @@ describe('general', () => {
     }, 50);
   });
 
-  it('should set min and max fps', () => {
-    ticker.setMaxFPS(30);
-    ticker.setMinFPS(10);
+  it('should tick and update manually', (done) => {
+    setTimeout(() => {
+      const fn = jest.fn();
 
-    expect(Math.round(ticker.maxFPS)).toBe(30);
+      ticker.override = true;
+      ticker.add(fn);
+      ticker.tick(1);
+      ticker.tick(1);
+      ticker.tick(1);
+      ticker.update();
+
+      setTimeout(() => {
+        expect(fn).toBeCalledTimes(4);
+        done();
+      }, 10);
+    }, 50);
+  });
+
+  it('should not tick below min fps', (done) => {
+    setTimeout(() => {
+      const fn = jest.fn();
+
+      ticker.override = true;
+      ticker.add(fn);
+      ticker.setMinFPS(5);
+      ticker.setMaxFPS(10);
+      ticker.update();
+      ticker.update();
+
+      setTimeout(() => {
+        ticker.update();
+        expect(fn).toBeCalledTimes(1);
+        done();
+      }, 100);
+    }, 50);
+  });
+
+  it('should set min and max fps', () => {
+    ticker.setMinFPS(10);
+    ticker.setMaxFPS(30);
+
     expect(Math.round(ticker.minFPS)).toBe(10);
+    expect(Math.round(ticker.maxFPS)).toBe(30);
+  });
+
+  it('should set min and max fps per constructor', () => {
+    const ticker2 = new Ticker([10, 30]);
+
+    expect(Math.round(ticker2.minFPS)).toBe(10);
+    expect(Math.round(ticker2.maxFPS)).toBe(30);
+  });
+
+  it('should only set max fps per constructor', () => {
+    const ticker2 = new Ticker(120);
+
+    expect(Math.round(ticker2.maxFPS)).toBe(120);
+  });
+
+  it('should set to default fps if 0', () => {
+    ticker.setMaxFPS(0);
+
+    expect(Math.round(ticker.maxFPS)).toBe(ticker.intervalMs * 1000);
   });
 });

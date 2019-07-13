@@ -3,11 +3,9 @@ import { getElementOffset } from '@smoovy/utils/m/element';
 
 import { ViewportObservable, ViewportObserver } from '../viewport-observer';
 import { ElementState } from './element-state';
-import { ElementStateImpl, StateChangeListener } from './element-state-impl';
-
-export interface StateChangeObservable {
-  remove: () => void;
-}
+import {
+  ElementStateImpl, StateChangeListener, StateChangeObservable,
+} from './element-state-impl';
 
 export class ElementObserver {
   private static lastRaf: number;

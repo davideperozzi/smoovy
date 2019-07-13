@@ -12,6 +12,7 @@ if (typeof process.argv[2] === 'string') {
   const pkgName = process.argv[2];
   const pkgPath = path.resolve('packages', pkgName);
   const testsPath = path.join(pkgPath, 'tests');
+  const srcPath = path.join(pkgPath, 'src/**/*.ts');
   const browserTestsPath = path.join(testsPath, 'browser');
   const coverageDirectory = path.join(pkgPath, '.coverage');
   const coverageUploadFile = path.join(coverageDirectory, 'lcov.info');
@@ -26,24 +27,16 @@ if (typeof process.argv[2] === 'string') {
       process.env.TEST_BROWSER_ROOT = browserTestsPath;
     }
 
-    const jestProcess = childProcess.spawnSync(
-      ciEnabled
-        ? `
-          jest \
-            --roots ${pkgPath} \
-            --passWithNoTests \
-            --runInBand \
-            --verbose \
-            --coverage \
-            --coverageDirectory ${coverageDirectory}
-        `
-        : `
-          jest \
-            --roots ${pkgPath} \
-            --passWithNoTests \
-            --runInBand
-        `
-      ,
+    const jestProcess = childProcess.spawnSync(`
+      jest \
+      --roots ${pkgPath} \
+      --passWithNoTests \
+      --runInBand \
+      --verbose \
+      --coverage \
+      --coverageDirectory ${coverageDirectory} \
+      --collectCoverageFrom=${path.relative(process.cwd(), srcPath)}
+    `,
       {
         shell: true,
         stdio: 'inherit'

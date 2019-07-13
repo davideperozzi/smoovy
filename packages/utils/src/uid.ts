@@ -5,7 +5,7 @@ export class Uid {
     this.next = 0;
   }
 
-  public static get(prefix: string = '') {
+  public static get(prefix = '') {
     return prefix + (this.next++).toString(36);
   }
 }

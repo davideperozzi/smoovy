@@ -3,7 +3,7 @@ import {
   objectDeepClone,
   objectDeepMerge,
   objectValueByPath,
-} from '../';
+} from '../src';
 
 describe('general', () => {
   it('should assume objects correctly', () => {
@@ -54,6 +54,14 @@ describe('merge', () => {
 
     expect(objectDeepMerge(obj1, obj2)).toMatchObject(result);
   });
+
+  it('should deep merge (with null) two objects', () => {
+    const obj1 = { test: 'test1', test2: null };
+    const obj2 = { test2: { test: 'OK', test2: {} } };
+    const result = { test: 'test1', test2: { test: 'OK', test2: {} } };
+
+    expect(objectDeepMerge(obj1, obj2)).toMatchObject(result);
+  });
 });
 
 describe('clone', () => {
@@ -84,5 +92,11 @@ describe('valueByPath', () => {
     const object = { d1: { d1x2: { test: 'Hi!' } } };
 
     expect(objectValueByPath(object, 'd1|d1x2|test', '|')).toBe('Hi!');
+  });
+
+  it('should return undefined if depth is invalid', () => {
+    const object = { d1: {  } };
+
+    expect(objectValueByPath(object, 'd1|d1x2|test', '|')).toBe(undefined);
   });
 });

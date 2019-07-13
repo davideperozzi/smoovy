@@ -1,4 +1,4 @@
-import { clamp, mapRange } from '../';
+import { clamp, mapRange } from '../src';
 
 describe('clamp', () => {
   it('should clamp number > 10', () => {

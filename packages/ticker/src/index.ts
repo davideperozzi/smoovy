@@ -21,13 +21,13 @@ export class TickerThread {
 }
 
 export class Ticker {
-  public readonly intervalMs: number = 60 / 1000;
-  public ticking: boolean = false;
-  public override: boolean = false;
+  public readonly intervalMs = 60 / 1000;
+  public ticking = false;
+  public override = false;
   private threads: TickerThread[] = [];
-  private lastTime: number = -1;
-  private minDeltaMs: number = 0;
-  private maxDeltaMs: number = 1000 / 10;
+  private lastTime = -1;
+  private minDeltaMs = 0;
+  private maxDeltaMs = 1000 / 10;
 
   public constructor(minMaxFps?: number | [ number, number ]) {
     if (minMaxFps instanceof Array && minMaxFps.length === 2) {
@@ -43,11 +43,11 @@ export class Ticker {
   public static requestAnimationFrame(callback: FrameRequestCallback) {
     return window.requestAnimationFrame
       ? window.requestAnimationFrame(callback)
-      : window.setTimeout(callback, 1000 / 60);
+      : /* istanbul ignore next */ window.setTimeout(callback, 1000 / 60);
   }
 
   public static now(): number {
-    return (window.performance || Date).now();
+    return (window.performance || /* istanbul ignore next */ Date).now();
   }
 
   public setMinFPS(fps: number) {
@@ -61,13 +61,13 @@ export class Ticker {
   }
 
   public setMaxFPS(fps: number) {
-    if (fps / 1000 > this.intervalMs) {
+    if (fps === 0) {
       return this.minDeltaMs = 0;
     }
 
-    const maxFPS = Math.max(Math.max(fps, this.minFPS), 1);
+    const maxFPS = Math.max(fps, this.minFPS);
 
-    return this.minDeltaMs = 1 / Math.min(maxFPS / 1000, this.intervalMs);
+    return this.minDeltaMs = 1 / (maxFPS / 1000);
   }
 
   public get maxFPS() {

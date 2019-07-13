@@ -24,7 +24,7 @@ export class Tween<T = any> implements Tweenable {
     public thread: TickerThread,
     protected options: Partial<TweenOptions<T>>
   ) {
-    Tween.registry.add(this, options.overwrite);
+    Tween.registry.add(this);
   }
 
   private static getChanges<T extends TweenTarget = {}>(
@@ -60,7 +60,8 @@ export class Tween<T = any> implements Tweenable {
       ? { ...fromTarget }
       : fromTarget;
 
-    if (options.overwrite !== false) {
+    if (options.overwrite !== false &&
+        Tween.registry.contains(fromTarget)) {
       Tween.registry.remove(fromTarget);
     }
 
@@ -72,8 +73,10 @@ export class Tween<T = any> implements Tweenable {
         kill();
       }
 
+      /* istanbul ignore else */
       if (msPassed > 0) {
         for (const prop in changes) {
+          /* istanbul ignore else */
           if (changes.hasOwnProperty(prop)) {
             target[prop as string] = easing(
               msPassed,
@@ -91,6 +94,7 @@ export class Tween<T = any> implements Tweenable {
 
       if (msPassed >= 0 && msPassed >= duration) {
         for (const prop in changes) {
+          /* istanbul ignore else */
           if (changes.hasOwnProperty(prop)) {
             target[prop as string] = toValues[prop];
           }
@@ -116,7 +120,7 @@ export class Tween<T = any> implements Tweenable {
   }
 
   public stop() {
-    if (this.thread) {
+    if ( ! this.thread.dead) {
       this.thread.kill();
 
       if (this.options.stop) {
