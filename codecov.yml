@@ -1,0 +1,30 @@
+coverage:
+  status:
+    project:
+      default: off
+      observer:
+        target: 70%
+        flags: observer
+      ticker:
+        target: 100%
+        flags: ticker
+      tween:
+        target: 100%
+        flags: tween
+      utils:
+        target: 100%
+        flags: utils
+
+flags:
+  observer:
+    paths:
+      - packages/observer/
+  ticker:
+    paths:
+      - packages/ticker/
+  tween:
+    paths:
+      - packages/tween/
+  utils:
+    paths:
+      - packages/utils/

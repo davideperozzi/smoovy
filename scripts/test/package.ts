@@ -11,13 +11,10 @@ if (typeof process.argv[2] === 'string') {
   const ciEnabled = !!process.env.CI;
   const pkgName = process.argv[2];
   const pkgPath = path.resolve('packages', pkgName);
-  const rootPath = path.resolve(__dirname, '../../');
-  const codecov = path.join(rootPath, 'node_modules/.bin/codecov');
   const testsPath = path.join(pkgPath, 'tests');
   const srcPath = path.join(pkgPath, 'src/**/*.ts');
   const browserTestsPath = path.join(testsPath, 'browser');
   const coverageDirectory = path.join(pkgPath, '.coverage');
-  const coverageUploadFile = path.join(coverageDirectory, 'lcov.info');
 
   if (fs.existsSync(testsPath)) {
     process.env.TEST_PACKAGE = pkgName;
@@ -48,32 +45,6 @@ if (typeof process.argv[2] === 'string') {
     if (jestProcess.status !== 0) {
       process.exit(jestProcess.status);
     }
-
-    if (ciEnabled) {
-      const coverageStats = fs.statSync(coverageUploadFile);
-
-      if (coverageStats.size > 0) {
-        console.log('Reporting to codecov.');
-
-        const coverageProcess = childProcess.spawnSync(
-          `cd ${rootPath} && ${codecov}`,
-          {
-            shell: true,
-            stdio: 'inherit'
-          }
-        );
-
-        if (coverageProcess.status !== 0) {
-          process.exit(coverageProcess.status);
-        }
-      } else {
-        console.log('Not reporting to codecov: lcov is empty.');
-      }
-
-      rimraf.sync(coverageDirectory);
-    }
-  } else {
-    console.warn(`Skipping tests for "${pkgName}"`);
   }
 } else {
   throw new Error('No package defined');

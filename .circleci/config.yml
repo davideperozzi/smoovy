@@ -36,6 +36,10 @@ references:
     run:
       name: "Run Jest on all packages"
       command: "npm run test:all"
+  test_report: &test_report
+    run:
+      name: "Report code coverage"
+      command: "npm run test:report"
 
 jobs:
   build:
@@ -56,7 +60,8 @@ jobs:
       - *build_packages
       - *lint_packages
       - *test_packages
-  build_deploy:
+      - *test_report
+  build_test_deploy:
     <<: *defaults
     steps:
       - checkout
@@ -64,6 +69,8 @@ jobs:
       - *install_node_modules
       - *bootstrap_packages
       - *build_packages
+      - *lint_packages
+      - *test_packages
       - run:
           name: "Add npm token"
           command: "echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc"
@@ -77,17 +84,9 @@ workflows:
       - build_test
   build_test_deploy:
     jobs:
-      - build_test:
+      - build_test_deploy:
           filters:
             branches:
               ignore: /.*/
             tags:
-              only: /.*/
-      - build_deploy:
-          requires:
-            - build_test
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /.*/
+              only: /^@smoovy\/.*/
