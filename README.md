@@ -6,7 +6,7 @@
 [![License](https://flat.badgen.net/badge/license/MIT/blue)](./LICENSE)
 
 ## Synopsis
-**smoovy** is just a collection of small and useful js packages preventing copy & paste. The goal is to use as minimum dependencies as possible to guarantee a **small final bundle**. Also to keep the code clean, small and simple.
+**smoovy** is a collection of small and useful js packages preventing copy & paste. The goal is to use as few dependencies as possible to guarantee a **small final bundle**. Also to keep the code clean, small and simple.
 
 ## Main packages
 | Name| Version | Size |
@@ -18,7 +18,7 @@
 | [@smoovy/utils](./packages/utils) | [![Version](https://flat.badgen.net/npm/v/@smoovy/utils)](https://www.npmjs.com/package/@smoovy/utils) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/utils) |
 
 ## Getting started
-Choose a package you want to install. Easy as that:
+Choose a package you want to install. It's as easy as that:
 ```sh
 npm install --save @smoovy/<package>
 ```
@@ -34,8 +34,8 @@ npm install --save @smoovy/<package>
 
 
 ## Workflow
-This is simple monorepo consisting of some of the packages mentioned above.
-> Every commands related to a package will be executed from the root directory via `scripty`
+This is a simple monorepo consisting of some of the packages mentioned above.
+> Every command related to a package will be executed from the root directory via `scripty`
 
 ### Building a package
 To ensure the best result, packages are created with rollup. The following formats are supported: `cjs`, `umd` and `esm`.
