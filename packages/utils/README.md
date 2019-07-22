@@ -1,7 +1,7 @@
 # @smoovy/utils
 [![Version](https://flat.badgen.net/npm/v/@smoovy/utils)](https://www.npmjs.com/package/@smoovy/utils) ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/utils)
 
-These are just some utilities I need for my websites. I think they're pretty self explaining. So you can just click through the files to find out more!
+These are just some utilities I need for my websites. I think they're pretty self-explanatory. So you can just click through the files to find out more!
 
 ## Installation
 ```sh

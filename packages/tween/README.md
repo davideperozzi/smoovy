@@ -57,7 +57,7 @@ easings.Bounce.in
 easings.Bounce.out
 ```
 
-To use one of these, you can just it to the tween options:
+To use one of these, you can just add it to the tween options:
 
 ```js
 Tween.fromTo(
@@ -71,7 +71,7 @@ Tween.fromTo(
 ```
 > The default easing is `Circ.out`
 
-You are able to implment your own easing functions. Just follow this type:
+You can implment your own easing functions. Just follow this pattern:
 ```ts
 type EasingImpl = (
   t: number, // time
@@ -103,7 +103,7 @@ Tween.fromTo(
 ```
 
 ### All the tween options
-Below all the available tween options.
+Below are all the available tween options.
 > `Values` represents the input type
 ```ts
 interface TweenOptions<Values> {

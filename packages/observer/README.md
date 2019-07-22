@@ -1,7 +1,7 @@
 # @smoovy/observer
 [![Version](https://flat.badgen.net/npm/v/@smoovy/observer)](https://www.npmjs.com/package/@smoovy/observer) ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/observer)
 
-Easily observing states of HTML elements and the viewport.
+Easily observe states of HTML elements and the viewport.
 
 ## Installation
 ```sh
@@ -10,7 +10,7 @@ npm install --save @smoovy/observer
 
 ## Why?!
 
-Operations like `window.innerWidth` and `element.offsetTop` will have an impact on the performance if not used properly. So this package is useful to avoid [layout trashing](https://devhints.io/layout-thrashing) by batching all of the expensive calls together and only execute them if needed.
+Operations like `window.innerWidth` and `element.offsetTop` will have an impact on the performance if not used properly. So this package is useful to avoid [layout thrashing](https://devhints.io/layout-thrashing) by batching all of the expensive calls together and only executing them if needed.
 
 ## Usage
 
@@ -30,7 +30,7 @@ To remove the listener you can simply call the `remove` method:
 listener.remove();
 ```
 
-> The viewport observers target is always the current `window` object
+> The viewport observer's target is always the current `window` object
 
 #### Throttling the change listener calls
 This will throttle the changed callback to **100ms**:
@@ -43,7 +43,7 @@ ViewportObserver.changed((state) => {}, 100);
 ViewportObserver.update();
 ```
 
-#### Accessing the state anytime
+#### Accessing the state at any time
 ```js
 const state = await ViewportObserver.state;
 ```
