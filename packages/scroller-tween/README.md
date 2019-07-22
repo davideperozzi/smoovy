@@ -1,7 +1,7 @@
 # @smoovy/scroller-tween
 [![Version](https://flat.badgen.net/npm/v/@smoovy/scroller-tween)](https://www.npmjs.com/package/@smoovy/scroller-tween) ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/scroller-tween)
 
-A tween based scrolling module for [@smoovy/scroller-core](../scroller-core)
+A tween-based scrolling module for [@smoovy/scroller-core](../scroller-core)
 
 ## Installation
 ```sh
