@@ -41,9 +41,9 @@ const scroller = new Scroller(
       cssTransform: {
         /**
          * If a section selector was passed, instead of animating
-         * the whole content wrapper only the selected sections
+         * the whole content wrapper, only the selected sections
          * will be animated. This gives you a huge performance boost
-         * in most browser, but also comes with a lot to care for.
+         * in most browser, but requires a lot of tweaking.
          * So use it wisely!
          */
         sectionSelector: 'section',
@@ -51,9 +51,9 @@ const scroller = new Scroller(
         /**
          * Adds a padding to the sections visible rect, so you can extend
          * the area in which the section will be recognized as visible,
-         * thus beeing tweened outside of the viewport. This can come in handy,
+         * thus beeing tweened outside of the viewport. This can come in handy
          * if you have some effects playing in one section and overlapping into
-         * another one
+         * another one.
          */
         sectionPadding: 50
       }
@@ -93,7 +93,7 @@ import { easings } from '@smoovy/tween';
 ```
 
 ## More details
-For more information on how this works take a look at the [core](../scroller-core) package.
+For more information on how this works, take a look at the [core](../scroller-core) package.
 
 ## Development commands
 ```js
