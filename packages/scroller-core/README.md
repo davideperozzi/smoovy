@@ -30,15 +30,15 @@ const scroller = new YourScroller(
   }
 );
 ```
-> Read more about transformers, inputs and outputs in the architecture explenation below to learn how to configure your scroller properly
+> Read more about transformers, inputs and outputs in the architecture explanation below to learn how to properly configure your scroller
 
 ### (Re)mapping delta
-Sometimes you want to merge to directions into one. To do so, use the `mapDelta` method in your config:
+To merge two directions into one use the `mapDelta` method in your config:
 ```js
 {
   mapDelta: (delta) => {
     // This will force both X and Y values to be added onto X.
-    // Also locking Y. No more changes in Y will occur from here
+    // Also locking Y. No more changes in Y will occur from here on
     delta.x += delta.y;
     delta.y = 0;
 
@@ -53,7 +53,7 @@ Programmatically scrolling to a specific position is also possible:
 scroller.scrollTo({ y: 200 });
 ```
 
-If your transformers and outpus are supporting temporary overwriting of their config, you can pass it as the second argument.
+If your transformers and outputs support temporary overwriting of their config, you can pass it as the second argument.
 
 **As an example:** I want to overwrite the animation speed in my `TweenTransformer` while the programmatic scrolling is processing:
 
@@ -78,9 +78,9 @@ To tell all the components to update you can simply use this:
 ```js
 scroller.update();
 ```
-> This will automatically be called if DOM mutations or a resizes occur.
+> This will automatically be called if DOM mutations or resizes occur.
 
-### Disabling/Enabling input emission
+### Disabling/Enabling input emissions
 To disable or enable all further input emissions:
 
 ```js
@@ -293,7 +293,7 @@ new YourScroller(document.body, {
 > Take a look at [this input component](../scroller-shared/src/inputs/mouse-wheel-input.ts) for more details
 
 ### 🤖 The transformer
-The transformer acts as a "middleware" between the input and output. So the transformer is responsible to notify the output about any positon change. To get started with the transformer you need to understand how to use the `virtualPosition` to update the `outputPosition`.
+The transformer acts as a "middleware" between the input and output. It is responsible for notifying the output about any positon change. To get started with the transformer you need to understand how to use the `virtualPosition` to update the `outputPosition`.
 
 #### Virtual position
 The virtual position is basically the most up-to-date position regarding all the delta changes. So each time a delta change gets emitted it will be immediately added to the current `virtualPosition` in the `ScrollerModule`. So the virtual position is always ahead of the output position and should be used if you want to know the position the user is anticipating.
@@ -325,7 +325,7 @@ class ClampTransformer extends ScrollerTransformer {
   /**
    * @param position The reference to the current output position
    * @param update Update callback to call if you've made changes to the position
-   * @param complete Complete callback to call if you're don making changes
+   * @param complete Complete callback to call if you're done making changes
    */
   outputTransform(position, update, complete) {
     // Since we don't want to make any changes to the output position
@@ -352,10 +352,10 @@ class CssTranslateOutput extends ScrollerOutput {
   }
 }
 ```
-> For a more detailed version on the css translation output you can take a look at [this](../scroller-shared/src/outputs/css-transform-output.ts)
+> For a more detailed version of the css translation output you can take a look at [this](../scroller-shared/src/outputs/css-transform-output.ts)
 
 ### ☊ The DOM
-Each output, input and transformer will be provided with a [dom provider](./src/dom.ts). This is just the base DOM structure which wraps around the target elements children. You should use this to get information from the elements inside the scrollable element. The rendered dom looks like this:
+Each output, input and transformer will be provided with a [dom provider](./src/dom.ts). This is just the base DOM structure which wraps around the target element's children. You should use this to get information from the elements inside the scrollable element. The rendered DOM looks like this:
 
 ```html
 <div id="your-target">
@@ -372,7 +372,7 @@ Lets say you want to read the height of the wrapper inside your `Input`:
 this.dom.wrapper.size.height;
 ```
 
-> The dimensions will be updated via viewport changes, dom mutations or manual updates
+> The dimensions will be updated via viewport changes, DOM mutations or manual updates
 
 ### ⚠️ Attention
 You should always be aware what your transformers etc. are doing, since there isn't a mechanism to detect collisions.
