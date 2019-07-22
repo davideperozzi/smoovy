@@ -50,7 +50,7 @@ You can also kill it like this:
 ```js
 setTimeout(() => thread.kill(), 2000);
 ```
-> Once the thread was marked as dead it will removed on the next animation frame. After that the reference will be removed.
+> Once the thread is marked as dead it will be removed on the next animation frame. After that the reference will be removed.
 
 ### Overriding the tick automation
 If you want to execute the tick function manually, you can enable the `override` flag. This prevent the internal ticking, after at least one thread is available:
