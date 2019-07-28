@@ -5,6 +5,7 @@ interface DemoElements {
 export interface DemoControls<T, R = any> {
   init?: () => T;
   play?: (ctx: T) => R;
+  stop?: (data: R) => void;
   reset?: (data: R) => void;
 }
 
@@ -13,11 +14,13 @@ function injectControls<T, R>(
   controls: DemoControls<T, R>
 ) {
   const playBtn = document.createElement('button');
+  const stopBtn = document.createElement('button');
   const ctx = controls.init ? controls.init.call(undefined) : {} as T;
   let data = {} as R;
   let firstPlay = true;
 
   playBtn.textContent = 'Play';
+  stopBtn.textContent = 'Stop';
 
   playBtn.classList.add('demo-play-btn');
   playBtn.addEventListener('click', () => {
@@ -42,8 +45,19 @@ function injectControls<T, R>(
     });
   }, false);
 
+  stopBtn.classList.add('demo-stop-btn');
+  stopBtn.addEventListener('click', () => {
+    if (controls.stop) {
+      controls.stop.call(undefined, data);
+    }
+  });
+
   if (controls.play) {
     demoEl.appendChild(playBtn);
+  }
+
+  if (controls.stop) {
+    demoEl.appendChild(stopBtn);
   }
 
   return demo;

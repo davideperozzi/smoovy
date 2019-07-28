@@ -1,6 +1,6 @@
 import { Coordinate, objectDeepMerge } from '@smoovy/utils';
 
-import { ScrollerDom } from './dom';
+import { ScrollerDom, ScrollerDomConfig } from './dom';
 import {
   ScrollerModule, ScrollerModuleConfig, ScrollerModuleConfigOverride,
 } from './module';
@@ -15,6 +15,7 @@ export interface ScrollerConfig<
   dom?: {
     container: HTMLElement;
     wrapper: HTMLElement;
+    config?: ScrollerDomConfig;
   };
 }
 
@@ -42,7 +43,8 @@ export class Scroller<M extends ScrollerModule = ScrollerModule> {
     this.dom = new ScrollerDom(
       this.target,
       this.config.dom ? this.config.dom.container : undefined,
-      this.config.dom ? this.config.dom.wrapper : undefined
+      this.config.dom ? this.config.dom.wrapper : undefined,
+      this.config.dom ? this.config.dom.config : undefined
     );
 
     this.module = new this.moduleCtor(

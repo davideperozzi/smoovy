@@ -66,7 +66,10 @@ const target = document.querySelector('main') as HTMLElement;
 const container = document.querySelector('.custom-container')  as HTMLElement;
 const wrapper = document.querySelector('.custom-wrapper') as HTMLElement;
 const scroller = new MyScroller(target, {
-  dom: { container, wrapper },
+  dom: {
+    container,
+    wrapper
+  },
   on: {
     input: (pos) => {
       console.log('input', pos);

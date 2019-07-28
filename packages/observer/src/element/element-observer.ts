@@ -1,40 +1,71 @@
-import { Browser } from '@smoovy/utils/m/browser';
-import { getElementOffset } from '@smoovy/utils/m/element';
+import { Browser, throttle } from '@smoovy/utils';
 
 import { ViewportObservable, ViewportObserver } from '../viewport-observer';
-import { ElementState } from './element-state';
-import {
-  ElementStateImpl, StateChangeListener, StateChangeObservable,
-} from './element-state-impl';
+import { ElementState, StateChangeListener } from './element-state';
+
+export interface ElementObserverMutator {
+  target?: HTMLElement;
+  options?: MutationObserverInit;
+}
+
+export interface ElementObserverConfig {
+  mutationThrottle?: number;
+  viewportThrottle?: number;
+  mutators?: ElementObserverMutator[];
+}
+
+const defaultConfig: ElementObserverConfig = {
+  mutationThrottle: 100,
+  viewportThrottle: 100,
+  mutators: [
+    {
+      target: Browser.client ? document.documentElement : undefined,
+      options: {
+        characterData: true,
+        childList: true,
+        subtree: true
+      }
+    }
+  ]
+};
 
 export class ElementObserver {
-  private static lastRaf: number;
-  private static attached = false;
-  private static viewportObserver?: ViewportObservable;
-  private static mutationObserver?: MutationObserver;
-  private static changeListeners = new Map<
-    ElementStateImpl,
-    StateChangeListener
-  >();
-  public static states: ElementStateImpl[] = [];
+  public static default = new ElementObserver(defaultConfig);
+  private lastRaf: number;
+  private attached = false;
+  private viewportObserver?: ViewportObservable;
+  private mutationObserver?: MutationObserver;
+  private states: ElementState[] = [];
 
-  public static observe(element: ElementStateImpl['element']) {
+  public constructor(
+    private config: ElementObserverConfig
+  ) {}
+
+  public static observe(element: HTMLElement) {
+    return this.default.observe(element);
+  }
+
+  public observe(element: HTMLElement) {
     for (let i = 0, len = this.states.length; i < len; i++) {
       if (this.states[i].element === element) {
         return this.states[i];
       }
     }
 
-    return new ElementState(element);
+    return this.register(new ElementState(element));
   }
 
-  public static register(state: ElementStateImpl) {
+  private register(state: ElementState) {
     this.states.push(state);
-    this.updateStateAsync(state);
     this.checkStates();
+
+    state.update(true);
+    state.onDestroy(() => this.deregister(state));
+
+    return state;
   }
 
-  public static deregister(state: ElementStateImpl) {
+  private deregister(state: ElementState) {
     const index = this.states.indexOf(state);
 
     if (index > -1) {
@@ -42,12 +73,12 @@ export class ElementObserver {
       this.checkStates();
     }
 
-    if (this.changeListeners.has(state)) {
-      this.changeListeners.delete(state);
+    if ( ! state.destroyed) {
+      state.destroy();
     }
   }
 
-  public static updateRaf() {
+  public updateRaf() {
     if (Browser.client) {
       cancelAnimationFrame(this.lastRaf);
 
@@ -57,97 +88,34 @@ export class ElementObserver {
     }
   }
 
-  public static update() {
+  public update(async = false) {
     for (let i = 0, len = this.states.length; i < len; i++) {
-      this.updateState(this.states[i]);
+      this.states[i].update(async);
     }
   }
 
-  public static changed(
-    state: ElementStateImpl,
-    listener: StateChangeListener
-  ): StateChangeObservable {
-    if ( ! this.states.includes(state)) {
-      throw new Error(
-        `[smoovy/observer] element state not found or destroyed`
-      );
-    }
-
-    this.changeListeners.set(state, listener);
-
-    return {
-      remove: () => this.changeListeners.delete(state)
-    };
-  }
-
-  public static updateStateAsync(state: ElementStateImpl) {
-    setTimeout(() => this.updateState(state));
-  }
-
-  public static updateState(state: ElementStateImpl) {
-    const prevSum = this.getStateSum(state);
-
-    this.updateOffset(state);
-    this.updateSize(state);
-
-    if (
-      prevSum !== this.getStateSum(state) &&
-      this.changeListeners.has(state)
-    ) {
-      const listener = this.changeListeners.get(state);
-
-      if (listener) {
-        listener.call(this, state);
-      }
-    }
-  }
-
-  private static getStateSum(state: ElementStateImpl) {
-    return (
-      state.offset.x + state.offset.y +
-      state.size.width + state.size.height
-    );
-  }
-
-  private static updateSize(state: ElementStateImpl) {
-    if (Browser.client) {
-      const bounds = state.element.getBoundingClientRect();
-
-      state.size.width = bounds.width;
-      state.size.height = bounds.height;
-    } else {
-      state.size.width = 0;
-      state.size.height = 0;
-    }
-  }
-
-  private static updateOffset(state: ElementStateImpl) {
-    if (Browser.client) {
-      const offset = getElementOffset(state.element);
-
-      state.offset.x = offset.x;
-      state.offset.y = offset.y;
-    } else {
-      state.offset.x = 0;
-      state.offset.y = 0;
-    }
-  }
-
-  private static attach() {
+  private attach() {
     this.attached = true;
-    this.viewportObserver = ViewportObserver.changed(() => this.update());
+    this.viewportObserver = ViewportObserver.changed(
+      typeof this.config.viewportThrottle === 'number'
+        ? throttle(() => this.update(), this.config.viewportThrottle)
+        : () => this.update()
+    );
 
-    if (Browser.client && Browser.mutationObserver) {
-      this.mutationObserver = new MutationObserver(() => this.updateRaf());
+    if (Browser.client && Browser.mutationObserver && this.config.mutators) {
+      const throttleMs = this.config.mutationThrottle;
 
-      this.mutationObserver.observe(
-        document.documentElement,
-        {
-          attributes: true,
-          childList: true,
-          subtree: true
-        }
+      this.mutationObserver = new MutationObserver(
+        typeof throttleMs === 'number'
+          ? throttle(() => this.updateRaf(), throttleMs)
+          : () => this.updateRaf()
       );
+
+      this.config.mutators.forEach(config => {
+        if (config.target && this.mutationObserver) {
+          this.mutationObserver.observe(config.target, { ...config.options  });
+        }
+      });
     }
 
     let domContentLoadedListener: EventListenerOrEventListenerObject;
@@ -170,7 +138,7 @@ export class ElementObserver {
     this.updateRaf();
   }
 
-  private static detach() {
+  private detach() {
     this.attached = false;
 
     if (this.viewportObserver) {
@@ -184,7 +152,7 @@ export class ElementObserver {
     }
   }
 
-  private static checkStates() {
+  private checkStates() {
     if (this.states.length > 0 && ! this.attached) {
       this.attach();
     }
