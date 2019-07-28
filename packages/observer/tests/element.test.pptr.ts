@@ -94,7 +94,7 @@ describe('browser', () => {
       height: vpSize.height * .5
     });
 
-    await page.evaluate(() => window.testState1.update());
+    await page.evaluate(() => window.testState1.update(true));
 
     await new Promise((resolve) => {
       setTimeout(async () => {
@@ -125,7 +125,7 @@ describe('browser', () => {
       height: vpSize.height * .7
     });
 
-    await page.evaluate(() => window.testState1.update());
+    await page.evaluate(() => window.testState1.update(true));
 
     setTimeout(() => {
       expect(changed).toBeCalled();
