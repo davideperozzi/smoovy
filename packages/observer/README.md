@@ -63,10 +63,9 @@ const state = ElementObserver.observe(element);
 
 #### Listening/Unlistening for element changes
 ```js
-const listener = state.changed(state => {
-  console.log('The element: ', state.element);
-  console.log('Element size: ', state.size);
-  console.log('Element page offset: ', state.offset);
+const listener = state.changed(({ size, offset }) => {
+  console.log('Element size:', size);
+  console.log('Element page offset:', offset);
 });
 
 // Stop listening
@@ -91,8 +90,36 @@ state.update();
 state.destroy();
 ```
 
-## Current issues
-Currently there is a circular dependency warning. This will be fixed in the future, but it shouldn't affect the API.
+### Creating a new element observer
+Sometimes you want to disable the `MutationObserver` or just want a separate stack of elements to observer. You can simply create a new `ElementObserver` by instantiating it:
+
+```js
+const observer = new ElementObserver({
+  viewportThrottle: 200,
+  mutationThrottle: 100
+});
+
+const element = document.querySelector('#test');
+const state = observer.observe(element);
+```
+
+#### Adding mutators
+You can add multiple targets to listen for DOM mutations:
+
+```js
+new ElementObserver({
+  mutators: [
+    {
+      target: document.body,
+      options: {
+        attribues: true,
+        attributesFilter: [ 'style' ]
+        subtree: true
+      }
+    }
+  ]
+});
+```
 
 ## Development commands
 ```js

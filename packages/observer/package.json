@@ -31,7 +31,7 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/utils": "^0.1.4",
+    "@smoovy/utils": "0.*.*",
     "tslib": "^1.9.3"
   }
 }

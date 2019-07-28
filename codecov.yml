@@ -6,7 +6,7 @@ coverage:
         threshold: null
       observer:
         flags: observer
-        target: 70%
+        target: 10%
       ticker:
         flags: ticker
         target: 100%

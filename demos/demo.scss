@@ -72,7 +72,19 @@ smoovy-demo-item {
     position: absolute;
     font-size: rem(8px);
     right: 0;
-    bottom: 0;
+    top: 0;
+    width: 40px;
+    height: 30px;
+    cursor: pointer;
+    color: #0C0C0C;
+    background-color: #f1f1f1;
+  }
+
+  button.demo-stop-btn {
+    position: absolute;
+    font-size: rem(8px);
+    right: 40px;
+    top: 0;
     width: 40px;
     height: 30px;
     cursor: pointer;

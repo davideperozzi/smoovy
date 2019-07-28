@@ -30,11 +30,8 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/observer": "^0.0.8",
-    "@smoovy/utils": "^0.1.4",
+    "@smoovy/observer": "0.*.*",
+    "@smoovy/utils": "0.*.*",
     "tslib": "^1.9.3"
-  },
-  "devDependencies": {
-    "@smoovy/utils": "^0.1.1"
   }
 }

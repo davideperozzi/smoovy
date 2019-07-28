@@ -1,9 +1,9 @@
-import { ElementObserver as _ElementObserver, ElementStateImpl } from '../';
+import { ElementObserver as _ElementObserver, ElementState } from '../src';
 
 declare global {
   interface Window {
     testEl1: HTMLElement;
-    testState1: ElementStateImpl;
+    testState1: ElementState;
     ElementObserver: typeof _ElementObserver;
   }
 }
@@ -15,13 +15,13 @@ describe('browser', () => {
   };
 
   let stateChangedCounter = 0;
-  const state1Changed = async (changed: (state: ElementStateImpl) => void) => {
+  const state1Changed = async (changed: (state: ElementState) => void) => {
     const fncName = `test_1_changed_${stateChangedCounter}`;
 
     await page.exposeFunction(fncName, (state) => changed(state));
     await page.evaluate((name) => {
-      window.testState1.changed((state: any) => {
-        (window as any)[name](state);
+      window.testState1.changed(() => {
+        (window as any)[name](window.testState1);
       });
     }, fncName);
 
@@ -50,7 +50,7 @@ describe('browser', () => {
       element.style.backgroundColor = 'green';
       element.textContent = 'Test element #1';
 
-      state.update();
+      state.update(true);
 
       window.testEl1 = element;
       window.testState1 = state;
@@ -58,7 +58,9 @@ describe('browser', () => {
   });
 
   it('should has element #test1', async () => {
-    expect(await page.evaluate(() => window.testState1)).toBeTruthy();
+    const element = await page.evaluate(() => window.testEl1);
+
+    expect(element).toBeTruthy();
   });
 
   it('should find ElementObserver in window', async() => {
@@ -108,7 +110,7 @@ describe('browser', () => {
     });
   });
 
-  it('should call the changed callback for the element', async (done) => {
+  it('should call the changed-callback for the element', async (done) => {
     const changed = await state1Changed(
       jest.fn((state) => {
         expect(state.size).toMatchObject({
@@ -189,21 +191,18 @@ describe('browser', () => {
       test2.textContent = 'Test element #2';
 
       document.body.prepend(test2);
+      document.body.removeChild(test2);
 
       setTimeout(() => {
-        document.body.removeChild(test2);
-
-        setTimeout(() => {
-          document.body.prepend(test2);
-        }, 100);
-      }, 100);
+        document.body.prepend(test2);
+      });
     });
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        expect(changed).toBeCalledTimes(3);
+        expect(changed).toBeCalledTimes(1);
         resolve();
-      }, 350);
+      }, 150);
     });
   });
 });
