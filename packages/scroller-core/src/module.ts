@@ -270,7 +270,7 @@ export class ScrollerModule<
       this.outputs[outputKeys[i]].update(this.outputPosition);
     }
 
-    for (let i = 0, len = this.inputListeners.length; i < len; i++) {
+    for (let i = 0, len = this.outputListeners.length; i < len; i++) {
       this.outputListeners[i].call(this, this.outputPosition);
     }
   }
