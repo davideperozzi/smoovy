@@ -2,7 +2,7 @@ coverage:
   status:
     project:
       default:
-        target: 90%
+        target: 70%
         threshold: null
       observer:
         flags: observer

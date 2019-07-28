@@ -1,8 +1,14 @@
-import { ElementObserver, ElementState } from '@smoovy/observer';
+import {
+  ElementObserver, ElementObserverConfig, ElementState,
+} from '@smoovy/observer';
 
 export enum ScrollerDomClasslist {
   WRAPPER = 'smoovy-wrapper',
   CONTAINER = 'smoovy-container'
+}
+
+export interface ScrollerDomConfig {
+  observer: false | ElementObserverConfig;
 }
 
 export class ScrollerDom {
@@ -14,28 +20,37 @@ export class ScrollerDom {
   public constructor(
     protected root: HTMLElement,
     private containerEl?: HTMLElement,
-    private wrapperEl?: HTMLElement
+    private wrapperEl?: HTMLElement,
+    private config?: ScrollerDomConfig
   ) {
+    const observerConfig = this.config && this.config.observer
+      ? this.config.observer
+      : {
+        mutationThrottle: 100,
+        viewportThrottle: 100,
+        mutators: [
+          {
+            target: this.containerEl,
+            options: {
+              childList: true,
+              subtree: true,
+              characterData: true
+            }
+          }
+        ]
+      };
 
     this.containerEl = this.containerEl || document.createElement('div');
     this.wrapperEl = this.wrapperEl || document.createElement('div');
-    this.observer = new ElementObserver({
-      mutationThrottle: 100,
-      viewportThrottle: 100,
-      mutators: [
-        {
-          target: this.containerEl,
-          options: {
-            childList: true,
-            subtree: true,
-            characterData: true
-          }
-        }
-      ]
-    });
 
-    this.container = this.observer.observe(this.containerEl);
-    this.wrapper = this.observer.observe(this.wrapperEl);
+    if (this.config && this.config.observer === false) {
+      this.container = new ElementState(this.containerEl);
+      this.wrapper = new ElementState(this.wrapperEl);
+    } else {
+      this.observer = new ElementObserver(observerConfig);
+      this.container = this.observer.observe(this.containerEl);
+      this.wrapper = this.observer.observe(this.wrapperEl);
+    }
 
     if (this.dynamic) {
       this.wrapper.element.className = ScrollerDomClasslist.WRAPPER;
