@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller-tween",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Scroller tween module",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -31,10 +31,10 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/scroller-core": "0.*.*",
-    "@smoovy/scroller-shared": "0.*.*",
-    "@smoovy/tween": "0.*.*",
-    "@smoovy/utils": "0.*.*",
+    "@smoovy/scroller-core": "^0.0.10",
+    "@smoovy/scroller-shared": "^0.0.11",
+    "@smoovy/tween": "^0.1.5",
+    "@smoovy/utils": "^0.1.5",
     "tslib": "^1.9.3"
   }
 }
