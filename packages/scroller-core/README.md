@@ -374,6 +374,60 @@ this.dom.wrapper.size.height;
 
 > The dimensions will be updated via viewport changes, DOM mutations or manual updates
 
+#### Configuring the DOM
+You register your own `wrapper` and `container` by providing them in the config accordingly:
+
+```js
+{
+  dom: {
+    container: document.querySelector('#custom-container'),
+    wrapper: document.querySelector('#custom-wrapper')
+  }
+}
+```
+
+> Make sure to pass both, the container and the wrapper, if you're going to override the default scroller DOM elements
+
+#### Configuring DOM observers
+Since the scroller uses the [@smoovy/observer](../observer) package to trigger updates, you can configure that by passing the config to the options of the dom object:
+
+```js
+{
+  dom: {
+    config: {
+      observer: {
+        mutationThrottle: 100,
+        viewportThrottle: 100,
+        mutators: [
+          {
+            target: document.documentElement,
+            options: {
+              subtree: true,
+              characterData: true
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+You can also disable the observer completely and handle all the updates manually:
+
+```js
+{
+  dom: {
+    config: {
+      observer: false
+    }
+  }
+}
+```
+
+>  You can read more about the observer configuration [here](../observer)
+
+
 ### ⚠️ Attention
 You should always be aware what your transformers etc. are doing, since there isn't a mechanism to detect collisions.
 
