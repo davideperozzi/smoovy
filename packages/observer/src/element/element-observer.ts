@@ -1,7 +1,7 @@
 import { Browser, throttle } from '@smoovy/utils';
 
 import { ViewportObservable, ViewportObserver } from '../viewport-observer';
-import { ElementState, StateChangeListener } from './element-state';
+import { ElementState } from './element-state';
 
 export interface ElementObserverMutator {
   target?: HTMLElement;

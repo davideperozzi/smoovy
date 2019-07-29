@@ -73,6 +73,11 @@ export class ScrollerDom {
     this.updateCbs.push(cb);
   }
 
+  public recalc(async = false) {
+    this.wrapper.update(async);
+    this.container.update(async);
+  }
+
   public create() {
     if (this.dynamic) {
       const children = Array.from(this.root.childNodes);

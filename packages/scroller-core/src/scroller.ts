@@ -13,8 +13,10 @@ export interface ScrollerConfig<
   M['transformers']
 > {
   dom?: {
-    container: HTMLElement;
-    wrapper: HTMLElement;
+    elements?: {
+      wrapper: HTMLElement;
+      container: HTMLElement;
+    },
     config?: ScrollerDomConfig;
   };
 }
@@ -42,8 +44,10 @@ export class Scroller<M extends ScrollerModule = ScrollerModule> {
 
     this.dom = new ScrollerDom(
       this.target,
-      this.config.dom ? this.config.dom.container : undefined,
-      this.config.dom ? this.config.dom.wrapper : undefined,
+      this.config.dom && this.config.dom.elements
+        ? this.config.dom.elements.container : undefined,
+      this.config.dom && this.config.dom.elements
+        ? this.config.dom.elements.wrapper : undefined,
       this.config.dom ? this.config.dom.config : undefined
     );
 
@@ -85,8 +89,9 @@ export class Scroller<M extends ScrollerModule = ScrollerModule> {
     this.detach();
   }
 
-  public update() {
-    this.module.recalc();
+  public update(async = false) {
+    this.dom.recalc(async);
+    this.module.recalc(async);
   }
 
   public enableInputs(enabled = true) {

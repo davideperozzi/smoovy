@@ -380,8 +380,10 @@ You register your own `wrapper` and `container` by providing them in the config 
 ```js
 {
   dom: {
-    container: document.querySelector('#custom-container'),
-    wrapper: document.querySelector('#custom-wrapper')
+    elements: {
+      container: document.querySelector('#custom-container'),
+      wrapper: document.querySelector('#custom-wrapper')
+    }
   }
 }
 ```

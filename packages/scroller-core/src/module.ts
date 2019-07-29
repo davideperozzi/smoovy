@@ -146,19 +146,27 @@ export class ScrollerModule<
     this.inputsDisabled = !enabled;
   }
 
-  public recalc() {
-    this.updateInput({ delta: { x: 0, y: 0 } });
-    this.eachInput((input) => input.recalc());
-    this.eachOutput((output) => output.recalc());
-    this.eachTransformer((transformer) => transformer.recalc());
-    this.updateInput({ delta: { x: 0, y: 0 } });
+  public recalc(async = false) {
+    const recalc = () => {
+      this.updateInput({ delta: { x: 0, y: 0 } });
+      this.eachInput((input) => input.recalc());
+      this.eachOutput((output) => output.recalc());
+      this.eachTransformer((transformer) => transformer.recalc());
+      this.updateInput({ delta: { x: 0, y: 0 } });
 
-    for (let i = 0, len = this.recalcListeners.length; i < len; i++) {
-      this.recalcListeners[i].call(
-        this,
-        this.virtualPosition,
-        this.outputPosition
-      );
+      for (let i = 0, len = this.recalcListeners.length; i < len; i++) {
+        this.recalcListeners[i].call(
+          this,
+          this.virtualPosition,
+          this.outputPosition
+        );
+      }
+    };
+
+    if (async) {
+      setTimeout(() => recalc());
+    } else {
+      recalc();
     }
   }
 
