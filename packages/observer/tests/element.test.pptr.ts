@@ -11,7 +11,15 @@ declare global {
 describe('browser', () => {
   const vpSize = { width: 1920, height: 1080 };
   const getState1 = async () => {
-    return await page.evaluate(() => window.testState1);
+    return await page.evaluate(() => {
+      return new Promise((resolve) => {
+        window.testState1.update();
+
+        setTimeout(() => {
+          resolve(window.testState1);
+        }, 50);
+      });
+    }) as Promise<ElementState>;
   };
 
   let stateChangedCounter = 0;
