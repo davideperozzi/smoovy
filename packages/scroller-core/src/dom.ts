@@ -15,6 +15,7 @@ export class ScrollerDom {
   public wrapper: ElementState;
   public container: ElementState;
   private observer: ElementObserver;
+  private _dynamic = false;
   private updateCbs: (() => void)[] = [];
 
   public constructor(
@@ -40,6 +41,7 @@ export class ScrollerDom {
         ]
       };
 
+    this._dynamic = ! containerEl && ! wrapperEl;
     this.containerEl = this.containerEl || document.createElement('div');
     this.wrapperEl = this.wrapperEl || document.createElement('div');
 
@@ -59,8 +61,8 @@ export class ScrollerDom {
     }
   }
 
-  protected get dynamic() {
-    return ! this.wrapperEl && ! this.containerEl;
+  public get dynamic() {
+    return this._dynamic;
   }
 
   private update() {
