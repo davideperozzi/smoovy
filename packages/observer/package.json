@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/observer",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Observing states of elements",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -31,7 +31,7 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/utils": "^0.1.5",
+    "@smoovy/utils": "^0.1.6",
     "tslib": "^1.9.3"
   }
 }
