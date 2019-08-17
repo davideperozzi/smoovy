@@ -44,10 +44,11 @@ npm run build:package <name>
 ```
 
 ### Testing a package
-Packages will be tested with `jest` and `puppeteer`. The dist files will be used for testing.
+Packages will be tested with `jest` and `puppeteer`. The sources files will be used for testing.
 ```sh
 npm run test:package <name>
 ```
+> Some packages are still missing tests. These will be excluded from the code coverage completely.
 
 ### Serving a package demo
 The demo will be served and bundled with `parcel`. Every demo must have a `index.html` file.

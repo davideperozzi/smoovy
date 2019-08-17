@@ -4,7 +4,7 @@ import * as easings from './easing';
 import { EasingImplementation } from './easing';
 
 export interface TweenTarget {
-  [key: string]: number;
+  [key: string]: number | any;
 }
 
 export interface TweenCallbacks<V> {

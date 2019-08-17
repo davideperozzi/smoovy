@@ -42,9 +42,11 @@ export class TweenTransformer<
       {
         duration: this.config.duration,
         easing: this.config.easing,
-        update: () => update(),
-        stop: () => complete(),
-        complete: () => complete()
+        on: {
+          update: () => update(),
+          stop: () => complete(),
+          complete: () => complete()
+        }
       }
     );
   }
