@@ -11,7 +11,7 @@ demo('clock', ({ clockEl }) => ({
 
     return {
       ticker,
-      thread: ticker.add((delta, time, kill) => {
+      thread: ticker.add((delta, time, _kill) => {
         const passedMs = Math.floor(time - now);
 
         (clockEl as HTMLElement).textContent = `

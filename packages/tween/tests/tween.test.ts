@@ -14,7 +14,7 @@ describe('general', () => {
     }
   );
 
-  it('shouldn\'t mutate but tween the property from 0 to 100 in 300ms',
+  it('should not mutate but tween the property from 0 to 100 in 300ms',
     (done) => {
       const mutation = { x: 0 };
 
@@ -82,7 +82,7 @@ describe('general', () => {
     const data = { y: 0 };
     const update = jest.fn();
 
-    Tween.fromTo(data, { y: 50 }, { duration: 100, update });
+    Tween.fromTo(data, { y: 50 }, { duration: 100, on: { update } });
 
     setTimeout(() => {
       expect(update).toHaveBeenCalled();
@@ -103,7 +103,14 @@ describe('general', () => {
 
   it('should call the stop method', (done) => {
     const stop = jest.fn();
-    const tween = Tween.fromTo({ y: 0 }, { y: 50 }, { duration: 100, stop });
+    const tween = Tween.fromTo(
+      { y: 0 },
+      { y: 50 },
+      {
+        duration: 100,
+        on: { stop }
+      }
+    );
 
     setTimeout(() => {
       tween.stop();
@@ -123,24 +130,30 @@ describe('general', () => {
       { x: 100 },
       {
         duration: 300,
-        complete: () => {
-          expect(data.x).toBe(100);
-          done();
+        on: {
+          complete: () => {
+            expect(data.x).toBe(100);
+            done();
+          }
         }
       }
     );
   });
 
-  it('should should overwrite the tween', (done) => {
+  it('should overwrite the tween', (done) => {
     const data = { x: 0 };
+    const overwriteFn = jest.fn();
 
     Tween.fromTo(
       data,
       { x: 100 },
       {
         duration: 300,
-        complete: () => {
-          done.fail();
+        on: {
+          overwrite: overwriteFn,
+          complete: () => {
+            done.fail();
+          }
         }
       }
     );
@@ -151,12 +164,227 @@ describe('general', () => {
         { x: 100 },
         {
           duration: 200,
-          complete: () => {
-            expect(data.x).toBe(100);
-            done();
+          on: {
+            overwrite: overwriteFn,
+            complete: () => {
+              expect(overwriteFn).toBeCalledTimes(1);
+              expect(data.x).toBe(100);
+              done();
+            }
           }
         }
       );
     }, 100);
+  });
+
+  it('should pause and resume the tween', (done) => {
+    const pauseFn = jest.fn();
+    const startFn = jest.fn();
+    const completeFn = jest.fn();
+    const dataFrom = { x: 0 };
+    const dataTo = { x: 200 };
+    const tween = Tween.fromTo(
+      dataFrom,
+      dataTo,
+      {
+        duration: 100,
+        on: {
+          pause: pauseFn,
+          start: startFn,
+          complete: completeFn,
+        }
+      }
+    );
+
+
+    setTimeout(() => {
+      tween.pause();
+
+      setTimeout(() => {
+        expect(tween.progress).toBeLessThan(1);
+
+        tween.start();
+
+        expect(pauseFn).toBeCalledTimes(1);
+        expect(startFn).toBeCalledTimes(2);
+
+        setTimeout(() => {
+          expect(tween.progress).toBeGreaterThanOrEqual(1);
+          expect(completeFn).toBeCalledTimes(1);
+          done();
+        }, 100);
+      }, 50);
+    }, 50);
+  });
+
+  it('should start after the delay', (done) => {
+    const delayFn = jest.fn();
+
+    Tween.fromTo(
+      { x: 0 },
+      { x: 100 },
+      {
+        delay: 100,
+        on: {
+          delay: delayFn,
+          complete: () => {
+            expect(delayFn).toHaveBeenCalled();
+            done();
+          }
+        }
+      }
+    );
+  });
+
+  it('should not start if paused', (done) => {
+    const tween = Tween.fromTo(
+      { x: 0 },
+      { x: 100 },
+      {
+        paused: true,
+        duration: 50
+      }
+    );
+
+    expect(tween.progress).toBe(0);
+    expect(tween.paused).toBe(true);
+    expect(tween.complete).toBe(false);
+
+    setTimeout(() => {
+      expect(tween.progress).toBe(0);
+      expect(tween.paused).toBe(true);
+      expect(tween.complete).toBe(false);
+      done();
+    }, 60);
+  });
+
+  it('should overwrite an active delay and call reset', (done) => {
+    let delayMs = 0;
+    const resetFn = jest.fn();
+    const tween = Tween.fromTo(
+      { x: 0 },
+      { x: 100 },
+      {
+        delay: 200,
+        duration: 200,
+        on: {
+          reset: resetFn,
+          delay: (passed) => delayMs = passed
+        }
+      }
+    );
+
+    setTimeout(() => {
+      expect(delayMs).toBeGreaterThan(90);
+      expect(delayMs).toBeLessThan(200);
+      expect(tween.progress).toBe(0);
+
+      tween.reset();
+
+      setTimeout(() => {
+        expect(delayMs).toBeGreaterThan(90);
+        expect(delayMs).toBeLessThan(200);
+        expect(tween.progress).toBe(0);
+        expect(resetFn).toBeCalledTimes(1);
+
+        tween.stop();
+        done();
+      }, 150);
+    }, 150);
+  });
+
+  it('should not run delay if paused', (done) => {
+    Tween.fromTo(
+      { x: 0 },
+      { x: 100 },
+      {
+        paused: true,
+        delay: 100,
+        duration: 100,
+        on: {
+          start: () => done.fail(),
+          delay: () => done.fail()
+        }
+      }
+    );
+
+    setTimeout(() => done(), 200);
+  });
+
+  it('should not run callbacks if already active on start & pause', (done) => {
+    const startFn = jest.fn();
+    const pauseFn = jest.fn();
+    const tween = Tween.fromTo(
+      { x: 0 },
+      { x: 100 },
+      {
+        delay: 100,
+        paused: true,
+        duration: 100,
+        on: {
+          start: startFn,
+          pause: pauseFn
+        }
+      }
+    );
+
+    setTimeout(() => {
+      tween.start();
+      tween.start();
+      tween.start();
+      tween.start();
+
+      setTimeout(() => {
+        tween.pause();
+        tween.pause();
+        tween.pause();
+        tween.pause();
+
+        expect(startFn).toBeCalledTimes(1);
+        expect(pauseFn).toBeCalledTimes(1);
+        done();
+      }, 10);
+    }, 10);
+  });
+
+  it('should reset without mutation', (done) => {
+    const target = { x: 0 };
+    const tween = Tween.fromTo(
+      target,
+      { x: 100 },
+      {
+        mutate: false,
+        duration: 100,
+        on: {
+          complete: () => {
+            expect(target).toMatchObject({ x: 0 });
+            done();
+          }
+        }
+      }
+    );
+
+    setTimeout(() => {
+      tween.reset();
+    }, 50);
+  });
+
+  it('should set the correct progress', (done) => {
+    const tween = Tween.fromTo(
+      { x: 0 },
+      { x: 100 },
+      {
+        duration: 100,
+        paused: true
+      }
+    );
+
+    expect(tween.passed).toBe(0);
+
+    setTimeout(() => {
+      tween.progress = 0.5;
+      expect(tween.passed).toBe(50);
+      done();
+    }, 50);
   });
 });

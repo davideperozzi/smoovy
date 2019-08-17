@@ -23,8 +23,10 @@ Tween.fromTo(
   { x: 100 },
   {
     duration: 200,
-    update: ({ x }) => {
-      // Do something with "x"
+    on: {
+      update: ({ x }) => {
+        // Do something with "x"
+      }
     }
   }
 );
@@ -95,8 +97,10 @@ Tween.fromTo(
   {
     duration: 200,
     mutate: false,
-    update: (values) => {
-      // someValues.x is still 0
+    on: {
+      update: (values) => {
+        // someValues.x is still 0
+      }
     }
   }
 );
@@ -123,14 +127,24 @@ interface TweenOptions<Values> {
   // Default: true
   overwrite: boolean;
 
-  // Stop callback
-  stop: () => void;
+  // Delay before start (in ms)
+  delay: number;
 
-  // Complete callback
-  complete: () => void;
+  // Determines if the tween should start immediately
+  // Default: false
+  paused: boolean;
 
-  // Update callback (every tick)
-  update: (values: Values) => void;
+  // All callbacks (optional)
+  on: {
+    stop: () => void;
+    pause: () => void;
+    start: () => void;
+    reset: () => void;
+    delay: (passed: number) => void;
+    update: (values: Values) => void;
+    overwrite: () => void;
+    complete: () => void;
+  }
 }
 ```
 
