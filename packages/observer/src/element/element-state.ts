@@ -20,11 +20,14 @@ export class ElementState {
     public element: HTMLElement
   ) {}
 
-  public update(async = false) {
+  public update(
+    async = false,
+    force = false
+  ) {
     if (async) {
-      setTimeout(() => this.updateDimensions());
+      setTimeout(() => this.updateDimensions(force));
     } else {
-      this.updateDimensions();
+      this.updateDimensions(force);
     }
   }
 
@@ -32,11 +35,11 @@ export class ElementState {
     this.destroyListeners.push(listener);
   }
 
-  private updateDimensions() {
+  private updateDimensions(force?: boolean) {
     this.updateSize();
     this.updateOffset();
 
-    if (this.hasChanged()) {
+    if (this.hasChanged() || force) {
       this.emitChanges();
     }
   }
@@ -86,6 +89,7 @@ export class ElementState {
   }
 
   public updateSize() {
+    /* istanbul ignore else */
     if (Browser.client) {
       const bounds = this.element.getBoundingClientRect();
 
@@ -98,6 +102,7 @@ export class ElementState {
   }
 
   public updateOffset() {
+    /* istanbul ignore else */
     if (Browser.client) {
       const offset = getElementOffset(this.element);
 

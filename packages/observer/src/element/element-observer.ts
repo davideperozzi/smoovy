@@ -14,6 +14,7 @@ export interface ElementObserverConfig {
   mutators?: ElementObserverMutator[];
 }
 
+/* istanbul ignore next */
 const defaultConfig: ElementObserverConfig = {
   mutationThrottle: 100,
   viewportThrottle: 100,
@@ -38,15 +39,20 @@ export class ElementObserver {
   private states: ElementState[] = [];
 
   public constructor(
-    private config: ElementObserverConfig
+    private config: ElementObserverConfig = {}
   ) {}
 
   public static observe(element: HTMLElement) {
     return this.default.observe(element);
   }
 
+  public static reset() {
+    return this.default.reset();
+  }
+
   public observe(element: HTMLElement) {
     for (let i = 0, len = this.states.length; i < len; i++) {
+      /* istanbul ignore else */
       if (this.states[i].element === element) {
         return this.states[i];
       }
@@ -68,17 +74,19 @@ export class ElementObserver {
   private deregister(state: ElementState) {
     const index = this.states.indexOf(state);
 
+    /* istanbul ignore else */
     if (index > -1) {
       this.states.splice(index, 1);
       this.checkStates();
     }
+  }
 
-    if ( ! state.destroyed) {
-      state.destroy();
-    }
+  public reset() {
+    this.states.forEach(state => this.deregister(state));
   }
 
   public updateRaf() {
+    /* istanbul ignore else */
     if (Browser.client) {
       cancelAnimationFrame(this.lastRaf);
 
@@ -97,11 +105,13 @@ export class ElementObserver {
   private attach() {
     this.attached = true;
     this.viewportObserver = ViewportObserver.changed(
+      /* istanbul ignore next */
       typeof this.config.viewportThrottle === 'number'
         ? throttle(() => this.update(), this.config.viewportThrottle)
         : () => this.update()
     );
 
+    /* istanbul ignore next */
     if (Browser.client && Browser.mutationObserver && this.config.mutators) {
       const throttleMs = this.config.mutationThrottle;
 
@@ -120,6 +130,7 @@ export class ElementObserver {
 
     let domContentLoadedListener: EventListenerOrEventListenerObject;
 
+    /* istanbul ignore next */
     if (Browser.client) {
       document.addEventListener(
         'DOMContentLoaded',
@@ -141,11 +152,13 @@ export class ElementObserver {
   private detach() {
     this.attached = false;
 
+    /* istanbul ignore next */
     if (this.viewportObserver) {
       this.viewportObserver.remove();
       this.viewportObserver = undefined;
     }
 
+    /* istanbul ignore next */
     if (this.mutationObserver) {
       this.mutationObserver.disconnect();
       this.mutationObserver = undefined;

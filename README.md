@@ -6,7 +6,7 @@
 [![License](https://flat.badgen.net/badge/license/MIT/blue)](./LICENSE)
 
 ## Synopsis
-**smoovy** is a collection of small and useful js packages preventing copy & paste. The goal is to use as few dependencies as possible to guarantee a **small final bundle**. Also to keep the code clean, small and simple.
+**smoovy** is a collection of small, useful and well tested js packages preventing copy & paste. The goal is to use as few dependencies as possible to guarantee a **small final bundle**. Also to keep the code clean, small and simple.
 
 ## Main packages
 | Name| Version | Size |

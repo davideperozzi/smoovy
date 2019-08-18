@@ -40,6 +40,7 @@ export class ViewportObserver {
   private static removeListener(listener: ViewportChangeListener) {
     const index = this.listeners.indexOf(listener);
 
+    /* istanbul ignore else */
     if (index > -1) {
       this.listeners.splice(index, 1);
       this.checkListeners();
@@ -51,6 +52,7 @@ export class ViewportObserver {
   }
 
   private static set listening(listening: boolean) {
+    /* istanbul ignore else */
     if (listening && ! this._listening) {
       this.attach();
     } else if ( ! listening && this._listening) {
@@ -60,14 +62,19 @@ export class ViewportObserver {
     this._listening = listening;
   }
 
+  public static get attached() {
+    return this._listening;
+  }
+
   public static get state() {
     return this.stateResolver.promise;
   }
 
   public static update(
-    force: boolean = false,
-    silent: boolean = false
+    force = false,
+    silent = false
   ) {
+    /* istanbul ignore else */
     if (Browser.client) {
       this._state.width = window.innerWidth;
       this._state.height = window.innerHeight;
@@ -86,7 +93,7 @@ export class ViewportObserver {
     return this._state.width + this._state.height;
   }
 
-  private static handleResize(force: boolean = false)  {
+  private static handleResize(force = false)  {
     cancelAnimationFrame(this.lastRafId);
 
     const prevSum = this.getStateSum();
@@ -103,10 +110,14 @@ export class ViewportObserver {
   }
 
   private static attach() {
-    if ( ! this.resizeListener ) {
+    /* istanbul ignore else */
+    if ( ! this.resizeListener) {
       this.handleResize();
+
+      /* istanbul ignore next */
       this.resizeListener = () => this.handleResize();
 
+      /* istanbul ignore else */
       if (Browser.client) {
         window.addEventListener('resize', this.resizeListener, true);
       }
@@ -114,7 +125,9 @@ export class ViewportObserver {
   }
 
   private static detach() {
+    /* istanbul ignore else */
     if (this.resizeListener) {
+      /* istanbul ignore else */
       if (Browser.client) {
         window.removeEventListener('resize', this.resizeListener, true);
       }
