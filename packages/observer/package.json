@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/observer",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Observing states of elements",
   "main": "dist/index.js",
   "source": "src/index.ts",
