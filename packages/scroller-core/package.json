@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller-core",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Scroller core",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -30,8 +30,8 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/observer": "^0.0.13",
-    "@smoovy/utils": "^0.1.6",
+    "@smoovy/observer": "^0.0.14",
+    "@smoovy/utils": "^0.1.7",
     "tslib": "^1.9.3"
   }
 }

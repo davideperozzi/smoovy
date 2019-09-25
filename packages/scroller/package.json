@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Smooth scrolling for the world",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -31,13 +31,13 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/scroller-core": "^0.0.14",
-    "@smoovy/scroller-tween": "^0.0.15",
+    "@smoovy/scroller-core": "^0.0.15",
+    "@smoovy/scroller-tween": "^0.0.16",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
-    "@smoovy/scroller-shared": "^0.0.15",
-    "@smoovy/utils": "^0.1.6"
+    "@smoovy/scroller-shared": "^0.0.16",
+    "@smoovy/utils": "^0.1.7"
   },
   "gitHead": "8aec1c21483db613a51382dd502ddba2311d1b40"
 }
