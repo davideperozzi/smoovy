@@ -3,6 +3,7 @@ import { Coordinate, objectDeepMerge } from '@smoovy/utils';
 import { ScrollerDom, ScrollerDomConfig } from './dom';
 import {
   ScrollerModule, ScrollerModuleConfig, ScrollerModuleConfigOverride,
+  InputListener, OutputListener, RecalcListener,
 } from './module';
 
 export interface ScrollerConfig<
@@ -100,6 +101,18 @@ export class Scroller<M extends ScrollerModule = ScrollerModule> {
 
   public disableInputs() {
     this.module.enableInputs(false);
+  }
+
+  public onInput(listener: InputListener) {
+    return this.module.onInput(listener);
+  }
+
+  public onOutput(listener: OutputListener) {
+    return this.module.onOutput(listener);
+  }
+
+  public onRecalc(listener: RecalcListener) {
+    return this.module.onRecalc(listener);
   }
 
   public scrollTo<

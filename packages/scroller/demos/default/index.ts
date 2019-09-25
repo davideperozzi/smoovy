@@ -16,6 +16,11 @@ const scroller = new Scroller(target, {
     tween: {
       duration: 1500
     }
+  },
+  on: {
+    recalc: (position) => {},
+    output: (position) => {},
+    input: (position) => {}
   }
 });
 
@@ -25,7 +30,7 @@ setTimeout(() => {
     {
       transformer: {
         tween: {
-          duration: undefined
+          duration: 10000
         }
       }
     }

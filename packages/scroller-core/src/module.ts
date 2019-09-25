@@ -17,6 +17,11 @@ export type RecalcListener = (
   outputPos: Coordinate
 ) => void;
 
+export type ModuleActionListener =
+  InputListener |
+  OutputListener |
+  RecalcListener;
+
 export interface ScrollerModuleConfig<
   I extends ScrollerModuleItem<ScrollerInput> = {},
   O extends ScrollerModuleItem<ScrollerOutput> = {},
@@ -131,15 +136,38 @@ export class ScrollerModule<
   }
 
   public onInput(listener: InputListener) {
-    this.inputListeners.push(listener);
+    return this.attachListener(this.inputListeners, listener);
   }
 
   public onOutput(listener: OutputListener) {
-    this.outputListeners.push(listener);
+    return this.attachListener(this.outputListeners, listener);
   }
 
   public onRecalc(listener: RecalcListener) {
-    this.recalcListeners.push(listener);
+    return this.attachListener(this.recalcListeners, listener);
+  }
+
+  private attachListener(
+    stack: ModuleActionListener[],
+    listener: ModuleActionListener
+  ) {
+    stack.push(listener);
+
+    return {
+      remove: () => this.removeListener(stack, listener)
+    };
+  }
+
+  private removeListener<L>(
+    stack: ModuleActionListener[],
+    listener: ModuleActionListener
+  ) {
+    const index = stack.indexOf(listener);
+
+    /* istanbul ignore else */
+    if (index > -1) {
+      stack.splice(index, 1);
+    }
   }
 
   public enableInputs(enabled: boolean = true) {

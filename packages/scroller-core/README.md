@@ -354,6 +354,38 @@ class CssTranslateOutput extends ScrollerOutput {
 ```
 > For a more detailed version of the css translation output you can take a look at [this](../scroller-shared/src/outputs/css-transform-output.ts)
 
+
+### 👂 Listening for changes
+To listen for changes regarding the outputs, inputs and recalcs you can either register them in the config directly like this:
+
+```js
+{
+  on: {
+    recalc: (position) => {},
+    output: (position) => {},
+    input: (position) => {}
+  }
+}
+```
+> These will exist as long as the scroller is alive
+
+You can also attach/detach the listeners later in your application:
+```js
+const scroller = new Scroller(target, { ... });
+
+scroller.onRecalc(() => {});
+scroller.onOutput((position) => {});
+scroller.onInput((position) => {});
+```
+
+To remove a previous mentioned listener you can simply call the `remove` method on your listener:
+```js
+const listener = scroller.onOutput((position) => {});
+
+listener.remove();
+listener = undefined; // optional
+```
+
 ### ☊ The DOM
 Each output, input and transformer will be provided with a [dom provider](./src/dom.ts). This is just the base DOM structure which wraps around the target element's children. You should use this to get information from the elements inside the scrollable element. The rendered DOM looks like this:
 
