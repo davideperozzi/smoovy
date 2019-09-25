@@ -213,8 +213,8 @@ describe('general', () => {
           expect(completeFn).toBeCalledTimes(1);
           done();
         }, 100);
-      }, 50);
-    }, 50);
+      }, 20);
+    }, 20);
   });
 
   it('should start after the delay', (done) => {
