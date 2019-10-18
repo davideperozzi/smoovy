@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller-tween",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Scroller tween module",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -32,10 +32,10 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/scroller-core": "^0.0.15",
-    "@smoovy/scroller-shared": "^0.0.16",
-    "@smoovy/tween": "^0.2.1",
-    "@smoovy/utils": "^0.1.7",
+    "@smoovy/scroller-core": "^0.0.16",
+    "@smoovy/scroller-shared": "^0.0.17",
+    "@smoovy/tween": "^0.2.2",
+    "@smoovy/utils": "^0.1.8",
     "tslib": "^1.9.3"
   }
 }

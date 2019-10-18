@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller-core",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Scroller core",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -30,8 +30,8 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/observer": "^0.0.14",
-    "@smoovy/utils": "^0.1.7",
+    "@smoovy/observer": "^0.0.15",
+    "@smoovy/utils": "^0.1.8",
     "tslib": "^1.9.3"
   }
 }

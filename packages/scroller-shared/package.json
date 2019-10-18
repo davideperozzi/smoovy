@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller-shared",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Scroller shared components",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -33,8 +33,8 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/scroller-core": "^0.0.15",
-    "@smoovy/utils": "^0.1.7",
+    "@smoovy/scroller-core": "^0.0.16",
+    "@smoovy/utils": "^0.1.8",
     "tslib": "^1.9.3"
   }
 }
