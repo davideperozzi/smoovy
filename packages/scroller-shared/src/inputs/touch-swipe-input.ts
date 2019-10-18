@@ -1,6 +1,5 @@
 import { ScrollerInput, ScrollerInputConfig } from '@smoovy/scroller-core';
-import { Browser } from '@smoovy/utils/m/browser';
-import { Coordinate } from '@smoovy/utils/m/dimension';
+import { Browser, Coordinate } from '@smoovy/utils';
 
 export interface TouchSwipeInputConfig extends ScrollerInputConfig {
   target: HTMLElement;

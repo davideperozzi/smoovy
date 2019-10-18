@@ -10,8 +10,6 @@ if (typeof process.argv[2] === 'string') {
   const rootPath = process.cwd();
   const pkgPath = path.resolve('packages', pkgName);
   const distPath = path.join(pkgPath, 'dist');
-  const modularFile = path.join(pkgPath, '.modular');
-  const distModulesPath = path.join(pkgPath, 'm');
   const tmpPath = path.join(rootPath, '.tmp');
   const buildConfigInput = path.join(rootPath, 'build', 'rollup.config.ts');
   const buildConfigOutput = path.join(tmpPath, 'rollup.config.js');
@@ -61,50 +59,8 @@ if (typeof process.argv[2] === 'string') {
     }
   );
 
-  if (buildProcess.status !== 0)  {
+  if (buildProcess.status !== 0) {
     process.exit(buildProcess.status);
-  }
-
-  if (fs.existsSync(modularFile)) {
-    rimraf.sync(distModulesPath);
-    console.log(`🔔 .modular file found!`);
-    console.log(`📦 Building modules for "${pkgName}":`);
-
-    const buildModuleConfigFile = path.join(
-      tmpPath,
-      `tsconfig.${pkgName}.json`
-    );
-
-    const buildModuleConfigContent = {
-      extends: path.join(pkgPath, 'tsconfig.json'),
-      compilerOptions: {
-        paths: {}
-      }
-    };
-
-    fs.writeFileSync(
-      buildModuleConfigFile,
-      JSON.stringify(buildModuleConfigContent)
-    );
-
-    const buildModulesProcess = childProcess.spawnSync(
-      `
-        tsc \
-          --module commonjs \
-          --project ${buildModuleConfigFile} \
-          --outDir ${distModulesPath}
-      `,
-      {
-        shell: true,
-        stdio: 'inherit'
-      }
-    );
-
-    fs.unlinkSync(buildModuleConfigFile);
-
-    if (buildModulesProcess.status !== 0)  {
-      process.exit(buildModulesProcess.status);
-    }
   }
 } else {
   throw new Error('No package defined');

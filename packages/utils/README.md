@@ -8,14 +8,6 @@ These are just some utilities I need for my websites. I think they're pretty sel
 npm install --save @smoovy/utils
 ```
 
-## Modularity
-To reduce the final bundle size even more, you can only import the utils you're really using. E.g.:
-
-```js
-import { Browser } from '@smoovy/utils/m/browser';
-import { objectDeepMerge } from '@smoovy/utils/m/object';
-```
-
 ## Development commands
 ```js
 // Serve with parcel

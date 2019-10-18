@@ -1,5 +1,5 @@
 import { ScrollerInput, ScrollerInputConfig } from '@smoovy/scroller-core';
-import { Browser } from '@smoovy/utils/m/browser';
+import { Browser } from '@smoovy/utils';
 
 export interface MouseWheelInputConfig extends ScrollerInputConfig {
   target: HTMLElement;

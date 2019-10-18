@@ -1,6 +1,4 @@
-import { throttle } from '@smoovy/utils/m/throttle';
-import { Resolver } from '@smoovy/utils/m/resolver';
-import { Browser } from '@smoovy/utils/m/browser';
+import { throttle, Resolver, Browser } from '@smoovy/utils';
 
 export type ViewportChangeListener = (state: ViewportState) => void;
 

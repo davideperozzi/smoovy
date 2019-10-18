@@ -15,3 +15,7 @@ export function clamp(
 ) {
   return Math.min(Math.max(value, min), max);
 }
+
+export function lerp(s: number, e: number, m: number) {
+  return s * (1 - m) + e * m;
+}

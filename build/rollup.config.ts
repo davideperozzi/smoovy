@@ -83,7 +83,7 @@ const cjsConfig = {
 
 const esmConfig = {
   format: 'esm',
-  file: path.join(outputPath, `${outputName}.m${outputType}`),
+  file: path.join(outputPath, `${outputName}.esm.${outputType}`),
   sourcemap: true
 };
 
