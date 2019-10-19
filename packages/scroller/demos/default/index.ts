@@ -1,38 +1,14 @@
-import { Scroller } from '../../src';
+import {
+  clampContent, lerpContent, mouseWheel, moveContent, Scroller,
+} from '../../src';
 
-const target = document.querySelector('main') as HTMLElement;
-const scroller = new Scroller(target, {
-  input: {
-    mouseWheel: {
-      target: document.documentElement
-    }
-  },
-  output: {
-    cssTransform: {
-      sectionSelector: 'section'
-    }
-  },
-  transformer: {
-    tween: {
-      duration: 1500
-    }
-  },
-  on: {
-    recalc: (position) => {},
-    output: (position) => {},
-    input: (position) => {}
-  }
-});
-
-setTimeout(() => {
-  scroller.scrollTo(
-    { y: 500 },
-    {
-      transformer: {
-        tween: {
-          duration: 10000
-        }
-      }
-    }
-  );
-}, 0);
+const element = document.querySelector('main') as HTMLElement;
+const scroller = new Scroller(
+  { element },
+  [
+    mouseWheel(),
+    lerpContent(),
+    moveContent(),
+    clampContent()
+  ]
+);

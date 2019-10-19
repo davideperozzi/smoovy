@@ -6,7 +6,7 @@
   },
   "scripts": {
     "lerna": "lerna",
-    "bootstrap:all": "lerna bootstrap",
+    "bootstrap": "lerna bootstrap",
     "lint:all": "lerna exec --concurrency 10 -- npm run lint",
     "build:all": "lerna exec --concurrency 10 -- npm run build",
     "test:all": "lerna exec --concurrency 10 -- npm run test",

@@ -19,3 +19,7 @@ export function clamp(
 export function lerp(s: number, e: number, m: number) {
   return s * (1 - m) + e * m;
 }
+
+export function between(num: number, a: number, b: number) {
+  return num > Math.min(a, b) && num < Math.max(a, b);
+}

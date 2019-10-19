@@ -42,7 +42,7 @@ export class ElementObserver {
     private config: ElementObserverConfig = {}
   ) {}
 
-  public static observe(element: HTMLElement) {
+  public static observe(element: HTMLElement | ElementState) {
     return this.default.observe(element);
   }
 
@@ -50,15 +50,17 @@ export class ElementObserver {
     return this.default.reset();
   }
 
-  public observe(element: HTMLElement) {
+  public observe(element: HTMLElement | ElementState) {
     for (let i = 0, len = this.states.length; i < len; i++) {
       /* istanbul ignore else */
-      if (this.states[i].element === element) {
+      if (this.states[i] === element || this.states[i].element === element) {
         return this.states[i];
       }
     }
 
-    return this.register(new ElementState(element));
+    return this.register(
+      element instanceof ElementState ? element : new ElementState(element)
+    );
   }
 
   private register(state: ElementState) {

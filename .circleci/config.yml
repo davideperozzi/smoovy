@@ -23,7 +23,7 @@ references:
   bootstrap_packages: &bootstrap_packages
     run:
       name: "Bootstrap packages"
-      command: "npm run bootstrap:all"
+      command: "npm run bootstrap"
   build_packages: &build_packages
     run:
       name: "Build all packages"

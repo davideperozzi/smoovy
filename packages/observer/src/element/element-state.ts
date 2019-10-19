@@ -8,17 +8,22 @@ export interface StateChangeListenerRef {
   remove: () => void;
 }
 
-export class ElementState {
+export class ElementState<T extends HTMLElement = HTMLElement> {
   public size: Size = { width: 0, height: 0 };
   public offset: Coordinate = { x: 0, y: 0 };
+  public element: T;
   private _destroyed = false;
   private changeListeners: StateChangeListener[] = [];
   private destroyListeners: StateDestroyListener[] = [];
   private lastSum = 0;
 
-  public constructor(
-    public element: HTMLElement
-  ) {}
+  public constructor(element: T | ElementState) {
+    if (element instanceof ElementState) {
+      this.element = element.element as T;
+    } else {
+      this.element = element;
+    }
+  }
 
   public update(
     async = false,
