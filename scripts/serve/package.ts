@@ -26,7 +26,7 @@ if (typeof process.argv[2] === 'string') {
     );
 
     if (parcelProcess.status !== 0) {
-      process.exit(parcelProcess.status);
+      process.exit(parcelProcess.status || 1);
     }
   } else {
     console.log(`The package "${pkgName}" does not have any demos`);

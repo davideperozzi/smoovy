@@ -31,7 +31,8 @@ if (typeof process.argv[2] === 'string') {
           --outDir ${path.dirname(buildConfigOutput)} \
           --target ES6 \
           --moduleResolution node \
-          --module ESNext
+          --module ESNext \
+          --esModuleInterop true
       `,
       {
         shell: true,
@@ -40,7 +41,7 @@ if (typeof process.argv[2] === 'string') {
     );
 
     if (compileConfigFileProcess.status !== 0)  {
-      process.exit(compileConfigFileProcess.status);
+      process.exit(compileConfigFileProcess.status || 1);
     }
   }
 
@@ -60,7 +61,7 @@ if (typeof process.argv[2] === 'string') {
   );
 
   if (buildProcess.status !== 0) {
-    process.exit(buildProcess.status);
+    process.exit(buildProcess.status || 1);
   }
 } else {
   throw new Error('No package defined');

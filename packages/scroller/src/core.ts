@@ -1,4 +1,4 @@
-import { EventEmitter } from '@smoovy/event';
+import { EventEmitter, EventListenerCb } from '@smoovy/event';
 import { Coordinate } from '@smoovy/utils';
 
 import { ScrollerDom, ScrollerDomConfig } from './dom';
@@ -32,6 +32,7 @@ export enum ScrollerEvent {
 
 export class Scroller extends EventEmitter {
   public dom: ScrollerDom;
+  private attached = false;
   public availableBehaviors = new Map<string, ScrollBehaviorItem>();
   public attachedBehaviors = new Map<string, ScrollBehaviorItemDetach>();
   public position: ScrollerPosition = {
@@ -58,23 +59,31 @@ export class Scroller extends EventEmitter {
   }
 
   private attach() {
-    this.dom.attach();
-    this.availableBehaviors.forEach(behavior => {
-      this.attachedBehaviors.set(behavior.name, behavior.attach(this));
-    });
+    if ( ! this.attached) {
+      this.attached = true;
+
+      this.dom.attach();
+      this.availableBehaviors.forEach(behavior => {
+        this.attachedBehaviors.set(behavior.name, behavior.attach(this));
+      });
+    }
   }
 
   public destroy() {
-    this.dom.detach();
-    this.attachedBehaviors.forEach(detach => {
-      if (typeof detach === 'function') {
-        detach.call(this);
-      }
-    });
+    if (this.attached) {
+      this.attached = false;
+
+      this.dom.detach();
+      this.attachedBehaviors.forEach(detach => {
+        if (typeof detach === 'function') {
+          detach.call(this);
+        }
+      });
+    }
   }
 
-  public updateDelta(delta: Coordinate) {
-    this.emit<Coordinate>(
+  public updateDelta<T extends Partial<Coordinate>>(delta: T) {
+    this.emit<T>(
       ScrollerEvent.TRANSFORM_DELTA,
       delta,
       (newDelta) => {
@@ -83,8 +92,13 @@ export class Scroller extends EventEmitter {
       }
     );
 
-    this.position.virtual.x -= delta.x;
-    this.position.virtual.y -= delta.y;
+    if (delta.x) {
+      this.position.virtual.x -= delta.x;
+    }
+
+    if (delta.y) {
+      this.position.virtual.y -= delta.y;
+    }
 
     this.emit<Coordinate>(
       ScrollerEvent.TRANSFORM_VIRTUAL,
@@ -104,10 +118,18 @@ export class Scroller extends EventEmitter {
     );
   }
 
-  private updateOutput(pos: Coordinate) {
+  protected updateOutput(pos: Coordinate) {
     this.position.output.x = pos.x;
     this.position.output.y = pos.y;
 
     this.emit(ScrollerEvent.OUTPUT, pos);
+  }
+
+  public onScroll(cb: EventListenerCb<Coordinate>) {
+    return this.on('output', cb);
+  }
+
+  public onDelta(cb: EventListenerCb<Coordinate>) {
+    return this.on('delta', cb);
   }
 }
