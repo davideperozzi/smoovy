@@ -1,16 +1,18 @@
-import { EventEmitter, EventListenerCb } from '@smoovy/event';
-import { easings, Tween } from '@smoovy/tween';
-import { Coordinate } from '@smoovy/utils';
-
-import { ScrollerDom, ScrollerDomConfig } from './dom';
 import { EasingImplementation } from 'tween/src/easing';
+
+import {
+  EventEmitter, EventListenerCb, listenCompose, Unlisten,
+} from '@smoovy/event';
+import { Ticker } from '@smoovy/ticker';
+import { easings, Tween, TweenOptions } from '@smoovy/tween';
+import { Coordinate, isNum } from '@smoovy/utils';
+
+import { ScrollerDom, ScrollerDomConfig, ScrollerDomEvent } from './dom';
 
 export type ScrollBehavior<C = any> = (config?: C) => ScrollBehaviorItem;
 export type ScrollBehaviorItemDetach = (() => void)|void;
-export interface ScrollBehaviorItem<S extends Scroller = Scroller> {
-  name: string;
-  attach: (scroller: S) => ScrollBehaviorItemDetach;
-}
+export type ScrollBehaviorItem<S extends Scroller = Scroller> =
+  (scroller: S) => ScrollBehaviorItemDetach;
 
 export interface ScrollerPosition {
   virtual: Coordinate;
@@ -24,11 +26,25 @@ export interface OutputTransformEvent {
   step: (pos: Coordinate) => void;
 }
 
+export interface TweenToEvent {
+  pos: Partial<Coordinate>;
+  options: Partial<
+    Pick<TweenOptions<any>, 'duration' | 'easing'> &
+    { force: boolean }
+  >;
+}
+
+export interface ScrollToEvent {
+  pos: Partial<Coordinate>;
+  skipOutputTransform: boolean;
+}
+
 export enum ScrollerEvent {
-  INPUT = 'input',
   DELTA = 'delta',
   OUTPUT = 'output',
   RECALC = 'recalc',
+  TWEEN_TO = 'tween_to',
+  SCROLL_TO = 'scroll_to',
   TRANSFORM_DELTA = '~delta',
   TRANSFORM_VIRTUAL = '~virtual',
   TRANSFORM_OUTPUT = '~output'
@@ -37,36 +53,30 @@ export enum ScrollerEvent {
 export class Scroller extends EventEmitter {
   private attached = false;
   private locks: string[] = [];
-  private mutedEvents: ScrollerEvent[] = [];
+  private availableBehaviors = new Map<string, ScrollBehaviorItem>();
+  private attachedBehaviors = new Map<string, ScrollBehaviorItemDetach>();
+  private unlisten: Unlisten;
   public dom: ScrollerDom;
-  public availableBehaviors = new Map<string, ScrollBehaviorItem>();
-  public attachedBehaviors = new Map<string, ScrollBehaviorItemDetach>();
   public position: ScrollerPosition = {
     output: { x: 0, y: 0 },
     virtual: { x: 0, y: 0 }
   };
 
   public constructor(
-    domConfig: ScrollerDomConfig,
-    behaviors: ScrollBehaviorItem[]
+    domConfig: ScrollerDomConfig | ScrollerDom,
+    behaviors: { [name: string]: ScrollBehaviorItem }
   ) {
     super();
 
-    this.dom = new ScrollerDom(domConfig);
+    this.dom = domConfig instanceof ScrollerDom
+      ? domConfig
+      : new ScrollerDom(domConfig);
 
-    behaviors.forEach(behavior => {
-      this.availableBehaviors.set(behavior.name, behavior);
-    });
-
-    this.dom.on<Coordinate>(ScrollerEvent.RECALC, () => {
-      this.updateDelta({ x: 0, y: 0 });
-    });
-
-    this.on<Coordinate>(ScrollerEvent.DELTA, (delta) => {
-      if ( ! this.isLocked()) {
-        this.updateDelta(delta);
+    for (const name in behaviors) {
+      if (behaviors.hasOwnProperty(name)) {
+        this.setBehavior(name, behaviors[name]);
       }
-    });
+    }
 
     this.attach();
   }
@@ -74,10 +84,23 @@ export class Scroller extends EventEmitter {
   private attach() {
     if ( ! this.attached) {
       this.attached = true;
+      this.unlisten = listenCompose(
+        this.dom.on<Coordinate>(ScrollerDomEvent.RECALC, () => {
+          this.updateDelta({ x: 0, y: 0 });
+          Ticker.requestAnimationFrame(() => {
+            this.emit(ScrollerEvent.RECALC);
+          });
+        }),
+        this.on<Coordinate>(ScrollerEvent.DELTA, (delta) => {
+          if ( ! this.isLocked()) {
+            this.updateDelta(delta);
+          }
+        })
+      );
 
       this.dom.attach();
-      this.availableBehaviors.forEach(behavior => {
-        this.attachedBehaviors.set(behavior.name, behavior.attach(this));
+      this.availableBehaviors.forEach((_behavior, key) => {
+        this.attachBehavior(key);
       });
     }
   }
@@ -85,6 +108,11 @@ export class Scroller extends EventEmitter {
   public destroy() {
     if (this.attached) {
       this.attached = false;
+
+      if (typeof this.unlisten === 'function') {
+        this.unlisten();
+        delete this.unlisten;
+      }
 
       this.dom.detach();
       this.attachedBehaviors.forEach(detach => {
@@ -95,7 +123,53 @@ export class Scroller extends EventEmitter {
     }
   }
 
+  public get behaviors() {
+    return this.availableBehaviors;
+  }
+
+  public setBehavior(
+    name: string,
+    behavior: ScrollBehaviorItem
+  ) {
+    this.availableBehaviors.set(name, behavior);
+  }
+
+  public deleteBehavior(name: string) {
+    if (this.attachedBehaviors.has(name)) {
+      this.detachBehavior(name);
+    }
+
+    return this.availableBehaviors.delete(name);
+  }
+
+  public attachBehavior(name: string) {
+    const behavior = this.availableBehaviors.get(name);
+
+    if (behavior && ! this.attachedBehaviors.get(name)) {
+      this.attachedBehaviors.set(name, behavior(this));
+
+      return true;
+    }
+
+    return false;
+  }
+
+  public detachBehavior(name: string) {
+    const detach = this.attachedBehaviors.get(name);
+
+    if (detach) {
+      detach.call(this);
+      this.attachedBehaviors.delete(name);
+
+      return true;
+    }
+
+    return false;
+  }
+
   public updateDelta<T extends Partial<Coordinate>>(delta: T) {
+    const virtPos = this.position.virtual;
+
     this.emit<T>(
       ScrollerEvent.TRANSFORM_DELTA,
       delta,
@@ -105,12 +179,19 @@ export class Scroller extends EventEmitter {
       }
     );
 
-    if (delta.x) {
-      this.position.virtual.x -= delta.x;
+    this.updatePosition({
+      x: isNum(delta.x) ? virtPos.x - (delta.x as number) : undefined,
+      y: isNum(delta.y) ? virtPos.y - (delta.y as number) : undefined
+    });
+  }
+
+  public updatePosition(virtPos?: Partial<Coordinate>) {
+    if (virtPos && isNum(virtPos.x)) {
+      this.position.virtual.x = virtPos.x as number;
     }
 
-    if (delta.y) {
-      this.position.virtual.y -= delta.y;
+    if (virtPos && isNum(virtPos.y)) {
+      this.position.virtual.y = virtPos.y as number;
     }
 
     this.emit<Coordinate>(
@@ -122,20 +203,17 @@ export class Scroller extends EventEmitter {
       }
     );
 
-    if (this.mutedEvents.includes(ScrollerEvent.TRANSFORM_OUTPUT)) {
+    if (
+      this.isEventMuted(ScrollerEvent.TRANSFORM_OUTPUT) ||
+      ! this.hasEventListeners(ScrollerEvent.TRANSFORM_OUTPUT)
+    ) {
       this.updateOutput(this.position.virtual);
     } else {
       this.emit<OutputTransformEvent>(
         ScrollerEvent.TRANSFORM_OUTPUT,
         {
           pos: this.position.output,
-          step: (pos) => {
-            if (this.mutedEvents.includes(ScrollerEvent.TRANSFORM_OUTPUT)) {
-              this.updateOutput(pos);
-            } else {
-              this.updateOutput(pos);
-            }
-          }
+          step: (outPos) => this.updateOutput(outPos)
         }
       );
     }
@@ -166,51 +244,24 @@ export class Scroller extends EventEmitter {
     return this.locks.length > 0;
   }
 
-  protected muteEvents(events: ScrollerEvent[]) {
-    events.forEach(event => {
-      if ( ! this.mutedEvents.includes(event)) {
-        this.mutedEvents.push(event);
-      }
-    });
-  }
-
-  protected unmuteEvents(events: ScrollerEvent[]) {
-    events.forEach(event => {
-      const index = this.mutedEvents.indexOf(event);
-
-      if (index > -1) {
-        this.mutedEvents.splice(index, 1);
-      }
-    });
-  }
-
   public scrollTo(
     pos: Partial<Coordinate>,
-    duration: number = 2000,
-    easing: EasingImplementation = easings.Sine.out
+    skipOutputTransform = false
   ) {
-    this.muteEvents([
-      ScrollerEvent.TRANSFORM_OUTPUT
-    ]);
+    this.emit<ScrollToEvent>(
+      ScrollerEvent.SCROLL_TO,
+      { pos, skipOutputTransform }
+    );
+  }
 
-    Tween.fromTo(this.position.virtual, pos, {
-      mutate: false,
-      duration,
-      easing,
-      on: {
-        update: (newPos) => {
-          this.updateDelta({
-            x: this.position.virtual.x - newPos.x,
-            y: this.position.virtual.y - newPos.y
-          });
-        },
-        complete: () => {
-          this.unmuteEvents([
-            ScrollerEvent.TRANSFORM_OUTPUT
-          ]);
-        }
-      }
-    });
+  public tweenTo(
+    pos: Partial<Coordinate>,
+    options: TweenToEvent['options'] = {}
+  ) {
+    this.emit<TweenToEvent>(
+      ScrollerEvent.TWEEN_TO,
+      { pos, options }
+    );
   }
 
   public onScroll(cb: EventListenerCb<Coordinate>) {

@@ -14,7 +14,7 @@ export interface ScrollerDomConfig {
 }
 
 export enum ScrollerDomEvent {
-  CHANGED = 'changed'
+  RECALC = 'recalc'
 }
 
 export class ScrollerDom extends EventEmitter {
@@ -46,8 +46,8 @@ export class ScrollerDom extends EventEmitter {
       this.container = this.observer.observe(this.container);
       this.wrapper = this.observer.observe(this.wrapper);
 
-      this.wrapper.changed(() => this.emit(ScrollerDomEvent.CHANGED));
-      this.container.changed(() => this.emit(ScrollerDomEvent.CHANGED));
+      this.wrapper.changed(() => this.emit(ScrollerDomEvent.RECALC));
+      this.container.changed(() => this.emit(ScrollerDomEvent.RECALC));
     }
 
     if (this.dynamic) {
@@ -67,7 +67,6 @@ export class ScrollerDom extends EventEmitter {
     if (this.dynamic) {
       const rootElement = this.config.element as HTMLElement;
       const children = Array.from(rootElement.childNodes);
-
 
       rootElement.appendChild(this.container.element);
       this.wrapper.element.append(...children);

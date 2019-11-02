@@ -1,9 +1,10 @@
 import { listenEl } from '@smoovy/event';
 
-import { ScrollBehavior } from '../core';
+import { ScrollBehavior, ScrollerEvent } from '../core';
 import { Browser } from '@smoovy/utils';
+import { getDeltaByKeyEvent } from '../utils/keyboard';
 
-export interface KeyboardConfig {
+export interface Config {
   /**
    * A target element on which the event listeners will be placed
    * Default: `document.documentElement`
@@ -29,10 +30,22 @@ export interface KeyboardConfig {
   arrowDelta?: number;
 
   /**
+   * The page up & down delta value
+   * Default: 250
+   */
+  pageDelta?: number;
+
+  /**
    * The delta value for the space key
    * Default: 150
    */
   spaceDelta?: number;
+
+  /**
+   * The delta value for home and end
+   * Default: Infinity
+   */
+  homeEndDelta?: number;
 }
 
 const defaultConfig = {
@@ -40,48 +53,40 @@ const defaultConfig = {
   target: Browser.client ? document.documentElement : undefined,
   eventName: 'keydown',
   arrowDelta: 100,
-  spaceDelta: 200
+  pageDelta: 250,
+  spaceDelta: 200,
+  homeEndDelta: Infinity
 };
 
-export const keyboard: ScrollBehavior<KeyboardConfig> = (config = {}) => {
+const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = Object.assign(defaultConfig, config);
 
-  return {
-    name: 'keyboard',
-    attach: (scroller) => {
-      const target = cfg.target as HTMLElement;
-      const listener = (event: KeyboardEvent) => {
-        switch (event.key) {
-          case ' ':
-            scroller.emit('delta', { y: -cfg.spaceDelta });
-            break;
+  return (scroller) => {
+    const target = cfg.target as HTMLElement;
+    const listener = (event: KeyboardEvent) => {
+      const delta = getDeltaByKeyEvent(
+        event,
+        cfg.arrowDelta,
+        cfg.pageDelta,
+        cfg.spaceDelta,
+        cfg.homeEndDelta
+      );
 
-          case 'ArrowLeft':
-            scroller.emit('delta', { x: cfg.arrowDelta });
-            break;
+      if (delta.x || delta.y) {
+        scroller.emit(ScrollerEvent.DELTA, delta);
+      }
+    };
 
-          case 'ArrowRight':
-            scroller.emit('delta', { x: -cfg.arrowDelta });
-            break;
-
-          case 'ArrowDown':
-            scroller.emit('delta', { y: -cfg.arrowDelta });
-            break;
-
-          case 'ArrowUp':
-            scroller.emit('delta', { y: cfg.arrowDelta });
-            break;
-        }
-      };
-
-      return Browser.wheelEvent
-        ? listenEl(
-            target,
-            cfg.eventName,
-            listener as any,
-            { passive: config.passive }
-          )
-        : () => {};
-    }
+    return Browser.wheelEvent
+      ? listenEl(
+          target,
+          cfg.eventName,
+          listener as any,
+          { passive: config.passive }
+        )
+      : undefined;
   };
 };
+
+export { Config as KeyboardConfig };
+export default behavior;

@@ -1,9 +1,9 @@
-import { smoothScrolling } from '../../src';
+import { smoothScroll } from '../../src';
+import { Browser } from '@smoovy/utils';
 
 const element = document.querySelector('main') as HTMLElement;
-const scroller = smoothScrolling({ element }, { wheel: { multiplier: 0.5 } });
-
-// scroller.lock();
-// scroller.onDelta((pos) => { console.log(pos); });
-// scroller.onScroll((position) => console.log(position.y));
-// scroller.scrollTo({ y: 500 }, 500);
+const scroller = smoothScroll({ element }, {
+  styles: {
+    height: '100vh'
+  }
+});

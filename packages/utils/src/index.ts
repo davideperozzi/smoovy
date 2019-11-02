@@ -7,4 +7,5 @@ export * from './dimension';
 export * from './range';
 export * from './resolver';
 export * from './uid';
+export * from './base';
 
