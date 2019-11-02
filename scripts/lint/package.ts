@@ -20,7 +20,7 @@ if (typeof process.argv[2] === 'string') {
   );
 
   if (lintProcess.status !== 0) {
-    process.exit(lintProcess.status);
+    process.exit(lintProcess.status || 1);
   }
 } else {
   throw new Error('No package defined');

@@ -1,6 +1,6 @@
 import { listenEl } from '@smoovy/event';
 
-import { ScrollBehavior } from '../core';
+import { ScrollBehavior, ScrollerEvent } from '../core';
 import { Browser } from '@smoovy/utils';
 
 export interface MouseWheelConfig {
@@ -29,34 +29,42 @@ export interface MouseWheelConfig {
   multiplierFirefox?: number;
 }
 
-export const mouseWheel: ScrollBehavior<MouseWheelConfig> = (config = {
-  passive: false
-}) => ({
-  name: 'mousewheel',
-  attach: (scroller) => {
-    const target = (config && config.target) || document.documentElement;
-    const listener = (event: WheelEvent) => {
-      if ( ! config.passive) {
-        event.preventDefault();
-      }
+const defaultConfig = {
+  passive: false,
+  multiplier: 1,
+  multiplierFirefox: 25
+};
 
-      const delta = { x: 0, y: 0 };
+export const mouseWheel: ScrollBehavior<MouseWheelConfig> = (config = {}) => {
+  const cfg = Object.assign(defaultConfig, config);
 
-      delta.x = (event as any).wheelDeltaX || event.deltaX * -1;
-      delta.y = (event as any).wheelDeltaY || event.deltaY * -1;
-      delta.x *= (config && config.multiplier) || 1;
-      delta.y *= (config && config.multiplier) || 1;
+  return {
+    name: 'mousewheel',
+    attach: (scroller) => {
+      const target = cfg.target || document.documentElement;
+      const listener = (event: WheelEvent) => {
+        const delta = { x: 0, y: 0 };
 
-      if (Browser.firefox && event.deltaMode === 1) {
-        delta.x *= config.multiplierFirefox || 25;
-        delta.y *= config.multiplierFirefox || 25;
-      }
+        if ( ! config.passive) {
+          event.preventDefault();
+        }
 
-      scroller.emit({ delta });
-    };
+        delta.x = (event as any).wheelDeltaX || event.deltaX * -1;
+        delta.y = (event as any).wheelDeltaY || event.deltaY * -1;
+        delta.x *= cfg.multiplier;
+        delta.y *= cfg.multiplier;
 
-    return Browser.wheelEvent
-      ? listenEl(target, 'wheel', listener, { passive: config.passive })
-      : () => {};
-  }
-});
+        if (Browser.firefox && event.deltaMode === 1) {
+          delta.x *= cfg.multiplierFirefox;
+          delta.y *= cfg.multiplierFirefox;
+        }
+
+        scroller.emit(ScrollerEvent.DELTA, delta);
+      };
+
+      return Browser.wheelEvent
+        ? listenEl(target, 'wheel', listener, { passive: cfg.passive })
+        : () => {};
+    }
+  };
+};

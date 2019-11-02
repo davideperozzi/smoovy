@@ -7,7 +7,7 @@ export class EventEmitter {
   public emit<T = any, TC = T>(
     eventsOrName: { [name: string]: T } | string,
     dataOrCallback?: T | ListenerCallback<TC>,
-    callback: ListenerCallback<TC> = (() => {})
+    callback: ListenerCallback<TC> = () => {}
   ) {
     const listnerCallback = typeof dataOrCallback === 'function'
       ? dataOrCallback as ListenerCallback<TC>

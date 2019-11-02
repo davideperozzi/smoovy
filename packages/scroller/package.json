@@ -35,11 +35,11 @@
     "@smoovy/event": "^0.0.0",
     "@smoovy/observer": "0.0.15",
     "@smoovy/utils": "^0.1.8",
+    "@smoovy/tween": "^0.2.2",
     "@smoovy/ticker": "^0.1.7",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
-    "@smoovy/scroller-shared": "^0.0.17",
     "@smoovy/utils": "^0.1.8"
   },
   "gitHead": "8aec1c21483db613a51382dd502ddba2311d1b40"

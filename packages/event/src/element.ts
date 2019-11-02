@@ -14,3 +14,9 @@ export function listenEl(
 
   return () => element.removeEventListener(type, listener, options);
 }
+
+export function listenCompose(
+  ...listeners: ReturnType<typeof listenEl>[]
+) {
+  return () => listeners.forEach(cb => cb.call(undefined));
+}

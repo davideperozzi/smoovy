@@ -43,7 +43,7 @@ if (typeof process.argv[2] === 'string') {
     );
 
     if (jestProcess.status !== 0) {
-      process.exit(jestProcess.status);
+      process.exit(jestProcess.status || 1);
     }
   }
 } else {

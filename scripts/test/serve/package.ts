@@ -28,7 +28,7 @@ if (
   );
 
   if (parcelProcess.status !== 0) {
-    process.exit(parcelProcess.status);
+    process.exit(parcelProcess.status || 1);
   }
 } else {
   throw new Error(`

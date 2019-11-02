@@ -7,9 +7,9 @@
   "scripts": {
     "lerna": "lerna",
     "bootstrap": "lerna bootstrap",
-    "lint:all": "lerna exec --concurrency 10 -- npm run lint",
-    "build:all": "lerna exec --concurrency 10 -- npm run build",
-    "test:all": "lerna exec --concurrency 10 -- npm run test",
+    "lint:all": "lerna run --parallel --stream lint",
+    "test:all": "lerna run --parallel --stream test",
+    "build:all": "lerna run --stream build",
     "test:report": "codecov -y codecov.yml",
     "publish:all:versions": "lerna version",
     "publish:tag:package": "scripty",

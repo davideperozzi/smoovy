@@ -1,6 +1,6 @@
 import { Coordinate, Browser } from '@smoovy/utils';
 
-import { ScrollBehavior } from '../core';
+import { ScrollBehavior, ScrollerEvent } from '../core';
 
 export interface MoveContentConfig {
   /**
@@ -13,20 +13,26 @@ export interface MoveContentConfig {
   firefoxFix?: boolean;
 }
 
-export const moveContent: ScrollBehavior<MoveContentConfig> = (config = {
+const defaultConfig = {
   firefoxFix: true
-}) => ({
-  name: 'movecontent',
-  attach: (scroller) => {
-    return scroller.on<Coordinate>('output', (pos) => {
-      const element = scroller.dom.wrapper.element;
-      let transform = `translate3d(${-pos.x}px, ${-pos.y}px, 0)`;
+};
 
-      if (Browser.firefox && config.firefoxFix) {
-        transform += ` rotate3d(0.01, 0.01, 0.01, 0.01deg)`;
-      }
+export const moveContent: ScrollBehavior<MoveContentConfig> = (config = {}) => {
+  const cfg = Object.assign(defaultConfig, config);
 
-      element.style.transform = transform;
-    });
-  }
-});
+  return {
+    name: 'movecontent',
+    attach: (scroller) => {
+      return scroller.on<Coordinate>(ScrollerEvent.OUTPUT, (pos) => {
+        const element = scroller.dom.wrapper.element;
+        let transform = `translate3d(${-pos.x}px, ${-pos.y}px, 0)`;
+
+        if (Browser.firefox && cfg.firefoxFix) {
+          transform += ` rotate3d(0.01, 0.01, 0.01, 0.01deg)`;
+        }
+
+        element.style.transform = transform;
+      });
+    }
+  };
+};

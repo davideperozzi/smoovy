@@ -13,6 +13,10 @@ export interface ScrollerDomConfig {
   element: HTMLElement | ScrollerDomElement;
 }
 
+export enum ScrollerDomEvent {
+  CHANGED = 'changed'
+}
+
 export class ScrollerDom extends EventEmitter {
   public container: ElementState;
   public wrapper: ElementState;
@@ -42,8 +46,8 @@ export class ScrollerDom extends EventEmitter {
       this.container = this.observer.observe(this.container);
       this.wrapper = this.observer.observe(this.wrapper);
 
-      this.wrapper.changed(() => this.emit('changed'));
-      this.container.changed(() => this.emit('changed'));
+      this.wrapper.changed(() => this.emit(ScrollerDomEvent.CHANGED));
+      this.container.changed(() => this.emit(ScrollerDomEvent.CHANGED));
     }
 
     if (this.dynamic) {
