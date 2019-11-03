@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller",
-  "version": "0.0.17",
+  "version": "0.1.0",
   "description": "Smooth scrolling for the world",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -32,11 +32,11 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/event": "^0.0.0",
-    "@smoovy/observer": "0.0.15",
-    "@smoovy/utils": "^0.1.8",
-    "@smoovy/tween": "^0.2.2",
-    "@smoovy/ticker": "^0.1.7",
+    "@smoovy/event": "^0.1.0",
+    "@smoovy/observer": "^0.1.0",
+    "@smoovy/ticker": "^0.1.8",
+    "@smoovy/tween": "^0.2.3",
+    "@smoovy/utils": "^0.1.9",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
