@@ -88,25 +88,6 @@ describe('general', () => {
     }, 50);
   });
 
-  it('should not tick below min fps', (done) => {
-    setTimeout(() => {
-      const fn = jest.fn();
-
-      ticker.override = true;
-      ticker.add(fn);
-      ticker.setMinFPS(5);
-      ticker.setMaxFPS(6);
-      ticker.update();
-      ticker.update();
-
-      setTimeout(() => {
-        ticker.update();
-        expect(fn).toBeCalledTimes(1);
-        done();
-      }, 100);
-    }, 50);
-  });
-
   it('should set min and max fps', () => {
     ticker.setMinFPS(10);
     ticker.setMaxFPS(30);
