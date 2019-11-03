@@ -7,7 +7,6 @@
 		"sourceMap": true,
 		"importHelpers": true,
     "strict": true,
-    "declaration": true,
     "preserveSymlinks": true,
     "strictPropertyInitialization": false,
     "emitDecoratorMetadata": true,

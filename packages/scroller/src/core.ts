@@ -1,10 +1,8 @@
-import { EasingImplementation } from 'tween/src/easing';
-
 import {
   EventEmitter, EventListenerCb, listenCompose, Unlisten,
 } from '@smoovy/event';
 import { Ticker } from '@smoovy/ticker';
-import { easings, Tween, TweenOptions } from '@smoovy/tween';
+import { TweenOptions } from '@smoovy/tween';
 import { Coordinate, isNum } from '@smoovy/utils';
 
 import { ScrollerDom, ScrollerDomConfig, ScrollerDomEvent } from './dom';
