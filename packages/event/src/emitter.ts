@@ -12,7 +12,7 @@ export class EventEmitter {
     dataOrCallback?: T | ListenerCallback<TC>,
     callback: ListenerCallback<TC> = () => {}
   ) {
-    const listnerCallback = typeof dataOrCallback === 'function'
+    const listenerCb = typeof dataOrCallback === 'function'
       ? dataOrCallback as ListenerCallback<TC>
       : callback;
 
@@ -21,9 +21,14 @@ export class EventEmitter {
 
       if (this.listeners.hasOwnProperty(name) && ! this.isEventMuted(name)) {
         for (let i = 0, len = this.listeners[name].length; i < len; i++) {
-          listnerCallback.call(
+          listenerCb.call(
             this,
-            this.listeners[name][i].call(this, dataOrCallback as T) as any
+            this.listeners[name][i].call(
+              this,
+              dataOrCallback !== listenerCb
+                ? dataOrCallback as T
+                : undefined
+            ) as any
           );
         }
       }
@@ -35,9 +40,10 @@ export class EventEmitter {
         const name = keys[k];
         const eventData = events[name];
 
+        /* istanbul ignore else */
         if (this.listeners.hasOwnProperty(name) && ! this.isEventMuted(name)) {
           for (let i = 0, len = this.listeners[name].length; i < len; i++) {
-            listnerCallback.call(
+            listenerCb.call(
               this,
               this.listeners[name][i].call(this, eventData) as any
             );
@@ -60,9 +66,11 @@ export class EventEmitter {
   public off(name: string, cb: EventListenerCb) {
     const listeners = this.listeners;
 
+    /* istanbul ignore else */
     if (listeners.hasOwnProperty(name)) {
       const index = listeners[name].indexOf(cb);
 
+      /* istanbul ignore else */
       if (index > -1) {
         listeners[name].splice(index, 1);
       }
@@ -79,6 +87,7 @@ export class EventEmitter {
 
   public muteEvents(...events: (string|boolean)[]): Unlisten {
     events.forEach(event => {
+      /* istanbul ignore else */
       if (typeof event === 'string' && ! this.mutedEvents.includes(event)) {
         this.mutedEvents.push(event);
       }
@@ -89,9 +98,11 @@ export class EventEmitter {
 
   public unmuteEvents(...events: (string|boolean)[]) {
     events.forEach(event => {
+      /* istanbul ignore else */
       if (typeof event === 'string') {
         const index = this.mutedEvents.indexOf(event);
 
+        /* istanbul ignore else */
         if (index > -1) {
           this.mutedEvents.splice(index, 1);
         }
