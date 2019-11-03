@@ -15,6 +15,7 @@
 | [@smoovy/observer](./packages/observer) | [![Version](https://flat.badgen.net/npm/v/@smoovy/observer)](https://www.npmjs.com/package/@smoovy/observer) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/observer) |
 | [@smoovy/tween](./packages/tween) | [![Version](https://flat.badgen.net/npm/v/@smoovy/tween)](https://www.npmjs.com/package/@smoovy/tween) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/tween) |
 | [@smoovy/ticker](./packages/ticker) | [![Version](https://flat.badgen.net/npm/v/@smoovy/ticker)](https://www.npmjs.com/package/@smoovy/ticker) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/ticker) |
+| [@smoovy/event](./packages/event) | [![Version](https://flat.badgen.net/npm/v/@smoovy/event)](https://www.npmjs.com/package/@smoovy/event) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/event) |
 | [@smoovy/utils](./packages/utils) | [![Version](https://flat.badgen.net/npm/v/@smoovy/utils)](https://www.npmjs.com/package/@smoovy/utils) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/utils) |
 
 ## Getting started

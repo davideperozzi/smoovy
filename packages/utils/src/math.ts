@@ -28,18 +28,17 @@ export function between(num: number, a: number, b: number) {
   return num > Math.min(a, b) && num < Math.max(a, b);
 }
 
-export function round(
+export function roundDec(
   value: number,
-  precision: number,
-  type = 'round'
+  precision: number
 ) {
   return Number(
-    (Math as any)[type](value + ('e' as any) + precision) + 'e-' + precision
+    Math.round(value + ('e' as any) + precision) + 'e-' + precision
   );
 }
 
 
-export function cutdec(
+export function cutDec(
   value: number,
   precision: number
 ) {

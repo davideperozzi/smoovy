@@ -95,7 +95,7 @@ describe('general', () => {
       ticker.override = true;
       ticker.add(fn);
       ticker.setMinFPS(5);
-      ticker.setMaxFPS(10);
+      ticker.setMaxFPS(6);
       ticker.update();
       ticker.update();
 

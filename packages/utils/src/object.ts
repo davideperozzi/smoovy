@@ -1,11 +1,7 @@
+import { isObj } from './base';
+
 interface DefaultObject {
   [id: string]: any;
-}
-
-export function isObject(item: any): boolean {
-  return (item && typeof item === 'object' &&
-         ! Array.isArray(item)) &&
-         ! (item instanceof Node);
 }
 
 export function objectDeepMerge<T extends DefaultObject>(
@@ -18,9 +14,9 @@ export function objectDeepMerge<T extends DefaultObject>(
 
   const source = sources.shift();
 
-  if (isObject(target) && isObject(source)) {
+  if (isObj(target) && isObj(source)) {
     for (const key in source) {
-      if (isObject(source[key])) {
+      if (isObj(source[key])) {
         if ( ! target[key]) {
           Object.assign(target, { [key]: {} });
         }
@@ -36,7 +32,7 @@ export function objectDeepMerge<T extends DefaultObject>(
 }
 
 export function objectDeepClone<T extends DefaultObject>(obj: T): T {
-  if (isObject(obj)) {
+  if (isObj(obj)) {
     const copy: { [attr: string]: any } = {};
 
     for (const attr in obj) {

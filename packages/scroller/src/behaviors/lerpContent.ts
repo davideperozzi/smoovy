@@ -1,5 +1,5 @@
 import { Ticker, TickerThread } from '@smoovy/ticker';
-import { cutdec, lerp, Browser } from '@smoovy/utils';
+import { cutDec, lerp, Browser } from '@smoovy/utils';
 
 import { OutputTransformEvent, ScrollBehavior, ScrollerEvent } from '../core';
 
@@ -60,13 +60,13 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
           const virtual = scroller.position.virtual;
           const outputX = lerp(pos.x, virtual.x, damping);
           const outputY = lerp(pos.y, virtual.y, damping);
-          const diffX = cutdec(Math.abs(virtual.x - outputX), cfg.tolerance);
-          const diffY = cutdec(Math.abs(virtual.y - outputY), cfg.tolerance);
+          const diffX = cutDec(Math.abs(virtual.x - outputX), cfg.tolerance);
+          const diffY = cutDec(Math.abs(virtual.y - outputY), cfg.tolerance);
 
           if (diffX > 0 || diffY > 0) {
             step({
-              x: cutdec(outputX, cfg.precision),
-              y: cutdec(outputY, cfg.precision)
+              x: cutDec(outputX, cfg.precision),
+              y: cutDec(outputY, cfg.precision)
             });
           } else {
             kill();

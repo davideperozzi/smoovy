@@ -1,26 +1,8 @@
 import {
-  isObject,
   objectDeepClone,
   objectDeepMerge,
   objectValueByPath,
 } from '../src';
-
-describe('general', () => {
-  it('should assume objects correctly', () => {
-    // Nope
-    expect(isObject([])).toBeFalsy();
-    expect(isObject('')).toBeFalsy();
-    expect(isObject(undefined)).toBeFalsy();
-    expect(isObject(1337)).toBeFalsy();
-    expect(isObject(null)).toBeFalsy();
-
-    // Yeahh
-    expect(isObject({})).toBeTruthy();
-    expect(isObject({ test: 'test', 1: '12' })).toBeTruthy();
-    expect(isObject(new Object)).toBeTruthy();
-    expect(isObject(new class T {})).toBeTruthy();
-  });
-});
 
 describe('merge', () => {
   it('should merge two objects', () => {

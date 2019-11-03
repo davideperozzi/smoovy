@@ -1,5 +1,5 @@
 export function isDef(val: any) {
-  return typeof val !== void 0;
+  return typeof val !== void 0 && val !== undefined;
 }
 
 export function isNum(val: any) {
@@ -17,7 +17,11 @@ export function isArr(val: any) {
 export function isObj(val: any) {
   const type = typeof val;
 
-  return type === 'object' && val != null || type === 'function';
+  return !isArr(val) && (
+    type === 'object' &&
+    val != null ||
+    type === 'function'
+  );
 }
 
 export function isFunc(val: any) {
