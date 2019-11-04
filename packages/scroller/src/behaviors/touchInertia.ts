@@ -47,7 +47,7 @@ const defaultConfig = {
   passive: false,
   deltaMultiplier: 1,
   velocityDamping: 0.08,
-  velocityMultiplier: 1,
+  velocityMultiplier: 20,
   minimumThreshold: 2
 };
 
@@ -83,10 +83,11 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       if (down) {
         if (velocity.x !== 0 || velocity.y !== 0) {
           ticker.add((_delta, _time, kill) => {
-            velocity.x = lerp(velocity.x, 0, cfg.velocityDamping) * -1;
-            velocity.y = lerp(velocity.y, 0, cfg.velocityDamping) * -1;
+            velocity.x = lerp(velocity.x, 0, cfg.velocityDamping);
+            velocity.y = lerp(velocity.y, 0, cfg.velocityDamping);
 
             scroller.emit(ScrollerEvent.DELTA, velocity);
+            console.log(velocity.y);
 
             if (
               between(velocity.x, threshold, -threshold) &&
@@ -118,8 +119,8 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
 
         velocity.x = (startPos.x - touch.pageX) / deltaTime;
         velocity.y = (startPos.y - touch.pageY) / deltaTime;
-        velocity.x *= cfg.velocityMultiplier;
-        velocity.y *= cfg.velocityMultiplier;
+        velocity.x *= -1 * cfg.velocityMultiplier;
+        velocity.y *= -1 * cfg.velocityMultiplier;
 
         startPos.x = touch.pageX;
         startPos.y = touch.pageY;

@@ -27,7 +27,7 @@ if (typeof process.argv[2] === 'string') {
       );
 
       if (publishProcess.status !== 0) {
-        process.exit(publishProcess.status);
+        process.exit(publishProcess.status || 1);
       }
     }
   } else {

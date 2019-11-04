@@ -19,13 +19,13 @@ export interface Config {
   /**
    * The condition to dermine whether
    * the native mode should be active or not
-   * Default: () => Browser.mobile
+   * Default: () => false
    */
   condition?: () => boolean;
 }
 
 const defaultConfig = {
-  condition: () => Browser.mobile
+  condition: () => false
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {

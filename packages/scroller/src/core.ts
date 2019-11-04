@@ -40,6 +40,7 @@ export interface ScrollToEvent {
 export enum ScrollerEvent {
   DELTA = 'delta',
   OUTPUT = 'output',
+  VIRTUAL = 'virtual',
   RECALC = 'recalc',
   TWEEN_TO = 'tween_to',
   SCROLL_TO = 'scroll_to',
@@ -85,9 +86,7 @@ export class Scroller extends EventEmitter {
       this.unlisten = listenCompose(
         this.dom.on<Coordinate>(ScrollerDomEvent.RECALC, () => {
           this.updateDelta({ x: 0, y: 0 });
-          Ticker.requestAnimationFrame(() => {
-            this.emit(ScrollerEvent.RECALC);
-          });
+          Ticker.requestAnimationFrame(() => this.emit(ScrollerEvent.RECALC));
         }),
         this.on<Coordinate>(ScrollerEvent.DELTA, (delta) => {
           if ( ! this.isLocked()) {
@@ -118,6 +117,16 @@ export class Scroller extends EventEmitter {
           detach.call(this);
         }
       });
+    }
+  }
+
+  public recalc(async = false) {
+    this.dom.recalc(async);
+
+    if (async) {
+      Ticker.requestAnimationFrame(() => this.emit(ScrollerEvent.RECALC));
+    } else {
+      this.emit(ScrollerEvent.RECALC);
     }
   }
 
@@ -183,7 +192,7 @@ export class Scroller extends EventEmitter {
     });
   }
 
-  public updatePosition(virtPos?: Partial<Coordinate>) {
+  protected updatePosition(virtPos?: Partial<Coordinate>) {
     if (virtPos && isNum(virtPos.x)) {
       this.position.virtual.x = virtPos.x as number;
     }
@@ -192,6 +201,7 @@ export class Scroller extends EventEmitter {
       this.position.virtual.y = virtPos.y as number;
     }
 
+    this.emit(ScrollerEvent.VIRTUAL, this.position.virtual);
     this.emit<Coordinate>(
       ScrollerEvent.TRANSFORM_VIRTUAL,
       this.position.virtual,
@@ -224,9 +234,11 @@ export class Scroller extends EventEmitter {
     this.emit(ScrollerEvent.OUTPUT, pos);
   }
 
-  public lock(name = 'default') {
-    if ( ! this.locks.includes(name)) {
+  public lock(name = 'default', enable = true) {
+    if ( ! this.locks.includes(name) && enable) {
       this.locks.push(name);
+    } else if ( ! enable) {
+      this.unlock(name);
     }
   }
 
@@ -238,7 +250,11 @@ export class Scroller extends EventEmitter {
     }
   }
 
-  public isLocked() {
+  public isLocked(name?: string) {
+    if (name) {
+      return this.locks.includes(name);
+    }
+
     return this.locks.length > 0;
   }
 
@@ -260,6 +276,10 @@ export class Scroller extends EventEmitter {
       ScrollerEvent.TWEEN_TO,
       { pos, options }
     );
+  }
+
+  public onVirtual(cb: EventListenerCb<Coordinate>) {
+    return this.on(ScrollerEvent.VIRTUAL, cb);
   }
 
   public onScroll(cb: EventListenerCb<Coordinate>) {
