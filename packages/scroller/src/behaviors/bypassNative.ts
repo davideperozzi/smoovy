@@ -1,15 +1,14 @@
-import { listenEl, listenCompose, Unlisten } from '@smoovy/event';
+import { listenCompose, listenEl, Unlisten } from '@smoovy/event';
+import { Ticker } from '@smoovy/ticker';
 import { Tween } from '@smoovy/tween';
-import { Browser, isNum } from '@smoovy/utils';
+import { isNum } from '@smoovy/utils';
 
 import {
-  ScrollBehavior, ScrollerEvent, ScrollToEvent, TweenToEvent, Scroller,
+  ScrollBehavior, ScrollerEvent, ScrollToEvent, TweenToEvent,
 } from '../core';
 import { getDeltaByKeyEvent } from '../utils/keyboard';
-import { ScrollerDom, ScrollerDomEvent } from '../dom';
-import { Ticker } from '@smoovy/ticker';
 
-export interface Config {
+interface Config {
   /**
    * The target to put all the events on
    * Default: Window

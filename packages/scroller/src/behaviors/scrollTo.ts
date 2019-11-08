@@ -1,8 +1,8 @@
 import { Unlisten } from '@smoovy/event';
 import { Ticker } from '@smoovy/ticker';
+import { Coordinate } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent, ScrollToEvent } from '../core';
-import { Coordinate } from '@smoovy/utils';
 
 const behavior: ScrollBehavior = () => (scroller) => {
   return scroller.on<ScrollToEvent>(ScrollerEvent.SCROLL_TO, (event) => {

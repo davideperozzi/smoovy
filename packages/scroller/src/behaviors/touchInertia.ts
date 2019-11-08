@@ -3,7 +3,7 @@ import { listenCompose, listenEl } from '@smoovy/event';
 import { Ticker } from '@smoovy/ticker';
 import { lerp, between } from '@smoovy/utils';
 
-export interface Config {
+interface Config {
   /**
    * A target element on which the event listeners will be placed
    * Default: `document.documentElement`
@@ -87,7 +87,6 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
             velocity.y = lerp(velocity.y, 0, cfg.velocityDamping);
 
             scroller.emit(ScrollerEvent.DELTA, velocity);
-            console.log(velocity.y);
 
             if (
               between(velocity.x, threshold, -threshold) &&

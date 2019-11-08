@@ -18,18 +18,16 @@ const behavior: ScrollBehavior = () => (scroller) => {
         scroller.on(ScrollerEvent.DELTA, () => {
           if (currentTween && ! force) {
             currentTween.stop();
-            currentTween = undefined;
           }
         })
       );
 
       if (currentTween) {
         currentTween.stop();
-        currentTween = undefined;
       }
 
       currentTween = Tween.fromTo(
-        scroller.position.output,
+        scroller.position.virtual,
         pos,
         {
           mutate: false,
@@ -38,13 +36,13 @@ const behavior: ScrollBehavior = () => (scroller) => {
           on: {
             update: (newPos) => {
               scroller.updateDelta({
-                x: scroller.position.output.x - newPos.x,
-                y: scroller.position.output.y - newPos.y
+                x: scroller.position.virtual.x - newPos.x,
+                y: scroller.position.virtual.y - newPos.y
               });
             },
             stop: () => {
               unlisten();
-
+              currentTween = undefined;
             },
             complete: () => {
               unlisten();

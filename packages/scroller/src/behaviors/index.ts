@@ -1,4 +1,4 @@
-export { default as bypassFocus } from './bypassFocus';
+export { default as bypassFocus, BypassFocusConfig } from './bypassFocus';
 export { BypassNativeConfig, default as bypassNative } from './bypassNative';
 export { default as clampContent } from './clampContent';
 export { default as keyboard, KeyboardConfig } from './keyboard';

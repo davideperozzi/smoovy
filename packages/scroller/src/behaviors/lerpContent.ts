@@ -1,9 +1,9 @@
 import { Ticker, TickerThread } from '@smoovy/ticker';
-import { cutDec, lerp, Browser } from '@smoovy/utils';
+import { Browser, cutDec, lerp } from '@smoovy/utils';
 
 import { OutputTransformEvent, ScrollBehavior, ScrollerEvent } from '../core';
 
-export interface Config {
+interface Config {
   /**
    * The damping used for the linear interpolation
    * The lower this value the smoother the animation

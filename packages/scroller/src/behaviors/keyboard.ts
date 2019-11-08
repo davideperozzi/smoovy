@@ -1,10 +1,10 @@
 import { listenEl } from '@smoovy/event';
+import { Browser } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
-import { Browser } from '@smoovy/utils';
 import { getDeltaByKeyEvent } from '../utils/keyboard';
 
-export interface Config {
+interface Config {
   /**
    * A target element on which the event listeners will be placed
    * Default: `document.documentElement`

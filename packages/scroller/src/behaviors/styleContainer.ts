@@ -1,7 +1,15 @@
 import { ScrollBehavior } from '../core';
 import { objectDeepMerge } from '@smoovy/utils';
 
-export interface Config {
+interface Config {
+  /**
+   * The default styling of the container element
+   * Default: {
+   *   width: '100%',
+   *   height: '100%',
+   *   overflow: 'hidden'
+   * }
+   */
   defaults?: Partial<{ [key: string]: string }>;
 }
 

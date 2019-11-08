@@ -1,4 +1,4 @@
-import { Coordinate, Browser } from '@smoovy/utils';
+import { Browser, Coordinate } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
 
@@ -11,26 +11,47 @@ interface Config {
    * Default: true
    */
   firefoxFix?: boolean;
+
+  /**
+   * Whether the styles should be set initially
+   * Default: true
+   */
+  initialStyles?: boolean;
 }
 
 const defaultConfig = {
-  firefoxFix: true
+  firefoxFix: true,
+  initialStyles: true
+};
+
+const updateTransform = (
+  element: HTMLElement,
+  pos: Coordinate,
+  rotate = false
+) => {
+  let transform = `translate3d(${-pos.x}px, ${-pos.y}px, 0)`;
+
+  if (rotate) {
+    transform += ` rotate3d(0.01, 0.01, 0.01, 0.01deg)`;
+  }
+
+  element.style.transform = transform;
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = Object.assign(defaultConfig, config);
+  const firefoxFix = cfg.firefoxFix && Browser.firefox;
 
   return (scroller) => {
     const element = scroller.dom.wrapper.element;
-    const unlisten = scroller.on<Coordinate>(ScrollerEvent.OUTPUT, (pos) => {
-      let transform = `translate3d(${-pos.x}px, ${-pos.y}px, 0)`;
+    const unlisten = scroller.on<Coordinate>(
+      ScrollerEvent.OUTPUT,
+      (pos) => updateTransform(element, pos, firefoxFix)
+    );
 
-      if (Browser.firefox && cfg.firefoxFix) {
-        transform += ` rotate3d(0.01, 0.01, 0.01, 0.01deg)`;
-      }
-
-      element.style.transform = transform;
-    });
+    if (cfg.initialStyles) {
+      updateTransform(element, { x: 0, y: 0 }, firefoxFix);
+    }
 
     return () => {
       element.style.transform = '';

@@ -1,28 +1,29 @@
-import * as behaviors from './behaviors';
-import { Scroller } from './core';
-import { ScrollerDomConfig } from './dom';
+import * as coreBehaviors from './behaviors';
+import { ScrollBehavior, Scroller } from './core';
+import { ScrollerDom, ScrollerDomConfig } from './dom';
 
 export const smoothScroll = (
-  dom: ScrollerDomConfig,
+  dom: ScrollerDomConfig | ScrollerDom,
   config: {
-    mouse?: behaviors.MouseWheelConfig,
-    touch?: behaviors.TouchInertiaConfig,
-    lerp?: behaviors.LerpContentConfig,
-    translate?: behaviors.TranslateConfig,
-    keyboard?: behaviors.KeyboardConfig,
-    styles?: behaviors.StyleContainerConfig['defaults']
+    mouse?: coreBehaviors.MouseWheelConfig,
+    touch?: coreBehaviors.TouchInertiaConfig,
+    lerp?: coreBehaviors.LerpContentConfig,
+    translate?: coreBehaviors.TranslateConfig,
+    keyboard?: coreBehaviors.KeyboardConfig,
+    focus?: coreBehaviors.BypassFocusConfig,
+    styles?: coreBehaviors.StyleContainerConfig['defaults'],
+    behaviors?: { [name: string]: ScrollBehavior }
   } = {},
-  customBehaviors: { [name: string]: ScrollBehavior } = {}
 ) => new Scroller(dom, {
-  clampContent: behaviors.clampContent(),
-  bypassFocus: behaviors.bypassFocus(),
-  tweenTo: behaviors.tweenTo(),
-  scrollTo: behaviors.scrollTo(),
-  styleContainer: behaviors.styleContainer({ defaults: config.styles }),
-  touchInertia: behaviors.touchInertia(config.touch),
-  lerpContent: behaviors.lerpContent(config.lerp),
-  mouseWheel: behaviors.mouseWheel(config.mouse),
-  translate: behaviors.translate(config.translate),
-  keyboard: behaviors.keyboard(config.keyboard),
-  ...customBehaviors
+  clampContent: coreBehaviors.clampContent(),
+  tweenTo: coreBehaviors.tweenTo(),
+  scrollTo: coreBehaviors.scrollTo(),
+  bypassFocus: coreBehaviors.bypassFocus(config.focus),
+  styleContainer: coreBehaviors.styleContainer({ defaults: config.styles }),
+  touchInertia: coreBehaviors.touchInertia(config.touch),
+  lerpContent: coreBehaviors.lerpContent(config.lerp),
+  mouseWheel: coreBehaviors.mouseWheel(config.mouse),
+  translate: coreBehaviors.translate(config.translate),
+  keyboard: coreBehaviors.keyboard(config.keyboard),
+  ...(config.behaviors || {})
 });

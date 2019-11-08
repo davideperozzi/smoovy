@@ -1,10 +1,19 @@
-import { listenEl, listenCompose } from '@smoovy/event';
-
-import { ScrollBehavior, ScrollerEvent } from '../core';
+import { listenCompose, listenEl } from '@smoovy/event';
 import { Ticker } from '@smoovy/ticker';
 
-const behavior: ScrollBehavior = () => (scroller) => {
+import { ScrollBehavior, ScrollerEvent } from '../core';
+
+interface Config {
+  /**
+   * Ignore focused elements within the given elements
+   * Default: []
+   */
+  ignoreInside?: HTMLElement[];
+}
+
+const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
   const target = scroller.dom.container.element;
+  const ignoreIn = config.ignoreInside || [];
   const scrollListener = (event: Event) => {
     event.preventDefault();
 
@@ -15,15 +24,26 @@ const behavior: ScrollBehavior = () => (scroller) => {
     if (event.key === 'Tab') {
       Ticker.requestAnimationFrame(() => {
         const activeEl = document.activeElement;
+        const ignore = ignoreIn.map(el => el.contains(activeEl)).includes(true);
 
-        if (activeEl && target.contains(activeEl) || target === activeEl) {
+        if (
+          ! ignore &&
+          activeEl &&
+          target.contains(activeEl)
+          || target === activeEl
+        ) {
           const bounds = activeEl.getBoundingClientRect();
           const targetSize = scroller.dom.container.size;
 
-          scroller.emit(ScrollerEvent.DELTA, {
-            y: -bounds.top + targetSize.height / 2,
-            x: -bounds.left + targetSize.width / 2
-          });
+          if (
+            bounds.top <= 0 || bounds.top >= targetSize.height ||
+            bounds.left <= 0 || bounds.right >= targetSize.width
+          ) {
+            scroller.emit(ScrollerEvent.DELTA, {
+              y: -bounds.top + targetSize.height / 2,
+              x: -bounds.left + targetSize.width / 2
+            });
+          }
         }
       });
     }
@@ -35,4 +55,5 @@ const behavior: ScrollBehavior = () => (scroller) => {
   );
 };
 
+export { Config as BypassFocusConfig };
 export default behavior;

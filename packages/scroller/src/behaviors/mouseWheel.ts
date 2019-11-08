@@ -1,9 +1,9 @@
 import { listenEl } from '@smoovy/event';
-
-import { ScrollBehavior, ScrollerEvent } from '../core';
 import { Browser } from '@smoovy/utils';
 
-export interface Config {
+import { ScrollBehavior, ScrollerEvent } from '../core';
+
+interface Config {
   /**
    * A target element on which the event listeners will be placed
    * Default: `document.documentElement`
