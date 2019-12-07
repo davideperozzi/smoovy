@@ -1,5 +1,5 @@
 import * as coreBehaviors from './behaviors';
-import { ScrollBehavior, Scroller } from './core';
+import { ScrollBehaviorItem, Scroller } from './core';
 import { ScrollerDom, ScrollerDomConfig } from './dom';
 
 export const smoothScroll = (
@@ -12,7 +12,7 @@ export const smoothScroll = (
     keyboard?: coreBehaviors.KeyboardConfig,
     focus?: coreBehaviors.BypassFocusConfig,
     styles?: coreBehaviors.StyleContainerConfig['defaults'],
-    behaviors?: { [name: string]: ScrollBehavior }
+    behaviors?: { [name: string]: ScrollBehaviorItem }
   } = {},
 ) => new Scroller(dom, {
   clampContent: coreBehaviors.clampContent(),
