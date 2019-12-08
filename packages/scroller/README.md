@@ -146,17 +146,17 @@ scroller.isLocked();
 
 A more advanced use-case is a simple menu, that locks the scroller if it's active. So you want to give the lock a context, so you can be sure it stays locked as long as the menu is enabled. You can achieve this by using named locks like this:
 ```js
-// Menu gets enabled:
+// The menu gets enabled:
 scroller.lock('menu');
 
-// Another components lockes the scroller too:
+// Another component locks the scroller too:
 scroller.lock('something');
 
-// Menu gets disabled:
+// The menu gets disabled:
 scroller.unlock('menu');
 
 // Scroller is still locked
-// The other components unlocks as well:
+// The other component unlocks as well:
 scroller.unlock('something');
 
 // The scroller is now fully unlocked again
@@ -172,7 +172,7 @@ scroller.destroy();
 > This will also put the DOM to the previous state
 
 ## The architecture
-The whole structure is very simple. The key components are the `core`, `dom` and `behaviors`. The core holds the dom and behaviors togehter and is responsible for the data beeing transmitted between these components:
+The whole structure is very simple. The key components are the `core`, `dom` and `behaviors`. The core holds the dom and behaviors together and is responsible for the data beeing transmitted between these components:
 
 ```
 +-------+                              +-----+ +-----------+

@@ -37,7 +37,6 @@ export function roundDec(
   );
 }
 
-
 export function cutDec(
   value: number,
   precision: number

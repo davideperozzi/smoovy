@@ -8,4 +8,6 @@ export * from './range';
 export * from './resolver';
 export * from './uid';
 export * from './base';
+export * from './fetch';
+export * from './url';
 

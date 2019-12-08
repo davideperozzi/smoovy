@@ -16,6 +16,7 @@
 | [@smoovy/tween](./packages/tween) | [![Version](https://flat.badgen.net/npm/v/@smoovy/tween)](https://www.npmjs.com/package/@smoovy/tween) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/tween) |
 | [@smoovy/ticker](./packages/ticker) | [![Version](https://flat.badgen.net/npm/v/@smoovy/ticker)](https://www.npmjs.com/package/@smoovy/ticker) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/ticker) |
 | [@smoovy/event](./packages/event) | [![Version](https://flat.badgen.net/npm/v/@smoovy/event)](https://www.npmjs.com/package/@smoovy/event) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/event) |
+| [@smoovy/router](./packages/router) | [![Version](https://flat.badgen.net/npm/v/@smoovy/router)](https://www.npmjs.com/package/@smoovy/router) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/router) |
 | [@smoovy/utils](./packages/utils) | [![Version](https://flat.badgen.net/npm/v/@smoovy/utils)](https://www.npmjs.com/package/@smoovy/utils) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/utils) |
 
 ## Getting started
@@ -29,10 +30,6 @@ npm install --save @smoovy/<package>
 - [ ] 📦 Create `@smoovy/timeline` (timeline for tweens)
 - [ ] 📦 Create `@smoovy/text-split` (easy text splitting)
 - [ ] 💡 Improve tween demos
-- [ ] 💡 Improve documentation
-- [ ] 💡 Improve testing
-- [ ] 💡 Improve code coverage
-
 
 ## Workflow
 This is a simple monorepo consisting of some of the packages mentioned above.

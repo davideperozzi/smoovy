@@ -1,6 +1,7 @@
 #!/usr/bin/env bin/ts-node
 import path = require('path');
-import childProcess = require('child_process');
+import Bundler = require('parcel-bundler');
+import express = require('express');
 
 if (
   typeof process.env.TEST_BROWSER_ROOT === 'string' ||
@@ -12,24 +13,22 @@ if (
     ? process.env.TEST_BROWSER_ROOT
     : path.join(pkgPath, 'tests', 'browser');
 
-  const parcelProcess = childProcess.spawnSync(
-    `
-      parcel \
-        --port ${process.env.TEST_PORT || 1337} \
-        --host ${process.env.TEST_HOST || 'localhost'} \
-        --out-dir ${path.resolve('.dev')} \
-        --no-autoinstall \
-      ${browserRootPath}/*.html
-    `,
-    {
-      shell: true,
-      stdio: 'inherit'
-    }
-  );
+    const app = express();
+    const port = Number(process.env.TEST_PORT || 1337);
+    const host = process.env.TEST_HOST || 'localhost';
+    const bundler = new Bundler(path.join(browserRootPath, '*.html'), {
+      outDir: path.join(process.cwd(), '.dev')
+    });
 
-  if (parcelProcess.status !== 0) {
-    process.exit(parcelProcess.status || 1);
-  }
+    app.get('/', (req, res, next) => {
+      req.url = '/index.html';
+
+      app._router.handle(req, res, next);
+    });
+
+    app.use(bundler.middleware()).listen(port, host);
+
+    console.log(`listening at http://${host}:${port}`);
 } else {
   throw new Error(`
     You need to pass the package name as arvg1 or define an environment
