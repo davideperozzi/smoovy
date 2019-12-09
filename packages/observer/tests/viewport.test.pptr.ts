@@ -1,4 +1,4 @@
-import { ViewportObserver as _ViewportObserver, ViewportState } from '../';
+import { ViewportObserver as _ViewportObserver, ViewportState } from '../src';
 
 declare global {
   interface Window {
