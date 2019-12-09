@@ -59,13 +59,7 @@ const defaultPlugins = [
         declarationDir: pkgConfig.types ? path.dirname(pkgConfig.types) : ''
       }
     },
-    tsconfig: path.resolve(pkgPath, 'tsconfig.json'),
-    tsconfigOverride: {
-      compilerOptions: {
-        // Remove paths, since we want to use the dist files here
-        paths: {}
-      }
-    }
+    tsconfig: path.resolve(pkgPath, 'tsconfig.json')
   }),
   localResolve(),
   terser({

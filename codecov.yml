@@ -6,16 +6,19 @@ coverage:
         threshold: null
       observer:
         flags: observer
-        target: 10%
+        target: 60%
       ticker:
         flags: ticker
-        target: 100%
+        target: 70%
       tween:
         flags: tween
-        target: 100%
+        target: 80%
+      router:
+        flags: utils
+        target: 60%
       utils:
         flags: utils
-        target: 100%
+        target: 80%
 flags:
   observer:
     paths:
@@ -26,6 +29,9 @@ flags:
   tween:
     paths:
       - packages/tween/src
+  router:
+    paths:
+      - packages/router/src
   utils:
     paths:
       - packages/utils/src

@@ -7,12 +7,11 @@
   "scripts": {
     "lerna": "lerna",
     "bootstrap": "lerna bootstrap",
+    "publish:all": "lerna version",
     "lint:all": "lerna run --parallel --stream lint",
     "test:all": "lerna run --parallel --stream test",
     "build:all": "lerna run --stream build",
     "test:report": "codecov -y codecov.yml",
-    "publish:all:versions": "lerna version",
-    "publish:tag:package": "scripty",
     "lint:package": "scripty",
     "build:package": "scripty",
     "test:package": "scripty",
