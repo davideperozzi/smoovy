@@ -1,7 +1,13 @@
 import { Ticker, TickerThread } from '../src';
+import { JSDOM } from 'jsdom';
 
 describe('general', () => {
-  (global as any).window = global;
+  const glob = (global as any);
+  const dom = new JSDOM(``, { pretendToBeVisual: true });
+
+  glob.window = dom.window;
+  glob.document = dom.window.document;
+  glob.navigator = dom.window.navigator;
 
   const ticker = new Ticker();
 

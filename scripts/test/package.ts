@@ -30,7 +30,6 @@ if (typeof process.argv[2] === 'string') {
       jest \
       --roots ${pkgPath} \
       --passWithNoTests \
-      --runInBand \
       --verbose \
       --coverage \
       --coverageDirectory ${coverageDirectory} \
