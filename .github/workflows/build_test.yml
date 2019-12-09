@@ -7,7 +7,7 @@ on:
     tags:
       - '!refs/tags/*'
 jobs:
-  build_deploy:
+  build_test:
     runs-on: ubuntu-latest
     steps:
       - name: Setup environment

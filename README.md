@@ -1,6 +1,6 @@
 # smoovy
 
-[![Build Status](https://img.shields.io/github/workflow/status/davideperozzi/smoovy/Build%20and%20test?label=build%20%26%20tests&style=flat-square)](https://github.com/davideperozzi/smoovy/actions)
+[![Build Status](https://img.shields.io/github/workflow/status/davideperozzi/smoovy/Build%20and%20test?label=build%20%26%20tests&style=flat-square)](https://github.com/davideperozzi/smoovy/actions?query=workflow%3A"Build+and+test)
 [![Codecov](https://img.shields.io/codecov/c/gh/davideperozzi/smoovy.svg?style=flat-square)](https://codecov.io/gh/davideperozzi/smoovy)
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat-square)
 [![License](https://flat.badgen.net/badge/license/MIT/blue)](./LICENSE)
