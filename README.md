@@ -1,6 +1,6 @@
 # smoovy
 
-[![CircleCI](https://flat.badgen.net/circleci/github/davideperozzi/smoovy/master)](https://circleci.com/gh/davideperozzi/smoovy/tree/master)
+[![Build Status](https://github.com/davidperozzi/smoovy/workflows/build_test/badge.svg)](https://github.com/davidperozzi/smoovy/actions)
 [![Codecov](https://img.shields.io/codecov/c/gh/davideperozzi/smoovy.svg?style=flat-square)](https://codecov.io/gh/davideperozzi/smoovy)
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat-square)
 [![License](https://flat.badgen.net/badge/license/MIT/blue)](./LICENSE)
