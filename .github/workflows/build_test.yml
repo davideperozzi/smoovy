@@ -10,6 +10,9 @@ jobs:
   build_deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup environment
+        run: |
+          echo "::set-env name=CI::1"
       - name: Checkout repository
         uses: actions/checkout@v1
       - name: Setup node (v11.10.1)

@@ -11,6 +11,7 @@ jobs:
         run: |
           PACKAGE=$(echo $GITHUB_REF | sed -r 's/refs\/tags\/@smoovy\/(.*)\@(.*)/\1/')
           echo "::set-env name=PACKAGE::${PACKAGE}"
+          echo "::set-env name=CI::1"
       - name: Checkout repository
         uses: actions/checkout@v1
       - name: Setup node (v11.10.1)
