@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/ticker",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Simple and easy-to-use ticker",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",

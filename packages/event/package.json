@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/event",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Event emitter and helpers",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
