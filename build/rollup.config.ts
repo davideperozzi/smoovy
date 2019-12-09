@@ -56,7 +56,12 @@ const defaultPlugins = [
       exclude: [ 'node_modules', 'tests', '__tests__', 'demos', 'dist' ],
       compilerOptions: {
         declaration: true,
-        declarationDir: pkgConfig.types ? path.dirname(pkgConfig.types) : ''
+        declarationDir: pkgConfig.types ? path.dirname(pkgConfig.types) : '',
+      }
+    },
+    tsconfigOverride: {
+      compilerOptions: {
+        paths: [],
       }
     },
     tsconfig: path.resolve(pkgPath, 'tsconfig.json')
