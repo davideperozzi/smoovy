@@ -55,11 +55,11 @@ describe('roundDec', () => {
 });
 
 describe('cutDec', () => {
-  it('cut 0.56 to 0.6', () => {
-    return expect(cutDec(0.56, 1)).toBe(0.6);
+  it('cut 0.56 to 0.5', () => {
+    return expect(cutDec(0.56, 1)).toBe(0.5);
   });
 
-  it('round 0.334 to 0.33', () => {
+  it('cut 0.334 to 0.33', () => {
     return expect(cutDec(0.334, 2)).toBe(0.33);
   });
 });
