@@ -23,23 +23,12 @@ interface Config {
    * Default: 2
    */
   precision?: number;
-
-  /**
-   * Defines when the animation will end.
-   * The higher this value the more precise it will be.
-   * This is simply used to cut the decimals of the delta value
-   * from the current animation in order to determine if the animation's
-   * finished
-   * Default: 1
-   */
-  tolerance?: number;
 }
 
 const defaultConfig = {
   damping: 0.1,
   mobileDamping: 0.18,
-  precision: 2,
-  tolerance: 1
+  precision: 2
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
@@ -49,6 +38,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     let thread: TickerThread;
     const ticker = new Ticker();
     const damping = Browser.mobile ? cfg.mobileDamping : cfg.damping;
+    const tolerance = cfg.precision + 1;
     const unlisten = scroller.on<OutputTransformEvent>(
       ScrollerEvent.TRANSFORM_OUTPUT,
       ({ pos, step }) => {
@@ -60,8 +50,8 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
           const virtual = scroller.position.virtual;
           const outputX = lerp(pos.x, virtual.x, damping);
           const outputY = lerp(pos.y, virtual.y, damping);
-          const diffX = cutDec(Math.abs(virtual.x - outputX), cfg.tolerance);
-          const diffY = cutDec(Math.abs(virtual.y - outputY), cfg.tolerance);
+          const diffX = cutDec(Math.abs(virtual.x - outputX), tolerance);
+          const diffY = cutDec(Math.abs(virtual.y - outputY), tolerance);
 
           if (diffX > 0 || diffY > 0) {
             step({

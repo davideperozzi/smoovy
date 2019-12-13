@@ -41,5 +41,7 @@ export function cutDec(
   value: number,
   precision: number
 ) {
-  return parseFloat(value.toFixed(precision));
+  const str = value.toString();
+
+  return parseFloat(str.substring(0, str.indexOf('.') + 1 + precision));
 }
