@@ -11,8 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup environment
-        run: |
-          echo "::set-env name=CI::1"
+        run: echo "::set-env name=CI::1"
       - name: Checkout repository
         uses: actions/checkout@v1
       - name: Setup node (v11.10.1)
@@ -35,7 +34,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: npm run test:report
       - name: Deploy changes from tags
-        if: github.ref === 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm run lerna publish from-git
