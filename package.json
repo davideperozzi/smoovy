@@ -7,7 +7,7 @@
   "scripts": {
     "lerna": "lerna",
     "bootstrap": "lerna bootstrap",
-    "publish:all": "lerna version",
+    "publish": "lerna version",
     "lint:all": "lerna run --parallel --stream lint",
     "test:all": "lerna run --stream test",
     "build:all": "lerna run --stream build",
