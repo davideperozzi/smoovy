@@ -7,7 +7,7 @@ on:
     tags:
       - '!refs/tags/*'
 jobs:
-  build_test:
+  build_test_deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Setup environment
@@ -34,6 +34,11 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: npm run test:report
+      - name: Deploy changes from tags
+        if: github.ref === 'refs/heads/master'
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm run lerna publish from-git
 
 
 
