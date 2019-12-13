@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/utils",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Some basic functionality to make better websites",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",

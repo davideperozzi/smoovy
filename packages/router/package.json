@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/router",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Event emitter and helpers",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -33,7 +33,7 @@
   "dependencies": {
     "@smoovy/event": "^0.1.1",
     "@smoovy/tween": "^0.2.5",
-    "@smoovy/utils": "^0.1.11",
+    "@smoovy/utils": "^0.1.12",
     "tslib": "^1.9.3"
   }
 }
