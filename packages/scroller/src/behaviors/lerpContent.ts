@@ -23,6 +23,11 @@ interface Config {
    * Default: 2
    */
   precision?: number;
+
+  /**
+   * A custom ticker to use for the animation
+   */
+  ticker?: Ticker;
 }
 
 const defaultConfig = {
@@ -36,9 +41,9 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
 
   return (scroller) => {
     let thread: TickerThread;
-    const ticker = new Ticker();
+    const ticker = cfg.ticker || new Ticker();
     const damping = Browser.mobile ? cfg.mobileDamping : cfg.damping;
-    const tolerance = cfg.precision + 1;
+    const tolerance = cfg.precision - 1;
     const unlisten = scroller.on<OutputTransformEvent>(
       ScrollerEvent.TRANSFORM_OUTPUT,
       ({ pos, step }) => {

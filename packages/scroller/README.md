@@ -74,6 +74,32 @@ smoothScroll({ element }, {
 });
 ```
 
+### Adding additional behaviors
+If you want to add new beahviors to an existing composition, you can add the to the `behaviors` object inside the configuration:
+
+```js
+smoothScroll({ element }, {
+  behaviors: {
+    yourBehavior: beahviorX(),
+    // You can also override default behaviors:
+    lerp: yourLerpBehavior({
+      customConfig: 1
+    })
+  }
+});
+```
+
+### Removing behaviors
+If you want to remove a bevhaior, you simply override it with undefined in the configuration like this:
+
+```js
+smoothScroll({ element }, {
+  behaviors: {
+    lerp: undefined
+  }
+});
+```
+
 You can take a look at all available configurations by accessing the `Config` interface of all the behaviors inside [this folder](./src/behaviors).
 
 ### Listening for scroll events
