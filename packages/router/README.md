@@ -27,7 +27,7 @@ This will update the history and emit some events. You can easily listen for tho
 | Name              | Description                 |
 | ----------------- | --------------------------- |
 | navigationstart   | Triggered before the router will update the history |
-| navigationend     | Triggered on the very end of the navigation life cycle (after the content events) |
+| navigationend     | Triggered on the very end of the navigation life cycle (after the content events and transitions) |
 | navigationcancel  | Triggered when an old navigation cycle was overwritten because it was pending (e.g. loading content) |
 | contentloadstart  | Triggered before the content will be loaded |
 | contentloadend    | Triggered after the content loaded successfully |

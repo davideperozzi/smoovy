@@ -33,19 +33,24 @@ export enum RouterEvent {
   CONTENT_LOAD_ERROR = 'contentloaderror'
 }
 
+export interface RouterConfig {
+  outlet?: string | RouterOutlet;
+  transitions?: (RouterTransition | [ RouterTransition, string[] ])[];
+}
+
 export class Router extends EventEmitter {
   public outlet?: RouterOutlet;
   private baseUrl: BrowserUrl;
   private state: RouterState = {};
-  private pending?: RouteChangeEvent;
   private fetch?: GoFetch;
+  private pendingEvent?: RouteChangeEvent;
   private unlistenPopstate: Unlisten;
   private contentCache = new Map<string, string>();
   private transitions = new Map<string, RouterTransition[]>();
 
   public constructor(
     baseUrl: string | BrowserUrl,
-    outlet?: string | RouterOutlet
+    config?: RouterConfig
   ) {
     super();
 
@@ -55,12 +60,22 @@ export class Router extends EventEmitter {
       this.baseUrl = baseUrl as BrowserUrl;
     }
 
-    if (outlet) {
-      if ( ! (outlet instanceof RouterOutlet)) {
-        this.outlet = new RouterOutlet(outlet);
+    if (config && config.outlet) {
+      if ( ! (config.outlet instanceof RouterOutlet)) {
+        this.outlet = new RouterOutlet(config.outlet);
       } else {
-        this.outlet = outlet;
+        this.outlet = config.outlet;
       }
+    }
+
+    if (config && config.transitions) {
+      config.transitions.forEach(transition => {
+        if (transition instanceof Array) {
+          this.addTransition(transition[0], transition[1]);
+        } else {
+          this.addTransition(transition);
+        }
+      });
     }
 
     this.init();
@@ -186,7 +201,7 @@ export class Router extends EventEmitter {
           }
         });
 
-        this.outlet.update(payload, transitions, event.trigger);
+        await this.outlet.update(payload, transitions, event.trigger);
       }
     }
   }
@@ -227,20 +242,27 @@ export class Router extends EventEmitter {
       return;
     }
 
-    if (this.pending) {
-      this.emit<RouteChangeEvent>(RouterEvent.NAVIGATION_CANCEL, this.pending);
+    if (this.pendingEvent) {
+      this.emit<RouteChangeEvent>(
+        RouterEvent.NAVIGATION_CANCEL,
+        this.pendingEvent
+      );
     }
 
-    this.pending = {
+    this.pendingEvent = {
       from: fromRoute,
       to: toRoute,
       trigger
     };
 
-    this.emit<RouteChangeEvent>(RouterEvent.NAVIGATION_START, this.pending);
+    this.emit<RouteChangeEvent>(
+      RouterEvent.NAVIGATION_START,
+      this.pendingEvent
+    );
+
     this.push(toRoute, history);
-    await this.loadContent(this.pending);
-    this.emit<RouteChangeEvent>(RouterEvent.NAVIGATION_END, this.pending);
-    delete this.pending;
+    await this.loadContent(this.pendingEvent);
+    this.emit<RouteChangeEvent>(RouterEvent.NAVIGATION_END, this.pendingEvent);
+    delete this.pendingEvent;
   }
 }
