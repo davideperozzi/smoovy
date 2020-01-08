@@ -1,7 +1,7 @@
 import { easings, Tween } from '@smoovy/tween';
 
 import { ActionArgs, RouterTransition } from '../transition';
-import { EasingImplementation } from 'tween/src/easing';
+import { EasingImplementation } from '@smoovy/tween';
 
 export interface FadeTransitionConfig {
   duration: number;

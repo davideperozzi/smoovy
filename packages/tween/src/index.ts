@@ -1,7 +1,10 @@
 import * as _easings from './easing';
 
+export { EasingImplementation } from './easing';
 export * from './tween';
 export { _easings as easings };
+export { easingsFlatMap };
+
 
 export const easingsMap: {
   [id: string]: { [type: string]: _easings.EasingImplementation }
@@ -21,4 +24,4 @@ for (const name in easingsMap) {
   }
 }
 
-export { easingsFlatMap };
+
