@@ -1,4 +1,4 @@
-import { Browser, Coordinate } from '@smoovy/utils';
+import { Browser, Coordinate, cutDec } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
 
@@ -17,19 +17,27 @@ interface Config {
    * Default: true
    */
   initialStyles?: boolean;
+
+  /**
+   * The decimal places to keep
+   * Default: 2
+   */
+  precision?: number;
 }
 
 const defaultConfig = {
   firefoxFix: true,
-  initialStyles: true
+  initialStyles: true,
+  precision: 2
 };
 
 const updateTransform = (
   element: HTMLElement,
-  pos: Coordinate,
+  posX = 0,
+  posY = 0,
   rotate = false
 ) => {
-  let transform = `translate3d(${-pos.x}px, ${-pos.y}px, 0)`;
+  let transform = `translate3d(${-posX}px, ${-posY}px, 0)`;
 
   if (rotate) {
     transform += ` rotate3d(0.01, 0.01, 0.01, 0.01deg)`;
@@ -46,11 +54,16 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     const element = scroller.dom.wrapper.element;
     const unlisten = scroller.on<Coordinate>(
       ScrollerEvent.OUTPUT,
-      (pos) => updateTransform(element, pos, firefoxFix)
+      (pos) => {
+        const posX = cutDec(pos.x, cfg.precision);
+        const posY = cutDec(pos.y, cfg.precision);
+
+        updateTransform(element, posX, posY, firefoxFix);
+      }
     );
 
     if (cfg.initialStyles) {
-      updateTransform(element, { x: 0, y: 0 }, firefoxFix);
+      updateTransform(element, 0, 0, firefoxFix);
     }
 
     return () => {

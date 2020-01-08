@@ -52,6 +52,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       delta.x *= cfg.multiplier;
       delta.y *= cfg.multiplier;
 
+
       if (Browser.firefox && event.deltaMode === 1) {
         delta.x *= cfg.multiplierFirefox;
         delta.y *= cfg.multiplierFirefox;

@@ -1,9 +1,8 @@
 import * as coreBehaviors from './behaviors';
-import { ScrollBehaviorItem, Scroller } from './core';
-import { ScrollerDom, ScrollerDomConfig } from './dom';
+import { ScrollBehaviorItem, Scroller, ScrollerDomType } from './core';
 
 export const smoothScroll = (
-  dom: ScrollerDomConfig | ScrollerDom,
+  dom: ScrollerDomType,
   config: {
     mouse?: coreBehaviors.MouseWheelConfig,
     touch?: coreBehaviors.TouchInertiaConfig,

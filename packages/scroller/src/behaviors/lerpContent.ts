@@ -18,9 +18,8 @@ interface Config {
   mobileDamping?: number;
 
   /**
-   * The amount of output decimals to preserve. Usually more than 2
-   * does not makes much sense when transforming the output normally.
-   * Default: 2
+   * The value on which to decide when to stop the lerp calculations
+   * Default: 0.009
    */
   precision?: number;
 
@@ -32,8 +31,8 @@ interface Config {
 
 const defaultConfig = {
   damping: 0.1,
+  precision: 0.009,
   mobileDamping: 0.18,
-  precision: 2
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
@@ -43,7 +42,6 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     let thread: TickerThread;
     const ticker = cfg.ticker || new Ticker();
     const damping = Browser.mobile ? cfg.mobileDamping : cfg.damping;
-    const tolerance = cfg.precision - 1;
     const unlisten = scroller.on<OutputTransformEvent>(
       ScrollerEvent.TRANSFORM_OUTPUT,
       ({ pos, step }) => {
@@ -55,17 +53,14 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
           const virtual = scroller.position.virtual;
           const outputX = lerp(pos.x, virtual.x, damping);
           const outputY = lerp(pos.y, virtual.y, damping);
-          const diffX = cutDec(Math.abs(virtual.x - outputX), tolerance);
-          const diffY = cutDec(Math.abs(virtual.y - outputY), tolerance);
+          const diffX = Math.abs(virtual.x - outputX);
+          const diffY = Math.abs(virtual.y - outputY);
 
-          if (diffX > 0 || diffY > 0) {
-            step({
-              x: cutDec(outputX, cfg.precision),
-              y: cutDec(outputY, cfg.precision)
-            });
-          } else {
+          if (diffX < cfg.precision && diffY < cfg.precision) {
             kill();
           }
+
+          step({ x: outputX, y: outputY });
         });
       }
     );

@@ -49,6 +49,8 @@ export enum ScrollerEvent {
   TRANSFORM_OUTPUT = '~output'
 }
 
+export type ScrollerDomType = HTMLElement | ScrollerDomConfig | ScrollerDom;
+
 export class Scroller extends EventEmitter {
   private attached = false;
   private locks: string[] = [];
@@ -62,14 +64,20 @@ export class Scroller extends EventEmitter {
   };
 
   public constructor(
-    domConfig: ScrollerDomConfig | ScrollerDom,
+    dom: ScrollerDomType,
     behaviors: { [name: string]: ScrollBehaviorItem }
   ) {
     super();
 
-    this.dom = domConfig instanceof ScrollerDom
-      ? domConfig
-      : new ScrollerDom(domConfig);
+    if (dom instanceof ScrollerDom) {
+      this.dom = dom;
+    } else {
+      this.dom = new ScrollerDom(
+        dom instanceof HTMLElement
+          ? { element: dom }
+          : dom
+      );
+    }
 
     for (const name in behaviors) {
       if (behaviors.hasOwnProperty(name)) {
