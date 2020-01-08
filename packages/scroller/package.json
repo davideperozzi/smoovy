@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Smooth scrolling for the world",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -35,7 +35,7 @@
     "@smoovy/event": "^0.1.1",
     "@smoovy/observer": "^0.1.4",
     "@smoovy/ticker": "^0.1.10",
-    "@smoovy/tween": "^0.2.5",
+    "@smoovy/tween": "^0.2.6",
     "@smoovy/utils": "^0.1.12",
     "tslib": "^1.9.3"
   }
