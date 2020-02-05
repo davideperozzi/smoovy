@@ -136,9 +136,9 @@ describe('browser', () => {
     await page.evaluate(() => window.testState1.update(true));
 
     setTimeout(() => {
-      expect(changed).toBeCalled();
+      expect(changed).toHaveBeenCalled();
       done();
-    }, 150);
+    }, 500);
   });
 
   it('should has the correct offset in the state', async () => {
@@ -169,9 +169,9 @@ describe('browser', () => {
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        expect(changed).toBeCalledTimes(0);
+        expect(changed).toHaveBeenCalledTimes(0);
         resolve();
-      }, 150);
+      }, 500);
     });
 
     await page.evaluate(() => {
@@ -181,9 +181,9 @@ describe('browser', () => {
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        expect(changed).toBeCalledTimes(1);
+        expect(changed).toHaveBeenCalledTimes(1);
         resolve();
-      }, 150);
+      }, 500);
     });
   });
 
@@ -208,9 +208,9 @@ describe('browser', () => {
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        expect(changed).toBeCalledTimes(1);
+        expect(changed).toHaveBeenCalledTimes(1);
         resolve();
-      }, 150);
+      }, 500);
     });
   });
 });

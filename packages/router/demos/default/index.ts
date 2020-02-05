@@ -1,6 +1,6 @@
 import { listenEl } from '@smoovy/event';
 
-import { Router, RouterEvent } from '../../src';
+import { Router, RouterEvent, RouterOutletEvent } from '../../src';
 import { FadeTransition } from '../../src/transitions/fade';
 
 const router = new Router(
@@ -24,3 +24,4 @@ document.querySelectorAll('a').forEach(link => {
     router.navigate(target.href);
   });
 });
+

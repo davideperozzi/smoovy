@@ -1,12 +1,27 @@
-import { RouterTransition, ActionArgs } from './transition';
+import { EventEmitter } from '@smoovy/event';
 
-export class RouterOutlet {
+import { ActionArgs, RouterTransition } from './transition';
+
+export enum RouterOutletEvent {
+  CONTENT_BEFORE_ENTER_START = 'contentbeforeenterstart',
+  CONTENT_BEFORE_ENTER_END = 'contentbeforeenterend',
+  CONTENT_AFTER_ENTER_START = 'contentafterenterstart',
+  CONTENT_AFTER_ENTER_END = 'contentafterenterend',
+  CONTENT_BEFORE_LEAVE_START = 'contentbeforelavestart',
+  CONTENT_BEFORE_LEAVE_END = 'contentbeforelaveend',
+  CONTENT_AFTER_LEAVE_START = 'contentafterleavestart',
+  CONTENT_AFTER_LEAVE_END = 'contentafterleaveend'
+}
+
+export class RouterOutlet extends EventEmitter {
   private activeAction?: ActionArgs;
   protected root: HTMLElement;
 
   public constructor(
     protected selector: string
   ) {
+    super();
+
     const rootEl = document.documentElement.querySelector(selector);
 
     if ( ! rootEl) {
@@ -64,6 +79,9 @@ export class RouterOutlet {
     }
 
     this.activeAction = action;
+    const event = { ...action };
+
+    this.emit(RouterOutletEvent.CONTENT_BEFORE_ENTER_START, event);
 
     await this.processTransitions(transitions.slice(), (transition) => {
       return transition.beforeEnter(action);
@@ -73,9 +91,13 @@ export class RouterOutlet {
       return;
     }
 
+    this.emit(RouterOutletEvent.CONTENT_BEFORE_ENTER_END, event);
+
     if ( ! this.root.contains(action.to)) {
       this.root.appendChild(action.to);
     }
+
+    this.emit(RouterOutletEvent.CONTENT_AFTER_ENTER_START, event);
 
     await this.processTransitions(transitions.slice(), (transition) => {
       return transition.afterEnter(action);
@@ -85,6 +107,9 @@ export class RouterOutlet {
       return;
     }
 
+    this.emit(RouterOutletEvent.CONTENT_AFTER_ENTER_END, event);
+    this.emit(RouterOutletEvent.CONTENT_BEFORE_LEAVE_START, event);
+
     await this.processTransitions(transitions.slice(), (transition) => {
       return transition.beforeLeave(action);
     });
@@ -93,13 +118,19 @@ export class RouterOutlet {
       return;
     }
 
+    this.emit(RouterOutletEvent.CONTENT_BEFORE_LEAVE_END, event);
+
     if (this.root.contains(action.from)) {
       this.root.removeChild(action.from);
     }
 
+    this.emit(RouterOutletEvent.CONTENT_AFTER_LEAVE_START, event);
+
     await this.processTransitions(transitions.slice(), (transition) => {
       return transition.afterLeave(action);
     });
+
+    this.emit(RouterOutletEvent.CONTENT_AFTER_LEAVE_END, event);
 
     if (this.activeAction === action) {
       delete this.activeAction;

@@ -83,10 +83,10 @@ Most of the times you want to inject the content you've loaded immediately after
 
 ```js
 // Use <main></main> as outlet
-new Router(window.location.href, 'main');
+new Router(window.location.href, { outlet: 'main' });
 
 // Use <div class="content"></div> as outlet
-new Router(window.location.href, 'div.content');
+new Router(window.location.href, { outlet: 'div.content' });
 ```
 > The selector will also be used to fetch the right node in the loaded content to place its children inside the active outlet
 
@@ -132,6 +132,14 @@ To finally register the page transition you can tell the router to add it to its
 ```js
 router.addTransition(new SampleTransition());
 ```
+or register them inside the config
+```js
+new Router(window.location.href), {
+  transitions: [
+    new SampleTranistion()
+  ]
+})
+```
 
 #### Using page transition constraints
 Sometimes you want to execute different transitions for specific routes. In order use this mechanism, you have to add some constraints to the `addTransition` method:
@@ -150,8 +158,55 @@ router.addTransition(new SepcialTransition(), [
 router.addTransition(new SepcialTransition(), [
   '/blog/.*? => /blog/category/.*?'
 ]);
+
+// Or if you registered the transitions by config
+new Router(window.location.href), {
+  transitions: [
+    [
+      new SampleTranistion(),
+      '/blog/.*? => /blog/category/.*?'
+    ]
+  ]
+})
 ```
 > The default constraints are: `[ '.* => .*' ]`
+
+### Listening for outlet events
+If you want to hook into the outlet events without a transitions you can easily
+use the same funcionality as with the router:
+
+```js
+import { RouterOutletEvent } from '@smoovy/router';
+
+if (router.outlet) {
+  router.outlet.on(
+    RouterEvent.CONTENT_BEFORE_ENTER_START,
+    (action) => {
+      // action: ActionArgs
+    }
+  );
+}
+```
+
+#### The available outlet events
+All events containing the `*_ENTER_*`/`*_AFTER_*` are emitted before/after the new dom nodes will be inserted/removed.
+The `*_START` and `*_END` part indicates the state of the transitions added to the router.
+Please consider to use these constants.
+
+```js
+// Enter events
+RouterOutletEvent.CONTENT_BEFORE_ENTER_START;
+RouterOutletEvent.CONTENT_BEFORE_ENTER_END;
+RouterOutletEvent.CONTENT_AFTER_ENTER_START;
+RouterOutletEvent.CONTENT_AFTER_ENTER_END;
+
+// Leave events
+RouterOutletEvent.CONTENT_BEFORE_LEAVE_START;
+RouterOutletEvent.CONTENT_BEFORE_LEAVE_END;
+RouterOutletEvent.CONTENT_AFTER_LEAVE_START;
+RouterOutletEvent.CONTENT_AFTER_LEAVE_END;
+```
+
 
 ## Next steps
 - [ ] Add unit tests

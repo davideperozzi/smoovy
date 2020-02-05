@@ -52,7 +52,7 @@ describe('browser', () => {
   it('should call the changed method', async () => {
     const changed = await viewportChanged(jest.fn(() => {}));
 
-    expect(changed).toBeCalledTimes(0);
+    expect(changed).toHaveBeenCalledTimes(0);
 
     await page.setViewport({ width: 1337, height: 1337 });
 
@@ -60,21 +60,21 @@ describe('browser', () => {
       setTimeout(async () => {
         await page.evaluate(() => window.ViewportObserver.update());
         resolve();
-      }, 50);
+      }, 200);
     });
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        expect(changed).toBeCalledTimes(1);
+        expect(changed).toHaveBeenCalledTimes(1);
         resolve();
-      }, 250);
+      }, 500);
     });
   });
 
   it('should not trigger if nothing has changed', async () => {
     const changed = await viewportChanged(jest.fn(() => {}));
 
-    expect(changed).toBeCalledTimes(0);
+    expect(changed).toHaveBeenCalledTimes(0);
 
     await new Promise((resolve) => {
       setTimeout(async () => {
@@ -85,16 +85,16 @@ describe('browser', () => {
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        expect(changed).toBeCalledTimes(0);
+        expect(changed).toHaveBeenCalledTimes(0);
         resolve();
-      }, 250);
+      }, 500);
     });
   });
 
   it('should trigger if update is forced and nothing has changed', async () => {
     const changed = await viewportChanged(jest.fn(() => {}));
 
-    expect(changed).toBeCalledTimes(0);
+    expect(changed).toHaveBeenCalledTimes(0);
 
     await new Promise((resolve) => {
       setTimeout(async () => {
@@ -105,9 +105,9 @@ describe('browser', () => {
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        expect(changed).toBeCalledTimes(1);
+        expect(changed).toHaveBeenCalledTimes(1);
         resolve();
-      }, 250);
+      }, 500);
     });
   });
 
@@ -117,7 +117,7 @@ describe('browser', () => {
     async () => {
       const changed = await viewportChanged(jest.fn(() => {}));
 
-      expect(changed).toBeCalledTimes(0);
+      expect(changed).toHaveBeenCalledTimes(0);
 
       await page.setViewport({ width: 1337, height: 1337 });
 
@@ -132,9 +132,9 @@ describe('browser', () => {
 
       await new Promise((resolve) => {
         setTimeout(() => {
-          expect(changed).toBeCalledTimes(1);
+          expect(changed).toHaveBeenCalledTimes(1);
           resolve();
-        }, 250);
+        }, 500);
       });
     });
 });
