@@ -1,0 +1,26 @@
+@import "@dorfjungs/scss-base/base/reset";
+
+.box-wrapper {
+  padding: 20%;
+}
+
+.box {
+  &.medium {
+    width: 300px;
+    height: 300px;
+    background-color: green;
+  }
+
+  &.small {
+    width: 150px;
+    height: 150px;
+    margin-left: 40%;
+    background-color: violet;
+  }
+}
+
+.spacer {
+  &.medium {
+    height: 200px;
+  }
+}

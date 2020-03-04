@@ -1,0 +1,36 @@
+{
+  "name": "@smoovy/parallax",
+  "version": "0.0.0",
+  "description": "Parallax effects library",
+  "main": "dist/bundles/index.js",
+  "module": "dist/bundles/index.esm.js",
+  "unpkg": "dist/bundles/index.umd.js",
+  "source": "src/index.ts",
+  "types": "dist/typings/index.d.ts",
+  "homepage": "https://github.com/davideperozzi/smoovy",
+  "repository": "https://github.com/davideperozzi/smoovy",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "lint": "NAME=$(basename \"$PWD\") && cd ../../ && npm run lint:package $NAME",
+    "test": "NAME=$(basename \"$PWD\") && cd ../../ && npm run test:package $NAME",
+    "build": "NAME=$(basename \"$PWD\") && cd ../../ && npm run build:package $NAME",
+    "serve": "NAME=$(basename \"$PWD\") && cd ../../ && npm run serve:package $NAME $1"
+  },
+  "keywords": [
+    "smoovy",
+    "parallax",
+    "scrolling"
+  ],
+  "author": "Davide Perozzi",
+  "license": "MIT",
+  "dependencies": {
+    "@smoovy/event": "^0.1.1",
+    "@smoovy/utils": "^0.1.12",
+    "tslib": "^1.9.3"
+  }
+}
