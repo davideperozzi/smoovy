@@ -131,4 +131,26 @@ export class ElementState<T extends HTMLElement = HTMLElement> {
 
     return changed;
   }
+
+  public inViewport(
+    scrollPosition: Coordinate,
+    viewportSize: Size,
+    padding: Coordinate = { x: 0, y: 0 }
+  ) {
+    const offset = {  ...this.offset };
+    const preposition = {
+      above: offset.y + padding.y + this.size.height < scrollPosition.y,
+      below: offset.y - padding.y > scrollPosition.y + viewportSize.height,
+      left: offset.x + padding.x + this.size.width < scrollPosition.x,
+      right: offset.x - padding.x > scrollPosition.x + viewportSize.width,
+    };
+
+    return {
+      ...preposition,
+      inside: (
+        !preposition.above && !preposition.below &&
+        !preposition.right && !preposition.left
+      )
+    };
+  }
 }

@@ -1,3 +1,5 @@
+import { Coordinate, Size } from '@smoovy/utils';
+
 export interface ParallaxControllerState {
   scrollPosX: number;
   scrollPosY: number;
@@ -7,6 +9,4 @@ export interface ParallaxControllerState {
   contentHeight: number;
 }
 
-export interface ParallaxItemState {
-
-}
+export interface ParallaxItemState extends Coordinate, Size {}

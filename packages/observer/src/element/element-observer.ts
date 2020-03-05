@@ -15,7 +15,7 @@ export interface ElementObserverConfig {
 }
 
 /* istanbul ignore next */
-const defaultConfig: ElementObserverConfig = {
+export const elementObserverDefaultConfig: ElementObserverConfig = {
   mutationThrottle: 100,
   viewportThrottle: 100,
   mutators: [
@@ -31,7 +31,7 @@ const defaultConfig: ElementObserverConfig = {
 };
 
 export class ElementObserver {
-  public static default = new ElementObserver(defaultConfig);
+  public static default = new ElementObserver(elementObserverDefaultConfig);
   private lastRaf: number;
   private attached = false;
   private viewportObserver?: ViewportObservable;

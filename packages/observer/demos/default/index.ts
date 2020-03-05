@@ -79,3 +79,11 @@ demo('element-mutations', (
     clearInterval(interval);
   }
 }));
+
+
+demo('element-mutations', ({ target1El }) => ({
+  init: () => {
+    const state = ElementObserver.observe(target1El as HTMLElement);
+
+  }
+}));

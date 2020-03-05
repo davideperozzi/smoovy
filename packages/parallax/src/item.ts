@@ -1,19 +1,14 @@
-import { Coordinate, Size } from '@smoovy/utils';
+import { Coordinate } from '@smoovy/utils';
 
-import { ParallaxControllerState } from './state';
-
-export interface ParallaxItemState extends Coordinate, Size {}
-
-export enum ParallaxItemEvent {
-  UPDATE = 'update'
-}
+import { ParallaxControllerState, ParallaxItemState } from './state';
 
 export interface ParallaxItemConfig {
-  speed: Coordinate;
-  offset: Coordinate;
-  state: () => ParallaxItemState;
+  speed: Coordinate | number;
+  offset: Coordinate | number;
+  state?: () => ParallaxItemState;
   on?: Partial<{
-    update: (pos: Coordinate, progress: number) => void
+    update: (pos: Coordinate, progress: number) => void,
+    destroy: () => void
   }>;
 }
 

@@ -30,6 +30,7 @@
   "license": "MIT",
   "dependencies": {
     "@smoovy/event": "^0.1.1",
+    "@smoovy/observer": "^0.1.5",
     "@smoovy/utils": "^0.1.12",
     "tslib": "^1.9.3"
   }

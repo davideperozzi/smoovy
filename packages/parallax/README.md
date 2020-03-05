@@ -8,31 +8,7 @@ Predictable parallax effects
 npm install --save @smoovy/parallax
 ```
 
-```ts
-import { ParallaxController, ParallaxElement } from '@smoovy/parallax';
-
-const elements = document.querySelectorAll('[data-parallax]');
-const controller = new ParallaxController({ offsetX: 0.5, offetY: 0.5 });
-
-elements.forEach(element => {
-  controller.attach(new ParallaxElement(element, {
-    speed: parseFloat(element.dataset.parallax)
-  }));
-});
-
-const item = new ParallaxItem({
-  speed: 0.5,
-  position: () => { x: 0, y: 100 },
-  update: ({ x, y, progress }) => {}
-});
-
-controller.attach(item);
-
-window.on('scroll', () => {
-  controller.update({ x: window.scrollX, y: window.scrollY });
-});
-```
-
+TBA
 
 ## Development commands
 ```js
