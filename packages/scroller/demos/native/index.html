@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>@smoovy/scroller | demos.default</title>
+    <title>@smoovy/scroller | demos.native</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="index.scss">
@@ -9,9 +9,12 @@
   <body>
     <main>
       <section class="medium">Section 1</section>
+      <section class="medium">
+        <a href="#scrollto" data-scrollto="#sec4">Scroll To Section 4</a>
+      </section>
       <section class="large">Section 2</section>
       <section class="medium">Section 3</section>
-      <section id="sec4" class="small"><a href="#test">Section 4</a></section>
+      <section class="small" id="sec4"><a href="#test">Section 4</a></section>
       <section class="large">Section 6</section>
       <section class="medium">
         <input type="text" placeholder="Section 7" />
@@ -21,6 +24,7 @@
       <section class="large">Section 8</section>
       <section class="large">Section 9</section>
     </main>
+
     <script src="index.ts"></script>
   </body>
 </html>

@@ -1,18 +1,24 @@
-import { Unlisten } from './utils';
+import { listenCompose, Unlisten } from './utils';
 
 export function listenEl<K extends keyof HTMLElementEventMap>(
-  element: HTMLElement|Window,
-  type: K,
+  element: HTMLElement | Document | Window,
+  type: K | K[],
   listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
   options?: boolean | AddEventListenerOptions
 ): Unlisten;
 export function listenEl(
-  element: HTMLElement|Window,
-  type: string,
+  element: HTMLElement | Document | Window,
+  type: string | string[],
   listener: EventListenerOrEventListenerObject,
   options?: boolean | AddEventListenerOptions
 ): Unlisten {
-  element.addEventListener(type, listener, options);
+  if (typeof type === 'string') {
+    type = [ type ];
+  }
 
-  return () => element.removeEventListener(type, listener, options);
+  type.forEach(t => element.addEventListener(t, listener, options));
+
+  return () => (type as string[]).forEach(t => {
+    element.removeEventListener(t, listener, options);
+  });
 }

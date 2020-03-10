@@ -1,13 +1,17 @@
 import {
   ElementObserver, elementObserverDefaultConfig, ElementState,
 } from '@smoovy/observer';
+import { Coordinate } from '@smoovy/utils';
 
 import { ParallaxControllerState } from '../state';
 import { VectorParallaxItem, VectorParallaxItemConfig } from './vector';
 
 export interface ElementParallaxItemConfig
   extends Omit<VectorParallaxItemConfig, 'state'> {
-
+  precision?: number;
+  padding?: Coordinate;
+  culling?: boolean;
+  translate?: boolean;
 }
 
 export class ElementParallaxItem<
@@ -25,23 +29,38 @@ export class ElementParallaxItem<
     this.elementState = ElementParallaxItem.observer.observe(this.element);
   }
 
+  protected get precision() {
+    return this.config.precision || 2;
+  }
+
   protected onUpdate(state: ParallaxControllerState) {
-    const viewportState = this.elementState.inViewport(
-      {
-        x: state.scrollPosX - this.position.x,
-        y: state.scrollPosY - this.position.y
-      },
-      {
-        width: state.viewportWidth,
-        height: state.viewportHeight
-      }
-    );
+    const culling = this.config.culling === false;
+    const viewportState = culling
+      ? { inside: true }
+      : this.elementState.inViewport(
+          {
+            x: state.scrollPosX - this.shift.x,
+            y: state.scrollPosY - this.shift.y
+          },
+          {
+            width: state.viewportWidth,
+            height: state.viewportHeight
+          },
+          this.config.padding
+        );
 
     if (viewportState.inside) {
       const element = this.elementState.element;
-      const translate3d = `${this.position.x}px, ${this.position.y}px, 0`;
 
-      element.style.transform = `translate3d(${translate3d})`;
+      if (this.config.translate !== false) {
+        element.style.transform = `
+          translate3d(
+            ${this.shift.x.toFixed(this.precision)}px,
+            ${this.shift.y.toFixed(this.precision)}px,
+            0
+          )
+        `;
+      }
     }
   }
 

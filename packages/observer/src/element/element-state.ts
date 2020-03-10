@@ -138,7 +138,7 @@ export class ElementState<T extends HTMLElement = HTMLElement> {
     padding: Coordinate = { x: 0, y: 0 }
   ) {
     const offset = {  ...this.offset };
-    const preposition = {
+    const prepos = {
       above: offset.y + padding.y + this.size.height < scrollPosition.y,
       below: offset.y - padding.y > scrollPosition.y + viewportSize.height,
       left: offset.x + padding.x + this.size.width < scrollPosition.x,
@@ -146,11 +146,8 @@ export class ElementState<T extends HTMLElement = HTMLElement> {
     };
 
     return {
-      ...preposition,
-      inside: (
-        !preposition.above && !preposition.below &&
-        !preposition.right && !preposition.left
-      )
+      ...prepos,
+      inside: !prepos.above && !prepos.below && !prepos.right && !prepos.left
     };
   }
 }

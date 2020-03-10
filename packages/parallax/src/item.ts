@@ -7,8 +7,8 @@ export interface ParallaxItemConfig {
   offset: Coordinate | number;
   state?: () => ParallaxItemState;
   on?: Partial<{
-    update: (pos: Coordinate, progress: number) => void,
-    destroy: () => void
+    update: (pos: Coordinate, progress: Coordinate) => void;
+    destroy: () => void;
   }>;
 }
 

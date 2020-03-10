@@ -1,6 +1,7 @@
 import { listenCompose, listenEl } from '@smoovy/event';
-import { ScrollBehavior, ScrollerEvent } from '@smoovy/scroller';
 import { Browser } from '@smoovy/utils';
+
+import { ScrollBehavior, ScrollerEvent } from '../core';
 
 interface Config {
   /**
@@ -14,7 +15,7 @@ const defaultConfig = {
   target: Browser.client ? window : undefined
 };
 
-export const nativeScrollbar: ScrollBehavior<Config> = (config = {}) => {
+const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = Object.assign(defaultConfig, config);
 
   return (scroller) => {
@@ -31,6 +32,7 @@ export const nativeScrollbar: ScrollBehavior<Config> = (config = {}) => {
     }
 
     return listenCompose(
+      () => contentSpan.remove(),
       cfg.target
         ? listenEl(cfg.target, 'scroll', () => (
             scroller.emit(ScrollerEvent.DELTA, {
@@ -43,3 +45,6 @@ export const nativeScrollbar: ScrollBehavior<Config> = (config = {}) => {
     );
   };
 };
+
+export { Config as NativeScrollbarConfig };
+export default behavior;

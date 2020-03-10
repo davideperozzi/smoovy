@@ -1,9 +1,23 @@
-import { listenCompose } from '@smoovy/event';
+import { listenCompose, listenEl, Unlisten } from '@smoovy/event';
 import { Tween } from '@smoovy/tween';
 
 import { ScrollBehavior, ScrollerEvent, TweenToEvent } from '../core';
 
-const behavior: ScrollBehavior = () => (scroller) => {
+interface Config {
+  /**
+   * Use native mode. This will trigger the scroll events on
+   * a defined target instead of the scroller directly
+   */
+  nativeTarget?: Window | HTMLElement;
+
+  /**
+   * Events used to detect changes on the native targets.
+   * Default: [ 'wheel', 'touchmove' ]
+   */
+  nativeKillEvents?: (keyof HTMLElementEventMap)[];
+}
+
+const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
   let currentTween: Tween | undefined;
 
   return scroller.on<TweenToEvent>(
@@ -11,15 +25,27 @@ const behavior: ScrollBehavior = () => (scroller) => {
     ({ pos, options }) => {
       const force = !!options.force;
       const unlisten = listenCompose(
-        scroller.muteEvents(
-          ScrollerEvent.TRANSFORM_OUTPUT,
-          force && ScrollerEvent.DELTA
-        ),
-        scroller.on(ScrollerEvent.DELTA, () => {
-          if (currentTween && ! force) {
-            currentTween.stop();
-          }
-        })
+        config.nativeTarget === undefined
+          ? listenCompose(
+              scroller.on(ScrollerEvent.DELTA, () => {
+                if (currentTween && ! force) {
+                  currentTween.stop();
+                }
+              }),
+              scroller.muteEvents(
+                ScrollerEvent.TRANSFORM_OUTPUT,
+                force && ScrollerEvent.DELTA
+              )
+            )
+          : listenEl(
+              config.nativeTarget,
+              config.nativeKillEvents || ['wheel', 'touchmove'],
+              () => {
+                if (currentTween && ! force) {
+                  currentTween.stop();
+                }
+              }
+            )
       );
 
       if (currentTween) {
@@ -35,10 +61,14 @@ const behavior: ScrollBehavior = () => (scroller) => {
           easing: options.easing,
           on: {
             update: (newPos) => {
-              scroller.updateDelta({
-                x: scroller.position.virtual.x - newPos.x,
-                y: scroller.position.virtual.y - newPos.y
-              });
+              if (config.nativeTarget) {
+                config.nativeTarget.scrollTo(newPos.x, newPos.y);
+              } else {
+                scroller.updateDelta({
+                  x: scroller.position.virtual.x - newPos.x,
+                  y: scroller.position.virtual.y - newPos.y
+                });
+              }
             },
             stop: () => {
               unlisten();
@@ -55,4 +85,5 @@ const behavior: ScrollBehavior = () => (scroller) => {
   );
 };
 
+export { Config as TweenToConfig };
 export default behavior;

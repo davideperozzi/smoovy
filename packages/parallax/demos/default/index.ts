@@ -6,7 +6,7 @@ import {
 const element = document.createElement('div');
 
 // Create parallax item
-const state = { x: 100, y: 500, width: 300, height: 300 };
+const state = { x: 100, y: 300, width: 300, height: 300 };
 const controller = new ParallaxController();
 const vectorItem = new VectorParallaxItem({
   speed: { x: 0, y: 0.2 },
@@ -14,19 +14,32 @@ const vectorItem = new VectorParallaxItem({
   on: {
     update: (position, progress) => {
       element.textContent = `${position.y.toFixed(2)}`;
-      element.style.transform = `translate3d(${position.x}px, ${position.y}px, 0)`;
+      element.style.transform = `
+        rotate(${360 * progress.y}deg)
+      `;
     }
   }
 });
 
 const elementItem1 = new ElementParallaxItem(
   document.querySelector('.box1') as HTMLElement,
-  { speed: 0.3 }
+  {
+    speed: 0.3,
+    translate: false,
+    culling: false,
+    on: {
+      update: (position, progress) =>  {
+        document.querySelector('.box1') .textContent = `${progress.y * 100}%`;
+      }
+    }
+  }
 );
 
 const elementItem2 = new ElementParallaxItem(
   document.querySelector('.box2') as HTMLElement,
-  { speed: 0.01 }
+  {
+    speed: 0.9
+  }
 );
 
 controller.add(vectorItem);
@@ -38,7 +51,7 @@ element.style.left = `${state.x}px`;
 element.style.top = `${state.y}px`;
 element.style.width = `${state.width}px`;
 element.style.height = `${state.height}px`;
-element.style.backgroundColor = 'red';
+element.style.backgroundColor = '#7f8fa6';
 element.style.textAlign = `center`;
 element.style.lineHeight = `${state.height}px`;
 
