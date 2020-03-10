@@ -13,6 +13,7 @@
 | --- | --- | --- |
 | [@smoovy/scroller](./packages/scroller) | [![Version](https://flat.badgen.net/npm/v/@smoovy/scroller)](https://www.npmjs.com/package/@smoovy/scroller) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/scroller) |
 | [@smoovy/observer](./packages/observer) | [![Version](https://flat.badgen.net/npm/v/@smoovy/observer)](https://www.npmjs.com/package/@smoovy/observer) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/observer) |
+| [@smoovy/parallax](./packages/parallax) | [![Version](https://flat.badgen.net/npm/v/@smoovy/parallax)](https://www.npmjs.com/package/@smoovy/parallax) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/parallax) |
 | [@smoovy/tween](./packages/tween) | [![Version](https://flat.badgen.net/npm/v/@smoovy/tween)](https://www.npmjs.com/package/@smoovy/tween) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/tween) |
 | [@smoovy/ticker](./packages/ticker) | [![Version](https://flat.badgen.net/npm/v/@smoovy/ticker)](https://www.npmjs.com/package/@smoovy/ticker) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/ticker) |
 | [@smoovy/event](./packages/event) | [![Version](https://flat.badgen.net/npm/v/@smoovy/event)](https://www.npmjs.com/package/@smoovy/event) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/event) |
@@ -26,7 +27,6 @@ npm install --save @smoovy/<package>
 ```
 
 ## Roadmap 2020
-- [ ] 📦 Create `@smoovy/parallax` (parallax effect math)
 - [ ] 📦 Create `@smoovy/timeline` (timeline for tweens)
 - [ ] 📦 Create `@smoovy/text-split` (easy text splitting)
 - [ ] 💡 Improve tween demos
