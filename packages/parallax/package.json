@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/parallax",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Parallax effects library",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
