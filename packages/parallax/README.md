@@ -129,6 +129,16 @@ const item = new ElementParallaxItem(element, {
     y: 0
   },
 
+  // Map the shift value to the desired shift value (e.g. y to x)
+  //
+  // Default: undefined
+  mapShift: (shift) => {
+    shfit.x = shift.y;
+    shift.y = 0;
+
+    return shift;
+  },
+
   // Events
   on: {
     update: (shift, progress) => {

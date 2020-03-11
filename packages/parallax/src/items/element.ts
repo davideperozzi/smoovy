@@ -12,6 +12,7 @@ export interface ElementParallaxItemConfig
   padding?: Coordinate;
   culling?: boolean;
   translate?: boolean;
+  mapShift?: (shift: Coordinate) => Coordinate;
 }
 
 export class ElementParallaxItem<
@@ -48,6 +49,10 @@ export class ElementParallaxItem<
           },
           this.config.padding
         );
+
+    if (typeof this.config.mapShift === 'function') {
+      this.shift = this.config.mapShift.call(this, this.shift);
+    }
 
     if (viewportState.inside) {
       const element = this.elementState.element;

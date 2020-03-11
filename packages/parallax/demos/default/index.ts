@@ -42,9 +42,23 @@ const elementItem2 = new ElementParallaxItem(
   }
 );
 
+const elementItem3 = new ElementParallaxItem(
+  document.querySelector('.box3') as HTMLElement,
+  {
+    speed: 0.5,
+    mapShift: (shift) => {
+      shift.x = shift.y;
+      shift.y = 0;
+
+      return shift;
+    }
+  }
+);
+
 controller.add(vectorItem);
 controller.add(elementItem1);
 controller.add(elementItem2);
+controller.add(elementItem3);
 
 element.style.position = 'absolute';
 element.style.left = `${state.x}px`;
