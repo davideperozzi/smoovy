@@ -13,6 +13,7 @@ const router = new Router(
 
 router.on(RouterEvent.NAVIGATION_END, () => {
   console.log('ENDEDEDED');
+  console.log(router.state.current!.url);
 });
 
 document.querySelectorAll('a').forEach(link => {

@@ -211,7 +211,7 @@ export class Router extends EventEmitter {
   }
 
   public get state() {
-    return Object.freeze(this._state);
+    return Object.freeze({ ...this._state });
   }
 
   public async preload(route: Route) {
