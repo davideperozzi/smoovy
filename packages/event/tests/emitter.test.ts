@@ -97,7 +97,50 @@ describe('emitter', () => {
     unlisten2();
     unlisten3();
 
-    expect(emitter.hasEventListeners('test1')).toBeFalsy  ();
+    expect(emitter.hasEventListeners('test1')).toBeFalsy();
     expect(emitter.hasEventListeners('test2')).toBeFalsy();
+  });
+
+  it('should reflect events to a separate emitter', () => {
+    const listener = jest.fn();
+    const emitter2 = new EventEmitter();
+
+    emitter2.on('test', listener);
+
+    emitter.reflectEvents(emitter2);
+    emitter.emit('test').emit('test').emit('test');
+
+    expect(listener).toHaveBeenCalledTimes(3);
+  });
+
+  it('should reflect events to a separate emitter with muted events', () => {
+    const listener = jest.fn();
+    const emitter2 = new EventEmitter();
+
+    emitter2.on('test', listener);
+
+    emitter.reflectEvents(emitter2);
+    emitter.emit('test');
+    emitter.muteEvents('test');
+    emitter.emit('test');
+    emitter.unmuteEvents('test');
+
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    emitter.emit('test');
+    emitter2.muteEvents('test');
+    emitter.emit('test');
+    emitter2.unmuteEvents('test');
+
+    expect(listener).toHaveBeenCalledTimes(2);
+
+    emitter.emit({ test: 'data' }).emit('test');
+
+    expect(listener).toHaveBeenCalledTimes(4);
+
+    emitter.unreflectEvents();
+    emitter.emit({ test: 'data' }).emit('test');
+
+    expect(listener).toHaveBeenCalledTimes(4);
   });
 });

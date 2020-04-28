@@ -115,6 +115,24 @@ unmute();
 emitter.emit('eventName1', 'Yo!') // Goes through
 ```
 
+### Reflecting events
+Reflect events to a different emitter. Muted events will not be reflects:
+```js
+const reflectedEmitter = new Emitter();
+
+// Reflect events to reflectedEmitter
+emitter.reflectEvents(reflectedEmitter);
+
+// Listen for events
+reflectedEmitter.on('eventName1', (msg) => console.log(msg));
+
+// Dispatch event in base emitter
+emitter.emit('eventName1', 'reflected'); // Displays 'reflected'
+
+// Remove reflected emitters
+emitter.unreflectEvents();
+```
+
 ## Development commands
 ```js
 // Serve with parcel

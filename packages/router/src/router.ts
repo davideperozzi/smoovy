@@ -89,7 +89,7 @@ export class Router extends EventEmitter {
 
     this.unlistenPopstate = listenEl(
       window,
-      'popstate' as any,
+      'popstate',
       (event: PopStateEvent) => {
         this.navigate(event.state, false, 'popstate');
       }

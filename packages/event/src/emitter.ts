@@ -5,6 +5,7 @@ export type ListenerCallback<T = any> = (...args: T[]) => void;
 
 export class EventEmitter {
   private listeners: { [name: string]: EventListenerCb[] } = {};
+  private emitters: EventEmitter[] = [];
   private mutedEvents: string[] = [];
 
   public emit<T = any, TC = T>(
@@ -19,17 +20,24 @@ export class EventEmitter {
     if (typeof eventsOrName === 'string') {
       const name = eventsOrName;
 
-      if (this.listeners.hasOwnProperty(name) && ! this.isEventMuted(name)) {
-        for (let i = 0, len = this.listeners[name].length; i < len; i++) {
-          listenerCb.call(
-            this,
-            this.listeners[name][i].call(
+      if ( ! this.isEventMuted(name)) {
+        for (let i = 0, len = this.emitters.length; i < len; i++) {
+          this.emitters[i].emit(eventsOrName, dataOrCallback, callback);
+        }
+
+        /* istanbul ignore else */
+        if (this.listeners.hasOwnProperty(name)) {
+          for (let i = 0, len = this.listeners[name].length; i < len; i++) {
+            listenerCb.call(
               this,
-              dataOrCallback !== listenerCb
-                ? dataOrCallback as T
-                : undefined
-            ) as any
-          );
+              this.listeners[name][i].call(
+                this,
+                dataOrCallback !== listenerCb
+                  ? dataOrCallback as T
+                  : undefined
+              ) as any
+            );
+          }
         }
       }
     } else {
@@ -41,16 +49,25 @@ export class EventEmitter {
         const eventData = events[name];
 
         /* istanbul ignore else */
-        if (this.listeners.hasOwnProperty(name) && ! this.isEventMuted(name)) {
-          for (let i = 0, len = this.listeners[name].length; i < len; i++) {
-            listenerCb.call(
-              this,
-              this.listeners[name][i].call(this, eventData) as any
-            );
+        if ( ! this.isEventMuted(name)) {
+          for (let i = 0, len = this.emitters.length; i < len; i++) {
+            this.emitters[i].emit(name, eventData, callback);
+          }
+
+          /* istanbul ignore else */
+          if (this.listeners.hasOwnProperty(name)) {
+            for (let i = 0, len = this.listeners[name].length; i < len; i++) {
+              listenerCb.call(
+                this,
+                this.listeners[name][i].call(this, eventData) as any
+              );
+            }
           }
         }
       }
     }
+
+    return this;
   }
 
   public on<T>(name: string, cb: EventListenerCb<T>): Unlisten {
@@ -108,5 +125,13 @@ export class EventEmitter {
         }
       }
     });
+  }
+
+  public reflectEvents(...emitters: EventEmitter[]) {
+    this.emitters = emitters;
+  }
+
+  public unreflectEvents() {
+    this.emitters = [];
   }
 }
