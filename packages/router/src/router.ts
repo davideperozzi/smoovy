@@ -24,6 +24,7 @@ export interface RouteChangeEvent {
 }
 
 export enum RouterEvent {
+  INIT = 'init',
   NAVIGATION_START = 'navigationstart',
   NAVIGATION_END = 'navigationend',
   NAVIGATION_CANCEL = 'navigationcancel',
@@ -41,7 +42,7 @@ export interface RouterConfig {
 export class Router extends EventEmitter {
   public outlet?: RouterOutlet;
   private baseUrl: BrowserUrl;
-  private state: RouterState = {};
+  private _state: RouterState = {};
   private fetch?: GoFetch;
   private pendingEvent?: RouteChangeEvent;
   private unlistenPopstate: Unlisten;
@@ -82,10 +83,13 @@ export class Router extends EventEmitter {
   }
 
   private init() {
-    this.replace({
+    const route = {
       url: `${this.baseUrl.pathname}${this.baseUrl.search}${this.baseUrl.hash}`,
       load: serializeUrl(this.baseUrl)
-    }, true);
+    };
+
+    this.replace(route, true);
+    this.emit(RouterEvent.INIT, route);
 
     this.unlistenPopstate = listenEl(
       window,
@@ -121,7 +125,7 @@ export class Router extends EventEmitter {
   }
 
   private replace(route: Route, history = false) {
-    this.state.current = route;
+    this._state.current = route;
 
     if (history) {
       window.history.replaceState(route, '', route.url);
@@ -129,7 +133,7 @@ export class Router extends EventEmitter {
   }
 
   private push(route: Route, history = false) {
-    this.state.current = route;
+    this._state.current = route;
 
     if (history) {
       window.history.pushState(route, '', route.url);
@@ -206,6 +210,10 @@ export class Router extends EventEmitter {
     }
   }
 
+  public get state() {
+    return Object.freeze(this._state);
+  }
+
   public async preload(route: Route) {
     if ( ! this.contentCache.has(route.load)) {
       this.fetch = goFetch(route.load);
@@ -223,7 +231,7 @@ export class Router extends EventEmitter {
     history = true,
     trigger: RouteChangeEvent['trigger'] = 'user'
   ) {
-    const fromRoute = this.state.current;
+    const fromRoute = this._state.current;
 
     if (typeof toRoute === 'string') {
       const url = parseUrl(toRoute);
@@ -238,7 +246,7 @@ export class Router extends EventEmitter {
       throw new Error('No initial route found!');
     }
 
-    if (this.state.current && this.state.current.url === toRoute.url) {
+    if (this._state.current && this._state.current.url === toRoute.url) {
       return;
     }
 
