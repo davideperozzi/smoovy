@@ -1,20 +1,22 @@
-export function isDef(val: any) {
+type Value<T> = T | undefined | null | void;
+
+export function isDef<T>(val: Value<T>): val is T {
   return typeof val !== void 0 && val !== undefined;
 }
 
-export function isNum(val: any) {
+export function isNum<T>(val: Value<T>): val is T {
   return typeof val === 'number';
 }
 
-export function isStr(val: any) {
+export function isStr<T>(val: Value<T>): val is T {
   return typeof val === 'string';
 }
 
-export function isArr(val: any) {
+export function isArr<T>(val: Value<T>): val is T {
   return Array.isArray(val);
 }
 
-export function isObj(val: any) {
+export function isObj<T>(val: Value<T>): val is T {
   const type = typeof val;
 
   return !isArr(val) && (
@@ -24,7 +26,7 @@ export function isObj(val: any) {
   );
 }
 
-export function isFunc(val: any) {
+export function isFunc<T>(val: Value<T>): val is T {
   return typeof val === 'function';
 }
 
