@@ -40,8 +40,7 @@ export class ParallaxController {
 
     if (index > -1) {
       this.items[index].destroy();
-
-      this.items = this.items.splice(index, 1);
+      this.items.splice(index, 1);
     }
   }
 
