@@ -1,2 +1,2 @@
-export * from './element';
-export * from './viewport-observer';
+export * from './controller';
+export * from './observe';

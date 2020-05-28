@@ -38,6 +38,7 @@ Thumbs.db
 
 # Package files
 dist
+.history
 
 # Plain module files
 packages/*/m
