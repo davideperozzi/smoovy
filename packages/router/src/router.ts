@@ -150,7 +150,10 @@ export class Router extends EventEmitter {
 
   private async loadContent(event: RouteChangeEvent) {
     if (this.fetch) {
-      this.fetch.controller.abort();
+      if  (this.fetch.controller) {
+        this.fetch.controller.abort();
+      }
+
       this.emit<RouteChangeEvent>(RouterEvent.CONTENT_LOAD_CANCEL);
     }
 
