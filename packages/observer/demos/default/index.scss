@@ -1,8 +1,10 @@
 .box {
-  position: absolute;
   width: 500px;
   height: 500px;
-  left: 30vw;
-  top: 10vw;
+  margin: 20vh auto;
   background: black;
+}
+
+.space {
+  height: 10vh;
 }

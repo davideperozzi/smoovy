@@ -17,6 +17,10 @@ if (
     const port = Number(process.env.TEST_PORT || 1337);
     const host = process.env.TEST_HOST || 'localhost';
     const bundler = new Bundler(path.join(browserRootPath, '*.html'), {
+      minify: true,
+      watch: false,
+      hmr: false,
+      bundleNodeModules: true,
       outDir: path.join(process.cwd(), '.dev')
     });
 

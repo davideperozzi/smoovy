@@ -1,2 +1,3 @@
-export * from './controller';
-export * from './observe';
+export * from './observable-controller';
+export * from './observable';
+export * from './utils';
