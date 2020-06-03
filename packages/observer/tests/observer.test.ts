@@ -1,5 +1,3 @@
-import { throttle } from '@smoovy/utils';
-
 import {
   defaultController, ObservableController, observe, unobserve, Observable,
 } from '../src';
@@ -51,24 +49,6 @@ describe('element', () => {
       expect(updateFn).toHaveBeenCalledTimes(1);
     });
 
-    it('should throttle the update-callback', (done) => {
-      const element = document.createElement('div');
-      const observable = observe(element);
-      const updateFn = jest.fn();
-
-      observable.onUpdate(throttle(updateFn, 100));
-      observable.update(); // Should trigger here
-      observable.update(); // Should ignored
-      observable.update(); // Should ignored
-      observable.update(); // Should ignored
-      observable.update(); // Should trigger here
-
-      setTimeout(() => {
-        expect(updateFn).toHaveBeenCalledTimes(2);
-        done();
-      }, 120);
-    });
-
     it('should detach if no more observables', (done) => {
       const element = document.createElement('div');
       const observable = observe(element);
@@ -87,13 +67,16 @@ describe('element', () => {
       const deleteFn = jest.fn();
       const attachFn = jest.fn();
 
-      observable.onUpdate(updateFn);
       observable.onAttach(attachFn);
       observable.onDetach(deleteFn);
-      observable.update();
-      observable.update();
 
       observe(observable, controller);
+
+      setTimeout(() => {
+        observable.onUpdate(updateFn);
+        observable.update();
+        observable.update();
+      }, 10);
 
       setTimeout(() => {
         unobserve(observable, controller);
@@ -101,7 +84,7 @@ describe('element', () => {
         expect(attachFn).toHaveBeenCalled();
         expect(deleteFn).toHaveBeenCalled();
         done();
-      }, 10);
+      }, 50);
     });
 
     it('should not add an invalid element', () => {

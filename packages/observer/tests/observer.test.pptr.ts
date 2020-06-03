@@ -39,8 +39,11 @@ describe('browser', () => {
     return changed;
   };
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     await page.goto(`${process.env.TEST_URL}/observer.test.html`);
+  });
+
+  beforeEach(async () => {
     await page.setViewport(vpSize);
     await page.evaluate(() => {
       const element = document.querySelector('#test1') as HTMLElement;

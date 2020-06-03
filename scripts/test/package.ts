@@ -32,6 +32,7 @@ if (typeof process.argv[2] === 'string') {
       --passWithNoTests \
       --verbose \
       --coverage \
+      --detectOpenHandles \
       --coverageDirectory ${coverageDirectory} \
       --collectCoverageFrom=${path.relative(process.cwd(), srcPath)}
     `,

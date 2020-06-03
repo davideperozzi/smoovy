@@ -21,7 +21,7 @@ if (!!process.env.TEST_BROWSER_ROOT) {
   // to disable jest-puppeteer for certain tests.
   launchConfig.launch = {
     headless: !debug,
-    args: [ '--disable-dev-shm-usage' ]
+    args: [ '--no-sandbox' ]
   };
 }
 

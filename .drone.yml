@@ -7,8 +7,10 @@ steps:
     image: node:13.12-alpine
     environment:
       CI: '1'
+      # PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+      # PUPPETEER_EXECUTABLE_PATH: '/usr/bin/chromium-browser'
     commands:
-      - apk --update add make g++ python3 udev ttf-freefont chromium nss freetype freetype-dev harfbuzz ca-certificates
+      # - apk --update add make g++ python3 udev ttf-freefont chromium nss freetype freetype-dev harfbuzz ca-certificates
       - npm install
       - npm run bootstrap
       - npm run lint
