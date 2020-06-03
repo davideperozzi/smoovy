@@ -20,12 +20,14 @@ export enum ObservableEvent {
   DETACH = 'detach'
 }
 
-export class Observable extends EventEmitter {
+export class Observable<
+  T extends ObservableTarget = ObservableTarget
+> extends EventEmitter {
   public bounds: ObservableRect = { x: 0, y: 0, width: 0, height: 0 };
   public offset: ObservableRect = { x: 0, y: 0, width: 0, height: 0 };
 
   public constructor(
-    public readonly target: ObservableTarget
+    public readonly target: T
   ) {
     super();
   }
@@ -43,8 +45,9 @@ export class Observable extends EventEmitter {
   }
 
   public update() {
-    this.emit(ObservableEvent.WILL_UPDATE);
+    this.emit(ObservableEvent.WILL_UPDATE, this);
 
+    /* istanbul ignore next: covered by pptr */
     if (this.target instanceof Window) {
       const size = { width: window.innerWidth, height: window.innerHeight };
 
@@ -53,8 +56,9 @@ export class Observable extends EventEmitter {
       this.offset.width = size.width;
       this.offset.height = size.height;
     } else {
-      const bounds = this.target.getBoundingClientRect();
-      const offset = getElementOffset(this.target);
+      const target = this.target as HTMLElement;
+      const bounds = target.getBoundingClientRect();
+      const offset = getElementOffset(target);
 
       this.bounds.x = bounds.left;
       this.bounds.y = bounds.top;
@@ -62,11 +66,11 @@ export class Observable extends EventEmitter {
       this.bounds.height = bounds.height;
       this.offset.x = offset.x;
       this.offset.y = offset.y;
-      this.offset.width = this.target.offsetWidth;
-      this.offset.height = this.target.offsetHeight;
+      this.offset.width = target.offsetWidth;
+      this.offset.height = target.offsetHeight;
     }
 
-    this.emit(ObservableEvent.UPDATE);
+    this.emit(ObservableEvent.UPDATE, this);
 
     return this;
   }

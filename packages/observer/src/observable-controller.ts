@@ -2,15 +2,16 @@ import { listenEl, Unlisten } from '@smoovy/event';
 import { Browser, throttle } from '@smoovy/utils';
 import { Observable, ObservableTarget, ObservableEvent } from './observable';
 
-export interface ObserveControllerConfig {
-  throttle?: number;
+export interface ObservableControllerConfig {
+  throttle: number;
   mutators?: {
     target?: HTMLElement;
     options?: MutationObserverInit;
   }[];
 }
 
-export const defaultConfig: ObserveControllerConfig = {
+/* istanbul ignore next */
+export const defaultControllerConfig: ObservableControllerConfig = {
   throttle: 50,
   mutators: Browser.client ? [
     {
@@ -31,15 +32,16 @@ export class ObservableController {
   private mutationObserver?: MutationObserver;
 
   public constructor(
-    protected config = defaultConfig
+    protected config = defaultControllerConfig
   ) {}
 
   private attach() {
-    const throttleMs = this.config.throttle || 0;
-    const updateFn = throttleMs > 0
+    const throttleMs = this.config.throttle;
+    const updateFn = /* istanbul ignore else */ throttleMs > 0
       ? throttle(this.update.bind(this, false), throttleMs)
-      : this.update.bind(this, false);
+      : /* istanbul ignore next */ this.update.bind(this, false);
 
+    /* istanbul ignore next: covered by pptr */
     if (Browser.client && Browser.mutationObserver && this.config.mutators) {
       this.mutationObserver = new MutationObserver(updateFn);
 
@@ -49,7 +51,7 @@ export class ObservableController {
             if (config.target && this.mutationObserver) {
               this.mutationObserver.observe(
                 config.target,
-                { ...config.options  }
+                { ...config.options }
               );
             }
           });
@@ -61,9 +63,16 @@ export class ObservableController {
   }
 
   private detach() {
+    /* istanbul ignore else */
     if (this.listener) {
       this.listener();
       delete this.listener;
+    }
+
+    /* istanbul ignore next */
+    if (this.mutationObserver) {
+      this.mutationObserver.disconnect();
+      delete this.mutationObserver;
     }
   }
 
@@ -85,22 +94,23 @@ export class ObservableController {
     return this.obervables.size > 0;
   }
 
-  public add(target: ObservableTarget | Observable) {
-    if ( ! target) {
-      throw new Error('Invalid element to observe');
+  public add<O extends ObservableTarget | Observable>(target: O) {
+    /* istanbul ignore else */
+    if (typeof target !== 'object') {
+      throw new Error(`Invalid target to observe (${target})`);
     }
 
-    const observable = new Observable(
-      target instanceof Observable
-        ? target.target
-        : target
-    );
+    const observable = target instanceof Observable
+      ? target as Exclude<O, ObservableTarget>
+      : new Observable<Exclude<O, Observable>>(target as any);
 
-    observable.emit(ObservableEvent.WILL_ATTACH);
+    (observable as Observable).emit(ObservableEvent.WILL_ATTACH, observable);
     this.obervables.add(observable);
-    observable.emit(ObservableEvent.ATTACH);
+    (observable as Observable).emit(ObservableEvent.ATTACH, observable);
+
     requestAnimationFrame(() => observable.update());
 
+    /* istanbul ignore else */
     if ( ! this.listener) {
       this.attach();
     }
@@ -109,20 +119,17 @@ export class ObservableController {
   }
 
   public delete(observable: Observable) {
-    if (this.obervables.has(observable)) {
-      observable.emit(ObservableEvent.WILL_DETACH);
+    if ( ! this.obervables.has(observable)) {
+      throw new Error('Observable was not added to this controller');
     }
 
-    const result = this.obervables.delete(observable);
+    observable.emit(ObservableEvent.WILL_DETACH, observable);
+    this.obervables.delete(observable);
+    observable.emit(ObservableEvent.DETACH, observable);
 
-    if (result) {
-      observable.emit(ObservableEvent.DETACH);
-    }
-
+    /* istanbul ignore else */
     if (this.obervables.size === 0 && this.listener) {
       this.detach();
     }
-
-    return result;
   }
 }

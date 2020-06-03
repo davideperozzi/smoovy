@@ -20,9 +20,9 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
 
   return (scroller) => {
     const contentSpan = document.createElement('div');
-    const parentElement = scroller.dom.container.element.parentElement;
+    const parentElement = scroller.dom.container.target.parentElement;
     const updateSize = () => {
-      contentSpan.style.height = `${scroller.dom.wrapper.size.height}px`;
+      contentSpan.style.height = `${scroller.dom.wrapper.offset.height}px`;
     };
 
     updateSize();

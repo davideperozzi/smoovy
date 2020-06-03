@@ -51,7 +51,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
   const firefoxFix = cfg.firefoxFix && Browser.firefox;
 
   return (scroller) => {
-    const element = scroller.dom.wrapper.element;
+    const element = scroller.dom.wrapper.target;
     const unlisten = scroller.on<Coordinate>(
       ScrollerEvent.OUTPUT,
       (pos) => {

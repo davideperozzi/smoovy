@@ -3,7 +3,7 @@ import { ObservableController } from './observable-controller';
 
 export const defaultController = ObservableController.default;
 export function observe(
-  target: ObservableTarget,
+  target: ObservableTarget | Observable,
   controller = defaultController
 ) {
   return controller.add(target);

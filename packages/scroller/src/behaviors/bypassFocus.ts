@@ -26,7 +26,7 @@ interface Config {
 
 const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
   const focusTarget = config.focusTarget || Browser.client ? window : undefined;
-  const container = scroller.dom.container.element;
+  const container = scroller.dom.container.target;
   const ignoreIn = config.ignoreInside || [];
   const scrollListener = (event: Event) => {
     event.preventDefault();
@@ -36,7 +36,11 @@ const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
 
   const focusListener = (event: FocusEvent) => {
     Ticker.requestAnimationFrame(() => {
-      const activeEl = event.target;
+      let activeEl = event.target as HTMLElement;
+
+      while (activeEl.shadowRoot && activeEl.shadowRoot.activeElement) {
+        activeEl = activeEl.shadowRoot.activeElement as HTMLElement;
+      }
 
       if ( ! (activeEl instanceof HTMLElement)) {
         return;
@@ -44,18 +48,13 @@ const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
 
       const ignore = ignoreIn.map(el => el.contains(activeEl)).includes(true);
 
-      if (
-        ! ignore &&
-        activeEl &&
-        container.contains(activeEl)
-        || container === activeEl
-      ) {
+      if ( ! ignore && activeEl) {
         const bounds = activeEl.getBoundingClientRect();
-        const targetSize = scroller.dom.container.size;
+        const targetSize = scroller.dom.container.bounds;
 
         if (
-          bounds.top <= 0 || bounds.top >= targetSize.height ||
-          bounds.left <= 0 || bounds.right >= targetSize.width
+          bounds.top < 0 || bounds.top > targetSize.height ||
+          bounds.left < 0 || bounds.right > targetSize.width
         ) {
           if (config.nativeTarget) {
             const position = scroller.position.virtual;

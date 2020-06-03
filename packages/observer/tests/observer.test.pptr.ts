@@ -1,5 +1,5 @@
 import {
-  Observable, observe as _observe, unobserve as _unobserve,
+  Observable, observe as _observe, unobserve as _unobserve, observe,
 } from '../src';
 
 declare global {
@@ -31,9 +31,7 @@ describe('browser', () => {
 
     await page.exposeFunction(fncName, (state) => changed(state));
     await page.evaluate((name) => {
-      window.testObs1.onUpdate(() => {
-        (window as any)[name](window.testObs1);
-      });
+      window.testObs1.onUpdate(() => (window as any)[name](window.testObs1));
     }, fncName);
 
     stateChangedCounter++;
@@ -104,7 +102,7 @@ describe('browser', () => {
     });
   });
 
-  it('should call the changed-callback for the element', async (done) => {
+  it('should call the changed-callback for the element', async () => {
     const changed = await state1Changed(
       jest.fn((state) => {
         expect(state.offset).toMatchObject({
@@ -120,11 +118,9 @@ describe('browser', () => {
     });
 
     await page.evaluate(() => window.testObs1.update());
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-    setTimeout(() => {
-      expect(changed).toHaveBeenCalled();
-      done();
-    }, 500);
+    expect(changed).toHaveBeenCalled();
   });
 
   it('should has the correct offset in the state', async () => {
@@ -163,11 +159,37 @@ describe('browser', () => {
       setTimeout(() => document.body.prepend(test2), 320);
     });
 
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        expect(changed).toHaveBeenCalled();
-        resolve();
-      }, 420);
-    });
+    await new Promise((resolve) => setTimeout(() => resolve(), 100));
+
+    expect(changed).toHaveBeenCalled();
+  });
+
+  it('should observe window as target', async () => {
+    const fnName = 'window_changed';
+    const obName = 'window_observable';
+    const changed = jest.fn();
+    const toVpSize = { width: vpSize.width * .5, height: vpSize.height * .5 };
+
+    await page.exposeFunction(fnName, (state) => changed(state));
+    await page.evaluate((name1, name2) => {
+      const observable = window.observe(window);
+      (window as any)[name2] = observable;
+
+      observable.onUpdate(() => (window as any)[name1](window.testObs1));
+    }, fnName, obName);
+    await page.setViewport(toVpSize);
+    await new Promise(resolve => setTimeout(() => resolve(), 100));
+
+    const size = await page.evaluate((name) => {
+      const observable = (window as any)[name];
+
+      return {
+        width: observable.offset.width,
+        height: observable.offset.height
+      };
+    }, obName);
+
+    expect(size).toMatchObject(toVpSize);
+    expect(changed).toHaveBeenCalled();
   });
 });

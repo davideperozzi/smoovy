@@ -1,5 +1,5 @@
 import {
-  ElementObserver, elementObserverDefaultConfig, ElementState,
+  ObservableController, Observable, observe,
 } from '@smoovy/observer';
 import { Coordinate } from '@smoovy/utils';
 
@@ -18,16 +18,22 @@ export interface ElementParallaxItemConfig
 export class ElementParallaxItem<
   C extends ElementParallaxItemConfig = ElementParallaxItemConfig
 > extends VectorParallaxItem<C> {
-  public static observer = new ElementObserver(elementObserverDefaultConfig);
-  protected elementState: ElementState;
+  public static observer = new ObservableController();
+  protected observable: Observable<HTMLElement>;
 
   public constructor(
-    protected element: HTMLElement | ElementState,
+    protected element: HTMLElement | Observable<HTMLElement>,
     config: Partial<C> = {}
   ) {
     super(config);
 
-    this.elementState = ElementParallaxItem.observer.observe(this.element);
+    const observable = ElementParallaxItem.observer.add(this.element);
+
+    if ( ! (observable.target instanceof HTMLElement)) {
+      throw new Error('Parallax element has to be of type HTMLElement');
+    }
+
+    this.observable = observable;
   }
 
   protected get precision() {
@@ -38,7 +44,7 @@ export class ElementParallaxItem<
     const culling = this.config.culling === false;
     const viewportState = culling
       ? { inside: true }
-      : this.elementState.inViewport(
+      : this.observable.prepos(
           {
             x: state.scrollPosX - this.shift.x,
             y: state.scrollPosY - this.shift.y
@@ -55,7 +61,7 @@ export class ElementParallaxItem<
     }
 
     if (viewportState.inside) {
-      const element = this.elementState.element;
+      const element = this.observable.target;
 
       if (this.config.translate !== false) {
         element.style.transform = `
@@ -71,10 +77,10 @@ export class ElementParallaxItem<
 
   protected getState() {
     return {
-      x: this.elementState.offset.x,
-      y: this.elementState.offset.y,
-      width: this.elementState.size.width,
-      height: this.elementState.size.height
+      x: this.observable.offset.x,
+      y: this.observable.offset.y,
+      width: this.observable.offset.width,
+      height: this.observable.offset.height
     };
   }
 }

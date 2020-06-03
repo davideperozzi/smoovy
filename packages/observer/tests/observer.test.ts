@@ -1,7 +1,7 @@
 import { throttle } from '@smoovy/utils';
 
 import {
-  defaultController, ObservableController, observe, unobserve,
+  defaultController, ObservableController, observe, unobserve, Observable,
 } from '../src';
 
 describe('element', () => {
@@ -82,19 +82,86 @@ describe('element', () => {
     it('should create a new element observer', (done) => {
       const element = document.createElement('div');
       const controller = new ObservableController();
-      const observable = observe(element, controller);
+      const observable = new Observable(element);
       const updateFn = jest.fn();
       const deleteFn = jest.fn();
+      const attachFn = jest.fn();
 
       observable.onUpdate(updateFn);
+      observable.onAttach(attachFn);
       observable.onDetach(deleteFn);
       observable.update();
       observable.update();
-      unobserve(observable);
 
-      expect(updateFn).toHaveBeenCalledTimes(2);
-      expect(deleteFn).toHaveBeenCalledTimes(1);
-      done();
+      observe(observable, controller);
+
+      setTimeout(() => {
+        unobserve(observable, controller);
+        expect(updateFn).toHaveBeenCalledTimes(2);
+        expect(attachFn).toHaveBeenCalled();
+        expect(deleteFn).toHaveBeenCalled();
+        done();
+      }, 10);
+    });
+
+    it('should not add an invalid element', () => {
+      expect(() => observe(1337 as any)).toThrowError();
+    });
+
+    it('should throw error if unobserve from wrong controller', () => {
+      const element = document.createElement('div');
+      const controller = new ObservableController();
+      const observable = observe(element);
+
+      expect(() => unobserve(observable, controller)).toThrowError();
+    });
+
+
+    it('should update all observables async', (done) => {
+      const updateFn1 = jest.fn();
+      const updateFn2 = jest.fn();
+      const obs1 = observe(document.createElement('div'));
+      const obs2 = observe(document.createElement('div'));
+
+      setTimeout(() => {
+        obs1.onUpdate(updateFn1);
+        obs2.onUpdate(updateFn2);
+
+        expect(updateFn1).toHaveBeenCalledTimes(0);
+        expect(updateFn2).toHaveBeenCalledTimes(0);
+
+        defaultController.update();
+
+        expect(updateFn1).toHaveBeenCalledTimes(0);
+        expect(updateFn2).toHaveBeenCalledTimes(0);
+
+        setTimeout(() => {
+          expect(updateFn1).toHaveBeenCalled();
+          expect(updateFn2).toHaveBeenCalled();
+          done();
+        }, 50);
+      });
+    });
+
+    it('should update all observables sync', (done) => {
+      const updateFn1 = jest.fn();
+      const updateFn2 = jest.fn();
+      const obs1 = observe(document.createElement('div'));
+      const obs2 = observe(document.createElement('div'));
+
+      setTimeout(() => {
+        obs1.onUpdate(updateFn1);
+        obs2.onUpdate(updateFn2);
+
+        expect(updateFn1).toHaveBeenCalledTimes(0);
+        expect(updateFn2).toHaveBeenCalledTimes(0);
+
+        defaultController.update(false);
+
+        expect(updateFn1).toHaveBeenCalled();
+        expect(updateFn2).toHaveBeenCalled();
+        done();
+      });
     });
 
     it('should determine if element is in viewport', () => {

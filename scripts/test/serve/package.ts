@@ -20,6 +20,8 @@ if (
       minify: true,
       watch: false,
       hmr: false,
+      cache: false,
+      scopeHoist: true,
       bundleNodeModules: true,
       outDir: path.join(process.cwd(), '.dev')
     });

@@ -14,100 +14,99 @@ Operations like `window.innerWidth` and `element.offsetTop` will have an impact 
 
 ## Usage
 
-The observer is separated into two main components. The `ViewportObserver` and the `ElementObserver`.
+For most use cases using the exposed `observe` and `unobserve` methods is sufficient.
 
-### Observing the viewport (a.k.a. window)
+### Observing the window
 ```js
-import { ViewportObserver } from '@smoovy/observer';
+import { observe } from '@smoovy/observer';
 
-const listener = ViewportObserver.changed(state => {
-  console.log(`The viewport size is ${state.width}x${state.height}`);
+const observable = observe(window);
+const unlisten = observable.onUpdate(() => {
+  const size = observable.offset;
+
+  console.log(`The viewport size is ${size.width}x${size.height}`);
 });
 ```
 
-To remove the listener you can simply call the `remove` method:
+To remove the listener and observable you can simply call the the `unobserve` method:
 ```js
-listener.remove();
+import { unobserve } from '@smoovy/observer';
+
+// Remove update listener
+unlisten();
+
+// Remove observable from detection
+unobserve(observable);
 ```
 
-> The viewport observer's target is always the current `window` object
-
-#### Throttling the change listener calls
-This will throttle the changed callback to **100ms**:
+#### Throttling the update listener calls
+This will throttle the update callback to **100ms**:
 ```js
-ViewportObserver.changed((state) => {}, 100);
+import { throttle } from '@smoovy/utils';
+
+const observable = observe(window).onUpdate(
+  throttle(() => {}, 100)
+);
 ```
 
-#### Updating the viewport manually
+#### Updating the observable manually
 ```js
-ViewportObserver.update();
+observable.update();
 ```
 
-#### Accessing the state at any time
-```js
-const state = await ViewportObserver.state;
-```
-
-#### When does a viewport change occur?
-The change gets called everytime the user triggers the `resize` event on the `window` element. The `ViewportObserver` also makes sure to emit only on the next animation frame.
+#### When does a viewport update occur?
+The update callback is called everytime the user triggers the `resize` event on the `window`; or through  `MutationObserver`s change detection.
 
 ### Observing an element
-By observing an element you automatically create a state inside the `ElementObserver`. This will be your reference to the current state of the element:
+Observing elements works through the same API as with the window.
 
 ```js
-import { ElementObserver } from '@smoovy/observer';
+import { observe } from '@smoovy/observer';
 
 const element = document.querySelector('#test');
-const state = ElementObserver.observe(element);
+const observable = observe(element);
 ```
 
-#### Listening/Unlistening for element changes
+#### Listening/Unlistening for element updates
 ```js
-const listener = state.changed(({ size, offset }) => {
-  console.log('Element size:', size);
+const listener = observable.onUpdate(({ bounds, offset }) => {
+  console.log('Element bounds:', bounds);
   console.log('Element page offset:', offset);
 });
 
 // Stop listening
-listener.remove();
-```
-
-> Changes occur when the `ViewportObserver` changes or the `MutationObserver` detects changes inside the `document.documentElement`
-
-#### Throttling the change listener calls
-This will throttle the changed callback to **100ms**:
-```js
-state.changed((state) => {}, 100);
+listener();
 ```
 
 #### Updating the element state manually
 ```js
-state.update();
+observable.update();
 ```
 
 #### Removing the element state from the observer
 ```js
-state.destroy();
+import { unobserve } from '@smoovy/observer';
+
+unobserver(observable);
 ```
 
-### Creating a new element observer
-Sometimes you want to disable the `MutationObserver` or just want a separate stack of elements to observer. You can simply create a new `ElementObserver` by instantiating it:
+### Creating a new observable controller
+Sometimes you want to disable the `MutationObserver` or just want a separate stack of elements to observer. You can simply create a new `ObservableController` by instantiating it:
 
 ```js
-const observer = new ElementObserver({
-  viewportThrottle: 200,
-  mutationThrottle: 100
-});
+import { ObservableController } from '@smoovy/observer';
+
+const observer = new ObservableController({ throttle: 200 });
 
 const element = document.querySelector('#test');
-const state = observer.observe(element);
+const observable = observer.add(element);
 ```
 
 #### Adding mutators
 You can add multiple targets to listen for DOM mutations:
 
 ```js
-new ElementObserver({
+new ObservableController({
   mutators: [
     {
       target: document.body,

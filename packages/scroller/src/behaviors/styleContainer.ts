@@ -25,7 +25,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = objectDeepMerge(defaultConfig as Config, config);
 
   return (scroller) => {
-    const target = scroller.dom.container.element;
+    const target = scroller.dom.container.target;
 
     for (const x in cfg.defaults) {
       if (cfg.defaults.hasOwnProperty(x)) {
