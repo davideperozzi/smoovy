@@ -8,7 +8,7 @@ steps:
     environment:
       CI: '1'
     commands:
-      - apk --update add make g++ python3 udev ttf-freefont chromium
+      - apk --update add make g++ python3 udev ttf-freefont chromium nss freetype freetype-dev harfbuzz ca-certificates
       - npm install
       - npm run bootstrap
       - npm run lint
