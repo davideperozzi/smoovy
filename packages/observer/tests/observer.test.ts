@@ -76,7 +76,7 @@ describe('element', () => {
         observable.onUpdate(updateFn);
         observable.update();
         observable.update();
-      }, 10);
+      }, 100);
 
       setTimeout(() => {
         unobserve(observable, controller);
@@ -84,7 +84,7 @@ describe('element', () => {
         expect(attachFn).toHaveBeenCalled();
         expect(deleteFn).toHaveBeenCalled();
         done();
-      }, 50);
+      }, 200);
     });
 
     it('should not add an invalid element', () => {
