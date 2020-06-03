@@ -8,7 +8,12 @@ steps:
     environment:
       CI: '1'
     commands:
-      - apk add make g++ python3
+      - apk --update add make \
+          g++ \
+          python3 \
+          udev \
+          ttf-freefont \
+          chromium
       - npm install
       - npm run bootstrap
       - npm run lint
