@@ -38,13 +38,15 @@ describe('general', () => {
         expect(kill).toBeInstanceOf(Function);
         done();
       });
-    });
+    }, 100);
   });
 
   it('should spawn a destroyable thread', (done) => {
-    const thread = ticker.add((delta, time, kill) => kill());
+    const thread = ticker.add((delta, time, kill) => {});
 
     expect(thread.dead).toBe(false);
+
+    thread.kill();
 
     setTimeout(() => {
       expect(thread.dead).toBe(true);

@@ -6,7 +6,7 @@ steps:
   - name: build and test
     image: node:13.12-alpine
     commands:
-      - apk add make g++ python
+      - apk add make g++ python3
       - npm install
       - npm run bootstrap
       - npm run lint
@@ -21,7 +21,7 @@ steps:
       CODECOV_TOKEN:
         from_secret: codecov_token
     commands:
-      - apk add make git g++ python
+      - apk add make git g++ python3
       - git fetch --tags --force
       - npm install
       - npm run bootstrap
