@@ -20,7 +20,8 @@ if (!!process.env.TEST_BROWSER_ROOT) {
   // start the browser in the background, since it's not possible
   // to disable jest-puppeteer for certain tests.
   launchConfig.launch = {
-    headless: !debug
+    headless: !debug,
+    args: [ '--disable-dev-shm-usage' ]
   };
 }
 
