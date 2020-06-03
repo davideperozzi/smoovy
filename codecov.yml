@@ -13,9 +13,6 @@ coverage:
       tween:
         flags: tween
         target: 80%
-      router:
-        flags: utils
-        target: 60%
       utils:
         flags: utils
         target: 80%

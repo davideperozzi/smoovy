@@ -1,0 +1,35 @@
+---
+kind: pipeline
+name: "build, test and deploy"
+
+steps:
+  - name: build and test
+    image: node:13.12-alpine
+    commands:
+      - npm install
+      - npm run bootstrap
+      - npm run lint
+      - npm run build
+      - npm run test
+      - npm run report
+  - name: publish
+    image: node:13.12-alpine
+    environment:
+      NPM_TOKEN:
+        from_secret: npm_publish_token
+      CODECOV_TOKEN:
+        from_secret: codecov_token
+    commands:
+      - apk add git
+      - git fetch --tags --force
+      - npm install
+      - npm run bootstrap
+      - npm run build
+      - echo "//registry.npmjs.org/:_authToken=$${NPM_TOKEN}" > .npmrc
+      - npm run lerna publish from-git -- --yes || true
+
+trigger:
+  branch:
+    - master
+  event:
+    - push
