@@ -5,6 +5,8 @@ name: "build, test and deploy"
 steps:
   - name: build and test
     image: node:13.12-alpine
+    environment:
+      CI: '1'
     commands:
       - apk add make g++ python3
       - npm install
@@ -16,6 +18,7 @@ steps:
   - name: publish
     image: node:13.12-alpine
     environment:
+      CI: '1'
       NPM_TOKEN:
         from_secret: npm_publish_token
       CODECOV_TOKEN:
