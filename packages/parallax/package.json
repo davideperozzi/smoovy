@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/parallax",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "Parallax effects library",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -30,8 +30,8 @@
   "license": "MIT",
   "dependencies": {
     "@smoovy/event": "^0.2.0",
-    "@smoovy/observer": "^0.1.8",
-    "@smoovy/utils": "^0.1.14",
+    "@smoovy/observer": "^0.2.0",
+    "@smoovy/utils": "^0.1.15",
     "tslib": "^1.9.3"
   }
 }
