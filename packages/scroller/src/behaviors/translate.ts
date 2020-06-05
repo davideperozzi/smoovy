@@ -1,6 +1,7 @@
 import { Browser, Coordinate, cutDec } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
+import { listenCompose } from '@smoovy/event';
 
 interface Config {
   /**
@@ -52,14 +53,21 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
 
   return (scroller) => {
     const element = scroller.dom.wrapper.target;
-    const unlisten = scroller.on<Coordinate>(
-      ScrollerEvent.OUTPUT,
-      (pos) => {
-        const posX = cutDec(pos.x, cfg.precision);
-        const posY = cutDec(pos.y, cfg.precision);
+    const unlisten = listenCompose(
+      scroller.on<Coordinate>(
+        ScrollerEvent.OUTPUT,
+        (pos) => {
+          const posX = cutDec(pos.x, cfg.precision);
+          const posY = cutDec(pos.y, cfg.precision);
 
-        updateTransform(element, posX, posY, firefoxFix);
-      }
+          updateTransform(element, posX, posY, firefoxFix);
+        }
+      ),
+      scroller.on(ScrollerEvent.RECALC, () => {
+        const pos = scroller.position.virtual;
+
+        updateTransform(element, pos.x, pos.y, firefoxFix);
+      })
     );
 
     if (cfg.initialStyles) {

@@ -35,6 +35,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     const target = cfg.target || window;
     const detachedBehaviors: string[] = [];
     let unlisten: Unlisten | undefined;
+    let active = false;
 
     const getPos = () => {
       const x = target === window
@@ -49,7 +50,11 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     };
 
     const check = () => {
-      if (cfg.condition()) {
+      const willActivate = cfg.condition();
+
+      if (willActivate && ! active) {
+        active = true;
+
         scroller.behaviors.forEach((b, name) => {
           if (b !== self) {
             scroller.detachBehavior(name);
@@ -75,46 +80,47 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
                 isNum(pos.y) ? pos.y as number : defPos.y
               );
             }
-          })
-        );
-
-        scroller.on<TweenToEvent>(
-          ScrollerEvent.TWEEN_TO,
-          ({ pos, options }) => {
-            const force = !!options.force;
-            let tween: Tween | undefined;
-            const shallowStop = () => {
-              if (tween && ! force) {
-                tween.stop();
-                tween = undefined;
-              }
-            };
-
-            const unlistenTween = listenCompose(
-              listenEl(window, 'touchstart', shallowStop),
-              listenEl(window, 'wheel', shallowStop),
-              listenEl(window, 'keydown', (event) => {
-                const delta = getDeltaByKeyEvent(event);
-
-                if (event.key === 'Tab' || delta.x !== 0 || delta.y !== 0) {
-                  shallowStop();
+          }),
+          scroller.on<TweenToEvent>(
+            ScrollerEvent.TWEEN_TO,
+            ({ pos, options }) => {
+              const force = !!options.force;
+              let tween: Tween | undefined;
+              const shallowStop = () => {
+                if (tween && ! force) {
+                  tween.stop();
+                  tween = undefined;
                 }
-              })
-            );
+              };
 
-            tween = Tween.fromTo(scroller.position.virtual, pos, {
-              mutate: false,
-              duration: options.duration,
-              easing: options.easing,
-              on: {
-                update: (newPos) => window.scrollTo(newPos.x, newPos.y),
-                complete: unlistenTween,
-                stop: unlistenTween
-              }
-            });
-          }
+              const unlistenTween = listenCompose(
+                listenEl(window, 'touchstart', shallowStop),
+                listenEl(window, 'wheel', shallowStop),
+                listenEl(window, 'keydown', (event) => {
+                  const delta = getDeltaByKeyEvent(event);
+
+                  if (event.key === 'Tab' || delta.x !== 0 || delta.y !== 0) {
+                    shallowStop();
+                  }
+                })
+              );
+
+              tween = Tween.fromTo(scroller.position.virtual, pos, {
+                mutate: false,
+                duration: options.duration,
+                easing: options.easing,
+                on: {
+                  update: (newPos) => window.scrollTo(newPos.x, newPos.y),
+                  complete: unlistenTween,
+                  stop: unlistenTween
+                }
+              });
+            }
+          )
         );
-      } else if (detachedBehaviors.length > 0) {
+      } else if (active && ! willActivate) {
+        active = false;
+
         if (unlisten) {
           unlisten();
           unlisten = undefined;
@@ -125,8 +131,9 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       }
     };
 
-    setTimeout(() => check());
-    scroller.on(ScrollerEvent.RECALC, () => check());
+    setTimeout(check);
+
+    return scroller.on(ScrollerEvent.RECALC, check);
   };
 };
 

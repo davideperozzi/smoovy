@@ -1,7 +1,7 @@
 import { easings } from '@smoovy/tween';
 import { getElementOffset } from '@smoovy/utils';
 
-import { nativeSmoothScroll } from '../../src';
+import { nativeSmoothScroll, ScrollerEvent } from '../../src';
 
 const element = document.querySelector('main') as HTMLElement;
 const scroller = nativeSmoothScroll(element);
