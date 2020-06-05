@@ -113,6 +113,10 @@ describe('emitter', () => {
     expect(listener).toHaveBeenCalledTimes(3);
   });
 
+  it('should return false if no listeners were found (on detach)', () => {
+    expect(emitter.off('j4ehfd', () => {})).toBeFalsy();
+  });
+
   it('should reflect events to a separate emitter with muted events', () => {
     const listener = jest.fn();
     const emitter2 = new EventEmitter();

@@ -4,7 +4,7 @@ export type EventListenerCb<T = any> = (data: T) => void;
 export type ListenerCallback<T = any> = (...args: T[]) => void;
 
 export class EventEmitter {
-  private listeners: { [name: string]: EventListenerCb[] } = {};
+  private listeners: { [name: string]: Set<EventListenerCb> } = {};
   private emitters: EventEmitter[] = [];
   private mutedEvents: string[] = [];
 
@@ -27,17 +27,17 @@ export class EventEmitter {
 
         /* istanbul ignore else */
         if (this.listeners.hasOwnProperty(name)) {
-          for (let i = 0, len = this.listeners[name].length; i < len; i++) {
+          this.listeners[name].forEach(cb => {
             listenerCb.call(
               this,
-              this.listeners[name][i].call(
+              cb.call(
                 this,
                 dataOrCallback !== listenerCb
                   ? dataOrCallback as T
                   : undefined
               ) as any
             );
-          }
+          });
         }
       }
     } else {
@@ -56,12 +56,9 @@ export class EventEmitter {
 
           /* istanbul ignore else */
           if (this.listeners.hasOwnProperty(name)) {
-            for (let i = 0, len = this.listeners[name].length; i < len; i++) {
-              listenerCb.call(
-                this,
-                this.listeners[name][i].call(this, eventData) as any
-              );
-            }
+            this.listeners[name].forEach(cb => {
+              listenerCb.call(this, cb.call(this, eventData) as any);
+            });
           }
         }
       }
@@ -72,9 +69,9 @@ export class EventEmitter {
 
   public on<T>(name: string, cb: EventListenerCb<T>): Unlisten {
     if (this.listeners.hasOwnProperty(name)) {
-      this.listeners[name].push(cb);
+      this.listeners[name].add(cb);
     } else {
-      this.listeners[name] = [ cb ];
+      this.listeners[name] = new Set([ cb ]);
     }
 
     return () => this.off(name, cb);
@@ -85,17 +82,14 @@ export class EventEmitter {
 
     /* istanbul ignore else */
     if (listeners.hasOwnProperty(name)) {
-      const index = listeners[name].indexOf(cb);
-
-      /* istanbul ignore else */
-      if (index > -1) {
-        listeners[name].splice(index, 1);
-      }
+      return listeners[name].delete(cb);
     }
+
+    return false;
   }
 
   public hasEventListeners(name: string) {
-    return this.listeners[name] && this.listeners[name].length > 0;
+    return this.listeners[name] && this.listeners[name].size > 0;
   }
 
   public isEventMuted(event: string) {
