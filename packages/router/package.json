@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/router",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Simple router",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -31,7 +31,7 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/event": "^0.2.0",
+    "@smoovy/event": "^0.2.1",
     "@smoovy/tween": "^0.2.7",
     "@smoovy/utils": "^0.1.15",
     "tslib": "^1.9.3"

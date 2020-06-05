@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/observer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Observing states of elements",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -32,7 +32,7 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/event": "^0.2.0",
+    "@smoovy/event": "^0.2.1",
     "@smoovy/utils": "^0.1.15",
     "tslib": "^1.9.3"
   }
