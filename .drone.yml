@@ -6,11 +6,13 @@ steps:
   - name: build and test
     image: node:13.12-alpine
     environment:
-      CI: '1'
+      CODECOV_TOKEN:
+        from_secret: codecov_token
       # PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
       # PUPPETEER_EXECUTABLE_PATH: '/usr/bin/chromium-browser'
     commands:
       # - apk --update add make g++ python3 udev ttf-freefont chromium nss freetype freetype-dev harfbuzz ca-certificates
+      - apk --update add git
       - npm install
       - npm run bootstrap
       - npm run lint
@@ -20,11 +22,8 @@ steps:
   - name: publish
     image: node:13.12-alpine
     environment:
-      CI: '1'
       NPM_TOKEN:
         from_secret: npm_publish_token
-      CODECOV_TOKEN:
-        from_secret: codecov_token
     commands:
       - apk add make git g++ python3
       - git fetch --tags --force
