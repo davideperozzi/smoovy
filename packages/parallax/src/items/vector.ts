@@ -111,6 +111,12 @@ export class VectorParallaxItem<
     }
   }
 
+  public recalc() {
+    if (this.config.on && typeof this.config.on.recalc === 'function') {
+      this.config.on.recalc.call(this);
+    }
+  }
+
   public destroy() {
     if (this.config.on && typeof this.config.on.destroy === 'function') {
       this.config.on.destroy.call(this);

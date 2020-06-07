@@ -101,6 +101,11 @@ const item = new ElementParallaxItem(element, {
   // Default: true
   culling: false,
 
+  // Disable automatic recalc on resize.
+  //
+  // Default: true
+  observe: false,
+
   // Defines the center point of the element.
   // The line will meet with the viewport center line
   // on the initial element position

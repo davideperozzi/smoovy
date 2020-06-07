@@ -21,7 +21,7 @@ const defaultConfig: ParallaxControllerConfig = {
 };
 
 export class ParallaxController {
-  protected items: ParallaxItem[] = [];
+  protected _items: ParallaxItem[] = [];
   protected config = defaultConfig;
   protected state = defaultState;
 
@@ -29,18 +29,28 @@ export class ParallaxController {
     this.config = objectDeepMerge(this.config, config);
   }
 
+  public get items() {
+    return this._items;
+  }
+
   public add(item: ParallaxItem) {
-    if ( ! this.items.includes(item)) {
-      this.items.push(item);
+    if ( ! this._items.includes(item)) {
+      this._items.push(item);
+    }
+  }
+
+  public recalc() {
+    for (let i = 0, len = this._items.length; i < len; i++) {
+      this._items[i].recalc();
     }
   }
 
   public remove(item: ParallaxItem) {
-    const index = this.items.indexOf(item);
+    const index = this._items.indexOf(item);
 
     if (index > -1) {
-      this.items[index].destroy();
-      this.items.splice(index, 1);
+      this._items[index].destroy();
+      this._items.splice(index, 1);
     }
   }
 
@@ -69,8 +79,8 @@ export class ParallaxController {
       this.state.contentHeight = state.contentHeight;
     }
 
-    for (let i = 0, len = this.items.length; i < len; i++) {
-      this.items[i].update(this.state, this.config.offset);
+    for (let i = 0, len = this._items.length; i < len; i++) {
+      this._items[i].update(this.state, this.config.offset);
     }
   }
 }

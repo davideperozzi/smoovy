@@ -12,6 +12,7 @@ export interface ElementParallaxItemConfig
   padding?: Coordinate;
   culling?: boolean;
   translate?: boolean;
+  observe?: boolean;
   mapShift?: (shift: Coordinate) => Coordinate;
 }
 
@@ -27,13 +28,35 @@ export class ElementParallaxItem<
   ) {
     super(config);
 
-    const observable = ElementParallaxItem.observer.add(this.element);
+    this.observable = this.element instanceof Observable
+      ? this.element
+      : new Observable(this.element);
 
-    if ( ! (observable.target instanceof HTMLElement)) {
+    if ( ! (this.observable.target instanceof HTMLElement)) {
       throw new Error('Parallax element has to be of type HTMLElement');
     }
 
-    this.observable = observable;
+    if (config.observe !== false) {
+      ElementParallaxItem.observer.add(this.observable);
+    } else {
+      this.recalc();
+    }
+  }
+
+  public destroy() {
+    super.destroy();
+
+    if (this.config.observe) {
+      ElementParallaxItem.observer.delete(this.observable);
+    }
+
+    delete this.observable;
+  }
+
+  public recalc() {
+    super.recalc();
+
+    this.observable.update();
   }
 
   protected get precision() {
