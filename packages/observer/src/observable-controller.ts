@@ -13,21 +13,12 @@ export interface ObservableControllerConfig {
 /* istanbul ignore next */
 export const defaultControllerConfig: ObservableControllerConfig = {
   throttle: 50,
-  mutators: Browser.client ? [
-    {
-      target: document.documentElement,
-      options: {
-        characterData: true,
-        childList: true,
-        subtree: true
-      }
-    }
-  ] : []
+  mutators: []
 };
 
 export class ObservableController {
   public static readonly default = new ObservableController();
-  private listener: Unlisten;
+  private listener?: Unlisten;
   private obervables = new Set<Observable>();
   private mutationObserver?: MutationObserver;
 
