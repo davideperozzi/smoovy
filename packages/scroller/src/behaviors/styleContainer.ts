@@ -22,7 +22,11 @@ const defaultConfig = {
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
-  const cfg = objectDeepMerge(defaultConfig as Config, config);
+  const cfg = config;
+
+  if ( ! config.defaults) {
+    cfg.defaults = defaultConfig.defaults;
+  }
 
   return (scroller) => {
     const target = scroller.dom.container.target;
