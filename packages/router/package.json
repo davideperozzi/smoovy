@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/router",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Simple router",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
