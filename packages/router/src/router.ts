@@ -45,7 +45,7 @@ export class Router extends EventEmitter {
   private _state: RouterState = {};
   private fetch?: GoFetch;
   private pendingEvent?: RouteChangeEvent;
-  private unlistenPopstate: Unlisten;
+  private unlistenPopstate?: Unlisten;
   private contentCache = new Map<string, string>();
   private transitions = new Map<string, RouterTransition[]>();
 
@@ -122,6 +122,26 @@ export class Router extends EventEmitter {
         this.transitions.set(constraint, [ transition ]);
       }
     });
+  }
+
+  public removeTransition(...transitions: RouterTransition[]) {
+    const emptyConstraints: string[] = [];
+
+    transitions.forEach(transition => {
+      this.transitions.forEach((currentTransitions, constraint) => {
+        const index = currentTransitions.indexOf(transition);
+
+        if (index > -1) {
+          currentTransitions.splice(index, 1);
+        }
+
+        if (currentTransitions.length === 0) {
+          emptyConstraints.push(constraint);
+        }
+      });
+    });
+
+    emptyConstraints.forEach(constr => this.transitions.delete(constr));
   }
 
   private replace(route: Route, history = false) {
