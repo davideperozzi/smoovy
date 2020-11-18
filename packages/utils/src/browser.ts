@@ -103,6 +103,16 @@ export class Browser {
   }
 
   /* istanbul ignore next */
+  public static get resizeObserver() {
+    return 'ResizeObserver' in window;
+  }
+
+  /* istanbul ignore next */
+  public static get intersectionObserver() {
+    return 'IntersectionObserver' in window;
+  }
+
+  /* istanbul ignore next */
   public static get client() {
     return typeof window !== 'undefined' &&
            typeof window.document !== 'undefined';

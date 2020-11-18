@@ -44,7 +44,7 @@ export class Observable<
     return this.on(ObservableEvent.DETACH, listener);
   }
 
-  public update() {
+  public update(rect?: DOMRectReadOnly) {
     this.emit(ObservableEvent.WILL_UPDATE, this);
 
     /* istanbul ignore next: covered by pptr */
@@ -57,7 +57,7 @@ export class Observable<
       this.offset.height = size.height;
     } else {
       const target = this.target as HTMLElement;
-      const bounds = target.getBoundingClientRect();
+      const bounds = rect || target.getBoundingClientRect();
       const offset = getElementOffset(target);
 
       this.bounds.x = bounds.left;

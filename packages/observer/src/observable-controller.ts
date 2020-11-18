@@ -2,68 +2,83 @@ import { listenEl, Unlisten } from '@smoovy/event';
 import { Browser, throttle } from '@smoovy/utils';
 import { Observable, ObservableTarget, ObservableEvent } from './observable';
 
+interface ResizeObserverSize {
+  blockSize: number;
+  inlineSize: number;
+}
+
+interface ResizeObserverEntry {
+  borderBoxSize: ResizeObserverSize[];
+  contentBoxSize: ResizeObserverSize[];
+  contentRect: DOMRectReadOnly;
+  devicePixelContentBoxSize: ResizeObserverSize[]
+  target: Element;
+}
+
+declare class ResizeObserver {
+  public constructor(cb: (entries: ResizeObserverEntry[]) => void);
+  public observe(target: Element): void;
+  public unobserve(target: Element): void;
+  public disconnect(): void;
+}
+
 export interface ObservableControllerConfig {
-  throttle: number;
-  mutators?: {
-    target?: HTMLElement;
-    options?: MutationObserverInit;
-  }[];
+  resizeObserver: boolean;
 }
 
 /* istanbul ignore next */
 export const defaultControllerConfig: ObservableControllerConfig = {
-  throttle: 50,
-  mutators: []
+  resizeObserver: true
 };
 
 export class ObservableController {
   public static readonly default = new ObservableController();
-  private listener?: Unlisten;
+  private unlistenResize?: Unlisten;
+  private resizeObserver?: ResizeObserver;
   private obervables = new Set<Observable>();
-  private mutationObserver?: MutationObserver;
 
   public constructor(
     protected config = defaultControllerConfig
   ) {}
 
   private attach() {
-    const throttleMs = this.config.throttle;
-    const updateFn = /* istanbul ignore else */ throttleMs > 0
-      ? throttle(this.update.bind(this, false), throttleMs)
-      : /* istanbul ignore next */ this.update.bind(this, false);
-
     /* istanbul ignore next: covered by pptr */
-    if (Browser.client && Browser.mutationObserver && this.config.mutators) {
-      this.mutationObserver = new MutationObserver(updateFn);
-
-      setTimeout(() => {
-        if (Browser.client && this.config.mutators) {
-          this.config.mutators.forEach(config => {
-            if (config.target && this.mutationObserver) {
-              this.mutationObserver.observe(
-                config.target,
-                { ...config.options }
-              );
+    if (
+      this.config.resizeObserver &&
+      Browser.client &&
+      Browser.resizeObserver
+    ) {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        entries.forEach(entry => {
+          this.obervables.forEach(observable => {
+            if (observable.target === entry.target) {
+              observable.update();
             }
           });
-        }
-      }, throttleMs || 0);
+        });
+      });
     }
 
-    this.listener = listenEl(window, 'resize', updateFn);
+    // update window observables
+    this.unlistenResize = listenEl(window, 'resize', () => {
+      this.obervables.forEach(observable => {
+        if (observable.target instanceof Window) {
+          observable.update();
+        }
+      });
+    });
   }
 
   private detach() {
     /* istanbul ignore else */
-    if (this.listener) {
-      this.listener();
-      delete this.listener;
+    if (this.unlistenResize) {
+      this.unlistenResize();
+      delete this.unlistenResize;
     }
 
-    /* istanbul ignore next */
-    if (this.mutationObserver) {
-      this.mutationObserver.disconnect();
-      delete this.mutationObserver;
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      delete this.resizeObserver;
     }
   }
 
@@ -91,20 +106,24 @@ export class ObservableController {
       throw new Error(`Invalid target to observe (${target})`);
     }
 
+    /* istanbul ignore else */
+    if ( ! this.unlistenResize) {
+      this.attach();
+    }
+
     const observable = target instanceof Observable
       ? target as Exclude<O, ObservableTarget>
       : new Observable<Exclude<O, Observable>>(target as any);
+
+    if (this.resizeObserver && observable.target instanceof Element) {
+      this.resizeObserver.observe(observable.target);
+    }
 
     (observable as Observable).emit(ObservableEvent.WILL_ATTACH, observable);
     this.obervables.add(observable);
     (observable as Observable).emit(ObservableEvent.ATTACH, observable);
 
     requestAnimationFrame(() => observable.update());
-
-    /* istanbul ignore else */
-    if ( ! this.listener) {
-      this.attach();
-    }
 
     return observable;
   }
@@ -114,12 +133,16 @@ export class ObservableController {
       throw new Error('Observable was not added to this controller');
     }
 
+    if (this.resizeObserver && observable.target instanceof Element) {
+      this.resizeObserver.unobserve(observable.target);
+    }
+
     observable.emit(ObservableEvent.WILL_DETACH, observable);
     this.obervables.delete(observable);
     observable.emit(ObservableEvent.DETACH, observable);
 
     /* istanbul ignore else */
-    if (this.obervables.size === 0 && this.listener) {
+    if (this.obervables.size === 0 && this.unlistenResize) {
       this.detach();
     }
   }
