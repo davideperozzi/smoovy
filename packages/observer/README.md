@@ -55,7 +55,7 @@ observable.update();
 ```
 
 #### When does a viewport update occur?
-The update callback is called everytime the user triggers the `resize` event on the `window`; or through  `MutationObserver`s change detection.
+The update callback is called everytime the user triggers the `resize` event on the `window`; or through `ResizeObserver`s change detection.
 
 ### Observing an element
 Observing elements works through the same API as with the window.
