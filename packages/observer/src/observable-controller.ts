@@ -11,7 +11,7 @@ interface ResizeObserverEntry {
   borderBoxSize: ResizeObserverSize[];
   contentBoxSize: ResizeObserverSize[];
   contentRect: DOMRectReadOnly;
-  devicePixelContentBoxSize: ResizeObserverSize[]
+  devicePixelContentBoxSize: ResizeObserverSize[];
   target: Element;
 }
 

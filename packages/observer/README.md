@@ -91,33 +91,15 @@ unobserver(observable);
 ```
 
 ### Creating a new observable controller
-Sometimes you want to disable the `MutationObserver` or just want a separate stack of elements to observer. You can simply create a new `ObservableController` by instantiating it:
+Sometimes you want to disable the `ResizeObserver` or just want a separate stack of elements to observer. You can simply create a new `ObservableController` by instantiating it:
 
 ```js
 import { ObservableController } from '@smoovy/observer';
 
-const observer = new ObservableController({ throttle: 200 });
+const observer = new ObservableController({ resizeObserver: false });
 
 const element = document.querySelector('#test');
 const observable = observer.add(element);
-```
-
-#### Adding mutators
-You can add multiple targets to listen for DOM mutations:
-
-```js
-new ObservableController({
-  mutators: [
-    {
-      target: document.body,
-      options: {
-        attribues: true,
-        attributesFilter: [ 'style' ]
-        subtree: true
-      }
-    }
-  ]
-});
 ```
 
 ## Development commands
