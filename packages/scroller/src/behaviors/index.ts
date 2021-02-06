@@ -2,7 +2,7 @@ export { default as bypassFocus, BypassFocusConfig } from './bypassFocus';
 export { default as bypassNative, BypassNativeConfig } from './bypassNative';
 export { default as clampContent } from './clampContent';
 export { default as keyboard, KeyboardConfig } from './keyboard';
-export { default as lerpContent, LerpContentConfig } from './lerpContent';
+export { default as lerpContent, LerpContentConfig, LerpContentEvent } from './lerpContent';
 export { default as mouseWheel, MouseWheelConfig } from './mouseWheel';
 export { default as scrollTo, ScrollToConfig } from './scrollTo';
 export { default as styleContainer, StyleContainerConfig } from './styleContainer';

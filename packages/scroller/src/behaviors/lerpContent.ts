@@ -29,6 +29,11 @@ interface Config {
   ticker?: Ticker;
 }
 
+enum Event {
+  LERP_CONTENT_START = '+lerp-content-start',
+  LERP_CONTENT_END = '+lerp-content-end'
+}
+
 const defaultConfig = {
   damping: 0.1,
   precision: 0.009,
@@ -40,6 +45,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
 
   return (scroller) => {
     let thread: TickerThread;
+    let running = false;
     const ticker = cfg.ticker || new Ticker();
     const damping = Browser.mobile ? cfg.mobileDamping : cfg.damping;
     const unlisten = scroller.on<OutputTransformEvent>(
@@ -55,12 +61,23 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
           const outputY = lerp(pos.y, virtual.y, damping);
           const diffX = Math.abs(virtual.x - outputX);
           const diffY = Math.abs(virtual.y - outputY);
+          const newPos = { x: outputX, y: outputY };
+
+          if ( ! running) {
+            scroller.emit(Event.LERP_CONTENT_START, newPos);
+            running = true;
+          }
 
           if (diffX < cfg.precision && diffY < cfg.precision) {
             kill();
+            Ticker.requestAnimationFrame(() => {
+              scroller.emit(Event.LERP_CONTENT_END, newPos);
+            });
+            running = false;
+            return;
           }
 
-          step({ x: outputX, y: outputY });
+          step(newPos);
         });
       }
     );
@@ -72,5 +89,9 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
   };
 };
 
-export { Config as LerpContentConfig };
+export {
+  Config as LerpContentConfig,
+  Event as LerpContentEvent
+};
+
 export default behavior;

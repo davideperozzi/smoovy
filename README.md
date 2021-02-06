@@ -26,7 +26,7 @@ Choose a package you want to install. It's as easy as that:
 npm install --save @smoovy/<package>
 ```
 
-## Roadmap 2020
+## Roadmap 2021
 - [ ] 📦 Create `@smoovy/timeline` (timeline for tweens)
 - [ ] 📦 Create `@smoovy/text-split` (easy text splitting)
 - [ ] 💡 Improve tween demos

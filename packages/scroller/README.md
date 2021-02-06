@@ -7,6 +7,7 @@ npm install --save @smoovy/scroller
 ```
 
 ## Examples
+* [huecryagency.com](https://huecryagency.com/)
 * [rootsandfriends.com](https://rootsandfriends.com/)
 * [davideperozzi.com](https://davideperozzi.com/)
 * [jobs.dorfjungs.com](https://jobs.dorfjungs.com/)

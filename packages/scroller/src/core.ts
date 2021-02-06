@@ -56,7 +56,7 @@ export class Scroller extends EventEmitter {
   private locks: string[] = [];
   private availableBehaviors = new Map<string, ScrollBehaviorItem>();
   private attachedBehaviors = new Map<string, ScrollBehaviorItemDetach>();
-  private unlisten: Unlisten;
+  private unlisten?: Unlisten;
   public dom: ScrollerDom;
   public position: ScrollerPosition = {
     output: { x: 0, y: 0 },
