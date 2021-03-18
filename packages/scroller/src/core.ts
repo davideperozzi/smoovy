@@ -38,6 +38,7 @@ export interface ScrollToEvent {
 }
 
 export enum ScrollerEvent {
+  LOCK = 'lock',
   DELTA = 'delta',
   OUTPUT = 'output',
   VIRTUAL = 'virtual',
@@ -245,6 +246,7 @@ export class Scroller extends EventEmitter {
   public lock(name = 'default', enable = true) {
     if ( ! this.locks.includes(name) && enable) {
       this.locks.push(name);
+      this.emit(ScrollerEvent.LOCK, { name, enable });
     } else if ( ! enable) {
       this.unlock(name);
     }
@@ -255,6 +257,7 @@ export class Scroller extends EventEmitter {
 
     if (index > -1) {
       this.locks.splice(index, 1);
+      this.emit(ScrollerEvent.LOCK, { name, enable: false });
     }
   }
 

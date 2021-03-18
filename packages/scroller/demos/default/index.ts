@@ -6,7 +6,14 @@ const scroller = nativeSmoothScroll(element);
 
 setTimeout(() => {
   scroller.scrollTo({ y: 1500 }, true);
-}, 2000);
+  setTimeout(() => scroller.lock());
+  setTimeout(() => scroller.lock(), 100);
+
+  setTimeout(() => {
+    scroller.unlock();
+    scroller.unlock();
+  }, 1500);
+}, 1500);
 
 // scroller.on(ScrollerEvent.RECALC, () => {
 //   console.log('recalc');

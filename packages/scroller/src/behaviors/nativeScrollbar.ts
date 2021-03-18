@@ -19,11 +19,17 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = Object.assign(defaultConfig, config);
 
   return (scroller) => {
+    const scrollerDom = scroller.dom;
     const contentSpan = document.createElement('div');
-    const parentElement = scroller.dom.container.target.parentElement;
-    const updateSize = () => {
-      contentSpan.style.height = `${scroller.dom.wrapper.offset.height}px`;
+    const parentElement = scrollerDom.container.target.parentElement;
+    const updateSize = (height?: number) => {
+      const wrapperHeight = scrollerDom.wrapper.offset.height;
+
+      contentSpan.style.height = `${height ?? wrapperHeight}px`;
     };
+
+    let restorePos = { x: 0, y: 0 };
+    let locked = false;
 
     updateSize();
 
@@ -41,7 +47,25 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
             }))
           )
         : undefined,
-      scroller.on(ScrollerEvent.RECALC, updateSize)
+      scroller.on(ScrollerEvent.RECALC, () => {
+        if ( ! scroller.isLocked()) {
+          updateSize();
+        }
+      }),
+      scroller.on(ScrollerEvent.LOCK, () => {
+        if (scroller.isLocked() && ! locked) {
+          locked = true;
+          restorePos.x = scroller.position.output.x;
+          restorePos.y = scroller.position.output.y;
+
+          updateSize(0);
+        } else if (locked) {
+          locked = false;
+
+          updateSize();
+          scroller.scrollTo(restorePos, true);
+        }
+      })
     );
   };
 };
