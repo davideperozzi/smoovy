@@ -24,6 +24,15 @@ interface Config {
   precision?: number;
 
   /**
+   * Disable this if you don't want to include the delta value from the
+   * animation in your lerp functions damping value. By disabling this you get
+   * different results for High frequency displays, since it renders the
+   * animation faster
+   * Default: true
+   */
+  multiplyDelta?: boolean;
+
+  /**
    * A custom ticker to use for the animation
    */
   ticker?: Ticker;
@@ -38,6 +47,7 @@ const defaultConfig = {
   damping: 0.1,
   precision: 0.009,
   mobileDamping: 0.18,
+  multiplyDelta: true
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
@@ -55,10 +65,11 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
           thread.kill();
         }
 
-        thread = ticker.add((_delta, _time, kill) => {
+        thread = ticker.add((delta, _time, kill) => {
+          const lerpDamp = damping * (cfg.multiplyDelta ? delta : 1);
           const virtual = scroller.position.virtual;
-          const outputX = lerp(pos.x, virtual.x, damping);
-          const outputY = lerp(pos.y, virtual.y, damping);
+          const outputX = lerp(pos.x, virtual.x, lerpDamp);
+          const outputY = lerp(pos.y, virtual.y, lerpDamp);
           const diffX = Math.abs(virtual.x - outputX);
           const diffY = Math.abs(virtual.y - outputY);
           const newPos = { x: outputX, y: outputY };
