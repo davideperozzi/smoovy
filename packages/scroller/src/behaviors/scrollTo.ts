@@ -42,7 +42,9 @@ const behavior: SmoovyScrollBehavior<Config> = (config = {}) => (scroller) => {
       }
 
       config.nativeTarget.scrollTo({
-        behavior: config.nativeBehavior || 'smooth',
+        behavior: event.skipOutputTransform
+          ? 'auto'
+          : (config.nativeBehavior || 'smooth'),
         ...position
       });
     } else {
