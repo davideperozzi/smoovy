@@ -19,17 +19,15 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = Object.assign(defaultConfig, config);
 
   return (scroller) => {
-    const scrollerDom = scroller.dom;
+    let locked = false;
+    const restorePos = { x: 0, y: 0 };
     const contentSpan = document.createElement('div');
-    const parentElement = scrollerDom.container.target.parentElement;
+    const parentElement = scroller.dom.container.target.parentElement;
     const updateSize = (height?: number) => {
-      const wrapperHeight = scrollerDom.wrapper.offset.height;
+      const wrapperHeight = scroller.dom.wrapper.offset.height;
 
       contentSpan.style.height = `${height ?? wrapperHeight}px`;
     };
-
-    let restorePos = { x: 0, y: 0 };
-    let locked = false;
 
     updateSize();
 
