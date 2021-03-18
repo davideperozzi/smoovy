@@ -1,5 +1,5 @@
 import { Ticker, TickerThread } from '@smoovy/ticker';
-import { Browser, cutDec, lerp } from '@smoovy/utils';
+import { Browser, lerp } from '@smoovy/utils';
 
 import { OutputTransformEvent, ScrollBehavior, ScrollerEvent } from '../core';
 
