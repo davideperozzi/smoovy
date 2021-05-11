@@ -51,11 +51,14 @@ const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
       if ( ! ignore && activeEl) {
         const bounds = activeEl.getBoundingClientRect();
         const targetSize = scroller.dom.container.bounds;
+        const visible = (
+          bounds.bottom > 0 &&
+          bounds.top < targetSize.height &&
+          bounds.right > 0 &&
+          bounds.left < targetSize.width
+        );
 
-        if (
-          bounds.top < 0 || bounds.top > targetSize.height ||
-          bounds.left < 0 || bounds.right > targetSize.width
-        ) {
+        if ( ! visible) {
           if (config.nativeTarget) {
             const position = scroller.position.virtual;
 

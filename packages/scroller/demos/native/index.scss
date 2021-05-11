@@ -3,7 +3,8 @@
 $sizes: (
   small 300px,
   medium 600px,
-  large 120vh
+  large 120vh,
+  verylarge 140vh
 );
 
 $colors:
@@ -34,5 +35,10 @@ section {
     &.#{$name} {
       height: $size;
     }
+  }
+
+  .big-link {
+    display: block;
+    height: 100%;
   }
 }

@@ -24,7 +24,7 @@ if (typeof process.argv[2] === 'string') {
       app._router.handle(req, res, next);
     });
 
-    app.use(bundler.middleware()).listen(port);
+    app.use(bundler.middleware()).listen(port, '0.0.0.0');
 
     console.log(`listening at http://localhost:${port}`);
   } else {
