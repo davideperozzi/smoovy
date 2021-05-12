@@ -9,3 +9,7 @@ const unlisten = listenCompose(
   box2.onVisibilityChanged((visible) => console.log('box2', visible)),
   box3.onVisibilityChanged((visible) => console.log('box3', visible)),
 );
+
+box1.onUpdate(() => {
+  console.log('updated');
+})

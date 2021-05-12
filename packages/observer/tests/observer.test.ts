@@ -70,7 +70,7 @@ describe('element', () => {
       observable.onAttach(attachFn);
       observable.onDetach(deleteFn);
 
-      observe(observable, controller);
+      controller.add(observable);
 
       setTimeout(() => {
         observable.onUpdate(updateFn);
@@ -90,15 +90,6 @@ describe('element', () => {
     it('should not add an invalid element', () => {
       expect(() => observe(1337 as any)).toThrowError();
     });
-
-    it('should throw error if unobserve from wrong controller', () => {
-      const element = document.createElement('div');
-      const controller = new ObservableController();
-      const observable = observe(element);
-
-      expect(() => unobserve(observable, controller)).toThrowError();
-    });
-
 
     it('should update all observables async', (done) => {
       const updateFn1 = jest.fn();
