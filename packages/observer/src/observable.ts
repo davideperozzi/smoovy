@@ -17,12 +17,14 @@ export enum ObservableEvent {
   WILL_ATTACH = 'will-attach',
   ATTACH = 'attach',
   WILL_DETACH = 'will-delete',
-  DETACH = 'detach'
+  DETACH = 'detach',
+  VISIBILITY_CHANGED = 'visibility-changed'
 }
 
 export class Observable<
   T extends ObservableTarget = ObservableTarget
 > extends EventEmitter {
+  private _visibility = false;
   public bounds: ObservableRect = { x: 0, y: 0, width: 0, height: 0 };
   public offset: ObservableRect = { x: 0, y: 0, width: 0, height: 0 };
 
@@ -42,6 +44,24 @@ export class Observable<
 
   public onDetach(listener: EventListenerCb) {
     return this.on(ObservableEvent.DETACH, listener);
+  }
+
+  public onVisibilityChanged(listener: EventListenerCb) {
+    return this.on(ObservableEvent.VISIBILITY_CHANGED, listener);
+  }
+
+  public set visibility(visibility: boolean) {
+    const changed = visibility !== this._visibility;
+
+    this._visibility = visibility;
+
+    if (changed) {
+      this.emit(ObservableEvent.VISIBILITY_CHANGED, this._visibility);
+    }
+  }
+
+  public get visibility() {
+    return this._visibility;
   }
 
   public update(rect?: DOMRectReadOnly) {
