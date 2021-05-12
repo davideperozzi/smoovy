@@ -29,7 +29,7 @@ interface IntersectionObserverConfig {
 }
 
 interface IntersectionObserverEntry {
-  rootBounds: DOMRectReadOnly
+  rootBounds: DOMRectReadOnly;
   boundingClientRect: DOMRectReadOnly;
   intersectionRect: DOMRectReadOnly;
   intersectionRatio: number;
@@ -101,7 +101,7 @@ export class ObservableController {
         entries.forEach(entry => {
           this.obervables.forEach(observable => {
             if (observable.target === entry.target) {
-              observable.visibility = entry.isIntersecting
+              observable.visibility = entry.isIntersecting;
             }
           });
         });
@@ -182,9 +182,14 @@ export class ObservableController {
       ? target as Exclude<O, ObservableTarget>
       : new Observable<Exclude<O, Observable>>(target as any);
 
-    if (this.resizeObserver && observable.target instanceof Element) {
-      this.resizeObserver.observe(observable.target);
-      this.intersecObserver!.observe(observable.target);
+    if (observable.target instanceof Element) {
+      if (this.resizeObserver) {
+        this.resizeObserver.observe(observable.target);
+      }
+
+      if (this.intersecObserver) {
+        this.intersecObserver.observe(observable.target);
+      }
     }
 
     (observable as Observable).emit(ObservableEvent.WILL_ATTACH, observable);

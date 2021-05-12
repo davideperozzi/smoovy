@@ -1,16 +1,17 @@
-import { Observable, ObservableTarget, ObservableEvent } from './observable';
+import { Observable, ObservableTarget } from './observable';
 import { ObservableController } from './observable-controller';
 
 export const defaultController = ObservableController.default;
+
 export function observe<T extends ObservableTarget>(
-  target: ObservableTarget | Observable<T>,
+  target: T,
   controller = defaultController
 ) {
   return controller.add(target);
 }
 
-export function unobserve(
-  observable: Observable,
+export function unobserve<T extends ObservableTarget>(
+  observable: Observable<T>,
   controller = defaultController
 ) {
   return controller.delete(observable);
