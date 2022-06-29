@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scss",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Basic SCSS utils",
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",
@@ -19,6 +19,5 @@
     "utils"
   ],
   "author": "Davide Perozzi",
-  "license": "MIT",
-  "dependencies": {}
+  "license": "MIT"
 }
