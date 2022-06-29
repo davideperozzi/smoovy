@@ -18,6 +18,7 @@
 | [@smoovy/ticker](./packages/ticker) | [![Version](https://flat.badgen.net/npm/v/@smoovy/ticker)](https://www.npmjs.com/package/@smoovy/ticker) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/ticker) |
 | [@smoovy/event](./packages/event) | [![Version](https://flat.badgen.net/npm/v/@smoovy/event)](https://www.npmjs.com/package/@smoovy/event) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/event) |
 | [@smoovy/router](./packages/router) | [![Version](https://flat.badgen.net/npm/v/@smoovy/router)](https://www.npmjs.com/package/@smoovy/router) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/router) |
+| [@smoovy/component](./packages/component) | [![Version](https://flat.badgen.net/npm/v/@smoovy/component)](https://www.npmjs.com/package/@smoovy/component) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/component) |
 | [@smoovy/utils](./packages/utils) | [![Version](https://flat.badgen.net/npm/v/@smoovy/utils)](https://www.npmjs.com/package/@smoovy/utils) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/utils) |
 | [@smoovy/scss](./packages/scss) | [![Version](https://flat.badgen.net/npm/v/@smoovy/scss)](https://www.npmjs.com/package/@smoovy/scss) | N/A |
 
