@@ -1,0 +1,43 @@
+@import "../functions/units";
+
+$smoovy--fluid-min-width: 320px !default;
+$smoovy--fluid-max-width: 1680px !default;
+
+@mixin fluid-size-base(
+  $properties,
+  $min-vw,
+  $max-vw,
+  $min-value,
+  $max-value
+) {
+  @each $property in $properties {
+    #{$property}: $min-value;
+  }
+
+  @media (min-width: $min-vw) {
+    @each $property in $properties {
+      #{$property}: calc(
+        #{$min-value}
+        + #{strip-unit($max-value - $min-value)}
+        * (100vw - #{$min-vw})
+        / #{strip-unit($max-vw - $min-vw)}
+      );
+    }
+  }
+
+  @media (min-width: $max-vw) {
+    @each $property in $properties {
+      #{$property}: $max-value;
+    }
+  }
+}
+
+@mixin fluid-size($properties, $min-value, $max-value) {
+  @include fluid-size-base(
+    $properties,
+    $smoovy--fluid-min-width,
+    $smoovy--fluid-max-width,
+    $min-value,
+    $max-value
+  );
+}

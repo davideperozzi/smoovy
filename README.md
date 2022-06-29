@@ -19,6 +19,7 @@
 | [@smoovy/event](./packages/event) | [![Version](https://flat.badgen.net/npm/v/@smoovy/event)](https://www.npmjs.com/package/@smoovy/event) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/event) |
 | [@smoovy/router](./packages/router) | [![Version](https://flat.badgen.net/npm/v/@smoovy/router)](https://www.npmjs.com/package/@smoovy/router) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/router) |
 | [@smoovy/utils](./packages/utils) | [![Version](https://flat.badgen.net/npm/v/@smoovy/utils)](https://www.npmjs.com/package/@smoovy/utils) | ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/utils) |
+| [@smoovy/scss](./packages/scss) | [![Version](https://flat.badgen.net/npm/v/@smoovy/scss)](https://www.npmjs.com/package/@smoovy/scss) | N/A |
 
 ## Getting started
 Choose a package you want to install. It's as easy as that:
@@ -26,7 +27,7 @@ Choose a package you want to install. It's as easy as that:
 npm install --save @smoovy/<package>
 ```
 
-## Roadmap 2021
+## Roadmap 2023
 - [ ] 📦 Create `@smoovy/timeline` (timeline for tweens)
 - [ ] 📦 Create `@smoovy/text-split` (easy text splitting)
 - [ ] 💡 Improve tween demos

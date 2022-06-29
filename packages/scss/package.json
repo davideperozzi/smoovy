@@ -1,0 +1,24 @@
+{
+  "name": "@smoovy/scss",
+  "version": "0.1.0",
+  "description": "Basic SCSS utils",
+  "homepage": "https://github.com/davideperozzi/smoovy",
+  "repository": "https://github.com/davideperozzi/smoovy",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "lint": "NAME=$(basename \"$PWD\") && cd ../../ && npm run lint:package $NAME",
+    "test": "NAME=$(basename \"$PWD\") && cd ../../ && npm run test:package $NAME",
+    "build": "NAME=$(basename \"$PWD\") && cd ../../ && npm run build:package $NAME",
+    "serve": "NAME=$(basename \"$PWD\") && cd ../../ && npm run serve:package $NAME $1"
+  },
+  "keywords": [
+    "smoovy",
+    "scss",
+    "utils"
+  ],
+  "author": "Davide Perozzi",
+  "license": "MIT",
+  "dependencies": {}
+}

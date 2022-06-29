@@ -13,26 +13,48 @@ if (typeof process.argv[2] === 'string') {
   const tmpPath = path.join(rootPath, '.tmp');
   const buildConfigInput = path.join(rootPath, 'build', 'rollup.config.ts');
   const buildConfigOutput = path.join(tmpPath, 'rollup.config.js');
+  const packageJson = require(pkgPath + '/package.json');
 
   if ( ! fs.existsSync(pkgPath)) {
     throw new Error(`Package ${pkgName} does not exist`);
   }
 
-  // Only compile rollup config if CI is disabled.
-  // This will speed up the build time in CI environment
-  if ( ! fs.existsSync(buildConfigOutput) || !ciEnbaled) {
-    rimraf.sync(distPath);
-    console.log(`🔧 Setting up build config`);
+  if (packageJson['source']) {
+    // Only compile rollup config if CI is disabled.
+    // This will speed up the build time in CI environment
+    if ( ! fs.existsSync(buildConfigOutput) || !ciEnbaled) {
+      rimraf.sync(distPath);
+      console.log(`🔧 Setting up build config`);
 
-    const compileConfigFileProcess = childProcess.spawnSync(
+      const compileConfigFileProcess = childProcess.spawnSync(
+        `
+          tsc \
+            ${buildConfigInput} \
+            --outDir ${path.dirname(buildConfigOutput)} \
+            --target ES6 \
+            --moduleResolution node \
+            --module ESNext \
+            --esModuleInterop true
+        `,
+        {
+          shell: true,
+          stdio: 'inherit'
+        }
+      );
+
+      if (compileConfigFileProcess.status !== 0)  {
+        process.exit(compileConfigFileProcess.status || 1);
+      }
+    }
+
+    rimraf.sync(distPath);
+    console.log(`📦 Building bundles for "${pkgName}":`);
+
+    const buildProcess = childProcess.spawnSync(
       `
-        tsc \
-          ${buildConfigInput} \
-          --outDir ${path.dirname(buildConfigOutput)} \
-          --target ES6 \
-          --moduleResolution node \
-          --module ESNext \
-          --esModuleInterop true
+        rollup \
+          -c ${buildConfigOutput} \
+          --environment PACKAGE:${pkgPath}
       `,
       {
         shell: true,
@@ -40,28 +62,11 @@ if (typeof process.argv[2] === 'string') {
       }
     );
 
-    if (compileConfigFileProcess.status !== 0)  {
-      process.exit(compileConfigFileProcess.status || 1);
+    if (buildProcess.status !== 0) {
+      process.exit(buildProcess.status || 1);
     }
-  }
-
-  rimraf.sync(distPath);
-  console.log(`📦 Building bundles for "${pkgName}":`);
-
-  const buildProcess = childProcess.spawnSync(
-    `
-      rollup \
-        -c ${buildConfigOutput} \
-        --environment PACKAGE:${pkgPath}
-    `,
-    {
-      shell: true,
-      stdio: 'inherit'
-    }
-  );
-
-  if (buildProcess.status !== 0) {
-    process.exit(buildProcess.status || 1);
+  } else {
+    console.log('Nothing to do for this package.');
   }
 } else {
   throw new Error('No package defined');
