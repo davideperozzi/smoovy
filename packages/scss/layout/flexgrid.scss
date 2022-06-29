@@ -1,0 +1,132 @@
+@import "../functions/breakpoint.scss";
+
+$smoovy--fg-columns: 12 !default;
+$smoovy--fg-max-width: 1920px !default;
+$smoovy--fg-gutter-width-min: 20px !default;
+$smoovy--fg-gutter-width-max: 20px !default;
+
+$gutter-compensation-min: -$smoovy--fg-gutter-width-min / 2;
+$gutter-compensation-max: -$smoovy--fg-gutter-width-max / 2;
+$half-gutter-width-min: $smoovy--fg-gutter-width-min / 2;
+$half-gutter-width-max: $smoovy--fg-gutter-width-max / 2;
+
+.fg-container {
+  max-width: $smoovy--fg-max-width;
+  box-sizing: border-box;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.fg-row {
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  @include fluid-size(
+    margin-left margin-right,
+    $gutter-compensation-min,
+    $gutter-compensation-max
+  );
+}
+
+.fg-row.fg-reverse {
+  flex-direction: row-reverse;
+}
+
+.fg-col.fg-reverse {
+  flex-direction: column-reverse;
+}
+
+@mixin fg-col-common {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  flex-grow: 0;
+  flex-shrink: 0;
+
+  @include fluid-size(
+    padding-left padding-right,
+    $half-gutter-width-min,
+    $half-gutter-width-max
+  );
+}
+
+@each $breakpoint in $smoovy--breakpoints {
+  $name: nth($breakpoint, 1);
+  $size: nth($breakpoint, 2);
+
+  @media only screen and (min-width: $size) {
+    .fg-col-#{$name} {
+      flex-basis: auto;
+
+      @include fg-col-common;
+    }
+
+    @for $i from 1 through $smoovy--fg-columns {
+      .fg-col-#{$name}-#{$i} {
+        flex-basis: 100% / $smoovy--fg-columns * $i;
+        max-width: 100% / $smoovy--fg-columns * $i;
+
+        @include fg-col-common;
+      }
+    }
+
+    @for $i from 1 through $smoovy--fg-columns {
+      .fg-col-#{$name}-offset-#{$i} {
+        margin-left: 100% / $smoovy--fg-columns * $i;
+
+        @include fg-col-common;
+      }
+    }
+
+    .fg-start-#{$name} {
+      justify-content: flex-start;
+      text-align: start;
+    }
+
+    .fg-center-#{$name} {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .fg-end-#{$name} {
+      justify-content: flex-end;
+      text-align: end;
+    }
+
+    .fg-top-#{$name} {
+      align-items: flex-start;
+    }
+
+    .fg-middle-#{$name} {
+      align-items: center;
+    }
+
+    .fg-bottom-#{$name} {
+      align-items: flex-end;
+    }
+
+    .fg-around-#{$name} {
+      justify-content: space-around;
+    }
+
+    .fg-between-#{$name} {
+      justify-content: space-between;
+    }
+
+    .fg-first-#{$name} {
+      order: -1;
+    }
+
+    .fg-last-#{$name} {
+      order: 1;
+    }
+
+    .fg-columns-#{$name} {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
