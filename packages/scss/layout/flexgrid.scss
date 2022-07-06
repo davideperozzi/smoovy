@@ -83,17 +83,14 @@ $half-gutter-width-max: $smoovy--fg-gutter-width-max / 2;
 
     .fg-start-#{$name} {
       justify-content: flex-start;
-      text-align: start;
     }
 
     .fg-center-#{$name} {
       justify-content: center;
-      text-align: center;
     }
 
     .fg-end-#{$name} {
       justify-content: flex-end;
-      text-align: end;
     }
 
     .fg-top-#{$name} {
