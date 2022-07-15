@@ -1,7 +1,12 @@
+import { Unlisten } from '@smoovy/event';
+import { observe } from '@smoovy/observer';
 import { Ticker } from '@smoovy/ticker';
 import { Coordinate } from '@smoovy/utils';
 
-import { Mesh } from './mesh';
+import { GLMesh } from './mesh';
+import { GLImage, GLImageConfig } from './meshes/image';
+import { GLPlane, GLPlaneConfig } from './meshes/plane';
+import { GLVideo, GLVideoConfig } from './meshes/video';
 import { Viewport, ViewportConfig, ViewportEvent } from './viewport';
 
 export interface WebGLConfig extends ViewportConfig {
@@ -24,28 +29,49 @@ export interface WebGLConfig extends ViewportConfig {
    *
    * Default = true
    */
-  autoInit?: boolean;
+  autoCreate?: boolean;
+
+  /**
+   * This will position the canvas element as fixed and always sets its size
+   * to the users screen size.
+   *
+   * Default = true
+   */
+  fullscreen?: boolean;
 }
 
 export class WebGL {
-  protected meshes: Mesh[] = [];
+  protected meshes: GLMesh[] = [];
   protected viewport: Viewport;
   protected ticker: Ticker;
+  private unlistenResize?: Unlisten;
   private paused = false;
   private lastTime = 0;
 
   public constructor(
-    protected config: WebGLConfig
+    protected config: WebGLConfig = {}
   ) {
     this.ticker = config.ticker || new Ticker();
     this.viewport = new Viewport(this.initCanvas(config.canvas), config);
 
-    if (config.autoInit !== false) {
-      this.init();
+    if (config.autoCreate !== false) {
+      this.create();
     }
   }
 
-  public init() {
+  public create() {
+    if (this.config.fullscreen !== false) {
+      const style = this.viewport.element.style;
+
+      style.position = 'fixed';
+      style.left = '0px';
+      style.top = '0px';
+
+      this.unlistenResize = observe(window).onUpdate((state) => {
+        this.setSize(state.offset.width, state.offset.height);
+      });
+    }
+
     this.viewport.on(ViewportEvent.RESIZE, () => this.recalc());
     this.viewport.attach();
     this.ticker.add((delta, time) => {
@@ -55,6 +81,15 @@ export class WebGL {
         this.lastTime = time;
       }
     });
+  }
+
+  public destroy() {
+    if (this.unlistenResize) {
+      this.unlistenResize();
+      delete this.unlistenResize;
+    }
+
+    this.ticker.kill();
   }
 
   private initCanvas(canvas?: HTMLCanvasElement | string) {
@@ -115,14 +150,16 @@ export class WebGL {
     this.paused = paused;
   }
 
-  public add(...meshes: Mesh[]) {
+  public add(...meshes: GLMesh[]) {
     meshes.forEach(mesh => {
       mesh.create(this.viewport);
       this.meshes.push(mesh);
     });
+
+    return this;
   }
 
-  public remove(mesh: Mesh) {
+  public remove(mesh: GLMesh) {
     const index = this.meshes.indexOf(mesh);
 
     if (index > -1) {
@@ -130,6 +167,8 @@ export class WebGL {
         mesh.destroy(this.viewport);
       });
     }
+
+    return this;
   }
 
   public render(time?: number) {
@@ -140,5 +179,29 @@ export class WebGL {
     }
 
     this.lastTime = time ?? this.lastTime;
+  }
+
+  private createMesh<T, C>(ctor: any, config: C, cb?: (mesh: T) => void): T {
+    const mesh = new ctor(config);
+
+    if (typeof cb === 'function') {
+      cb(mesh);
+    }
+
+    this.add(mesh);
+
+    return mesh;
+  }
+
+  public plane(config: GLPlaneConfig, cb?: (plane: GLPlane) => void) {
+    return this.createMesh(GLPlane, config, cb);
+  }
+
+  public video(config: GLVideoConfig, cb?: (video: GLVideo) => void) {
+    return this.createMesh(GLVideo, config, cb);
+  }
+
+  public image(config: GLImageConfig, cb?: (image: GLImage) => void) {
+    return this.createMesh(GLImage, config, cb);
   }
 }

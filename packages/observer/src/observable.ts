@@ -34,19 +34,19 @@ export class Observable<
     super();
   }
 
-  public onUpdate(listener: EventListenerCb) {
+  public onUpdate(listener: EventListenerCb<Observable>) {
     return this.on(ObservableEvent.UPDATE, listener);
   }
 
-  public onAttach(listener: EventListenerCb) {
+  public onAttach(listener: EventListenerCb<Observable>) {
     return this.on(ObservableEvent.ATTACH, listener);
   }
 
-  public onDetach(listener: EventListenerCb) {
+  public onDetach(listener: EventListenerCb<Observable>) {
     return this.on(ObservableEvent.DETACH, listener);
   }
 
-  public onVisibilityChanged(listener: EventListenerCb) {
+  public onVisibilityChanged(listener: EventListenerCb<Observable>) {
     return this.on(ObservableEvent.VISIBILITY_CHANGED, listener);
   }
 

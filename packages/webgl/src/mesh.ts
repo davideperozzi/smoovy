@@ -5,7 +5,7 @@ import { mat4 } from './utils/math';
 import { Viewport } from './viewport';
 import { Buffer } from './buffers';
 
-export enum MeshDrawMode {
+export enum GLMeshDrawMode {
   POINTS = 0,
   LINES = 1,
   LINE_STRIP = 2,
@@ -15,16 +15,16 @@ export enum MeshDrawMode {
   TRIANGLE_FAN = 6
 }
 
-export enum MeshEvent {
+export enum GLMeshEvent {
   BEFORE_RECALC = 'beforerecalc'
 }
 
-export interface MeshConfig {
-  drawMode?: MeshDrawMode;
+export interface GLMeshConfig {
+  drawMode?: GLMeshDrawMode;
   uniforms?: { [name: string]: Uniform };
 }
 
-export class Mesh extends EventEmitter {
+export class GLMesh extends EventEmitter {
   private animating = false;
   public disabled = false;
   protected program!: Program;
@@ -34,7 +34,7 @@ export class Mesh extends EventEmitter {
   public readonly model = mat4();
 
   public constructor(
-    protected config: MeshConfig = {}
+    protected config: GLMeshConfig = {}
   ) {
     super();
 
@@ -82,7 +82,7 @@ export class Mesh extends EventEmitter {
 
       const mode = typeof this.config.drawMode !== 'undefined'
         ? this.config.drawMode
-        : MeshDrawMode.TRIANGLES
+        : GLMeshDrawMode.TRIANGLES
 
       this.beforeDraw();
       gl.drawArrays(mode, 0, verticesCount);
@@ -91,7 +91,7 @@ export class Mesh extends EventEmitter {
   }
 
   public recalc() {
-    this.emit(MeshEvent.BEFORE_RECALC);
+    this.emit(GLMeshEvent.BEFORE_RECALC);
 
     for (const name in this._buffers) {
       this._buffers[name].update();
@@ -138,6 +138,22 @@ export class Mesh extends EventEmitter {
     }
 
     this.onDestroy();
+  }
+
+  public uniform(name: string, value: number[] | number) {
+    let type = UniformType.FLOAT;
+
+    if (value instanceof Array) {
+      switch (value.length) {
+        case 2: type = UniformType.VEC2; break;
+        case 3: type = UniformType.VEC3; break;
+        case 4: type = UniformType.VEC4; break;
+      }
+    }
+
+    this._uniforms[name] = { type, value };
+
+    return this;
   }
 
   protected beforeDraw() {}

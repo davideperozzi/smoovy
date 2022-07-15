@@ -158,23 +158,22 @@ export class Viewport extends EventEmitter {
   public scrollTo(pos: Partial<Coordinate>) {
     const viewSize = this.viewSize;
 
-    if (pos.x) {
+    if (typeof pos.x === 'number' && pos.x !== this.scrollPosition.x) {
       const moveX = mapRange(pos.x, 0, this.width, 0, viewSize.width);
 
       mat4t(this._projection, [
-        moveX - this.position.x,
-        this.position.y
+        moveX - this.position.x
       ]);
 
       this.position.x = moveX;
       this.scrollPosition.x = pos.x;
     }
 
-    if (pos.y) {
+    if (typeof pos.y === 'number' && pos.y !== this.scrollPosition.y) {
       const moveY = mapRange(pos.y, 0, this.height, 0, viewSize.height);
 
       mat4t(this._projection, [
-        this.position.x,
+        undefined,
         moveY - this.position.y
       ]);
 
