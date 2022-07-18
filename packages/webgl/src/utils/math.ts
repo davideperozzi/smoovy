@@ -1,5 +1,9 @@
 export type Mat4 = Float32Array;
-export type Vec3 = { x: number, y: number, z: number };
+export interface Vec3 {
+  x: number;
+  y: number;
+  z: number;
+}
 
 /** Returns an identity matrix */
 export function mat4(): Mat4 {
@@ -43,9 +47,17 @@ export function mat4tv(m: Mat4, v: Partial<Vec3>): Mat4 {
 
 /** Translates matrix by a vector (absolute) */
 export function mat4ta(m: Mat4, t: [ number?, number?, number? ]): Mat4 {
-  if (typeof t[0] !== 'undefined') m[12] = t[0];
-  if (typeof t[1] !== 'undefined') m[13] = t[1];
-  if (typeof t[2] !== 'undefined') m[15] = t[2];
+  if (typeof t[0] !== 'undefined') {
+    m[12] = t[0];
+  }
+
+  if (typeof t[1] !== 'undefined') {
+    m[13] = t[1];
+  }
+
+  if (typeof t[2] !== 'undefined') {
+    m[15] = t[2];
+  }
 
   return m;
 }

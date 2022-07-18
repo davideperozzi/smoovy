@@ -23,7 +23,7 @@ export enum GLImageEvent {
 }
 
 export class GLImage extends GLPlane {
-  private texture: WebGLTexture;
+  private texture: WebGLTexture | null;
   private image: HTMLImageElement;
   private loadResolver = new Resolver();
   private imageLoading = false;
@@ -35,6 +35,7 @@ export class GLImage extends GLPlane {
     super(viewport, config);
 
     this.program = new Program(
+      viewport.gl,
       config.vertex || `
         attribute vec4 vertCoord;
         attribute vec2 texCoord;
@@ -81,12 +82,13 @@ export class GLImage extends GLPlane {
 
     if (this.texture) {
       const gl = this.viewport.gl;
+      const img = this.image;
 
       gl.bindTexture(gl.TEXTURE_2D, this.texture);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
       gl.bindTexture(gl.TEXTURE_2D, null);
 
       this.recalc();
@@ -149,7 +151,7 @@ export class GLImage extends GLPlane {
   public onCreate() {
     super.onCreate();
 
-    this.texture = this.viewport.gl.createTexture()!;
+    this.texture = this.viewport.gl.createTexture();
   }
 
   public onDestroy() {

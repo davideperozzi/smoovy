@@ -4,7 +4,7 @@ export enum BufferType {
 }
 
 export abstract class Buffer {
-  protected buffer?: WebGLBuffer;
+  protected buffer?: WebGLBuffer | null;
   protected gl?: WebGLRenderingContext;
   protected data: Float32Array = new Float32Array();
 
@@ -55,7 +55,7 @@ export abstract class Buffer {
       throw new Error('Buffer already attached');
     }
 
-    this.buffer = gl.createBuffer()!;
+    this.buffer = gl.createBuffer();
   }
 
   public destroy(gl: WebGLRenderingContext) {

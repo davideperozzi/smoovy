@@ -55,37 +55,40 @@ export class GLMesh extends EventEmitter {
     }
 
     if (this.animating) {
-      const gl = this.viewport.gl;
       let verticesCount = 0;
 
-      this.program.use(gl);
+      this.program.use();
 
       // update buffers
       for (const name in this._buffers) {
-        const buffer = this._buffers[name];
+        if (this._buffers.hasOwnProperty(name)) {
+          const buffer = this._buffers[name];
 
-        if (buffer instanceof Buffer) {
-          verticesCount += this.program.updateAttrib(gl, name, buffer);
+          if (buffer instanceof Buffer) {
+            verticesCount += this.program.updateAttrib(name, buffer);
+          }
         }
       }
 
       // update uniforms
       for (const name in this._uniforms) {
-        const uniform = this._uniforms[name];
+        if (this._uniforms.hasOwnProperty(name)) {
+          const uniform = this._uniforms[name];
 
-        if (name === 'time') {
-          uniform.value = time / 1000;
+          if (name === 'time') {
+            uniform.value = time / 1000;
+          }
+
+          this.program.updateUniform(name, uniform);
         }
-
-        this.program.updateUniform(gl, name, uniform);
       }
 
       const mode = typeof this.config.drawMode !== 'undefined'
         ? this.config.drawMode
-        : GLMeshDrawMode.TRIANGLES
+        : GLMeshDrawMode.TRIANGLES;
 
       this.beforeDraw();
-      gl.drawArrays(mode, 0, verticesCount);
+      this.viewport.gl.drawArrays(mode, 0, verticesCount);
       this.afterDraw();
     }
   }
@@ -94,7 +97,9 @@ export class GLMesh extends EventEmitter {
     this.emit(GLMeshEvent.BEFORE_RECALC);
 
     for (const name in this._buffers) {
-      this._buffers[name].update();
+      if (this._buffers.hasOwnProperty(name)) {
+        this._buffers[name].update();
+      }
     }
   }
 
@@ -112,10 +117,12 @@ export class GLMesh extends EventEmitter {
       value: this.viewport.projection
     };
 
-    this.program.create(this.viewport.gl);
+    this.program.create();
 
     for (const name in this._buffers) {
-      this._buffers[name].create(this.viewport.gl);
+      if (this._buffers.hasOwnProperty(name)) {
+        this._buffers[name].create(this.viewport.gl);
+      }
     }
 
     this.recalc();
@@ -134,7 +141,9 @@ export class GLMesh extends EventEmitter {
     this.program.destroy(viewport.gl);
 
     for (const name in this._buffers) {
-      this._buffers[name].destroy(viewport.gl);
+      if (this._buffers.hasOwnProperty(name)) {
+        this._buffers[name].destroy(viewport.gl);
+      }
     }
 
     this.onDestroy();
@@ -146,7 +155,9 @@ export class GLMesh extends EventEmitter {
   ) {
     if (typeof nameOrValues === 'object') {
       for (const name in nameOrValues) {
-        this.uniform(name, nameOrValues[name]);
+        if (nameOrValues.hasOwnProperty(name)) {
+          this.uniform(name, nameOrValues[name]);
+        }
       }
 
       return this;

@@ -66,6 +66,7 @@ export class GLPlane extends GLMesh {
 
     this.buffers.vertCoord = new VertexAttrBuffer(2);
     this.program = new Program(
+      viewport.gl,
       config.vertex || `
         attribute vec4 vertCoord;
 

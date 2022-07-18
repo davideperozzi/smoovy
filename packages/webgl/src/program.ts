@@ -23,7 +23,7 @@ export interface Uniform<V = any> {
 }
 
 export class Program {
-  protected program?: WebGLProgram;
+  protected program: WebGLProgram | null;
   protected vertexShader?: WebGLShader;
   protected fragmentShader?: WebGLShader;
   protected attribLocations = new Map<string, number>();
@@ -32,24 +32,22 @@ export class Program {
   public buffers = new Set<VertexAttrBuffer>();
 
   public constructor(
-    protected vertexSource: string,
-    protected fragmentSource: string
-  ) {}
+    protected gl: WebGLRenderingContext,
+    protected vertex: string,
+    protected fragment: string
+  ) {
+    this.program = this.gl.createProgram();
+  }
 
-  public create(gl: WebGLRenderingContext) {
-    this.program = gl.createProgram()!;
+  public create() {
+    if ( ! this.program) {
+      throw new Error('Couldn\'t initialize Program');
+    }
 
-    this.vertexShader = this.createShader(
-      gl,
-      gl.VERTEX_SHADER,
-      this.vertexSource
-    );
+    const gl = this.gl;
 
-    this.fragmentShader = this.createShader(
-      gl,
-      gl.FRAGMENT_SHADER,
-      this.fragmentSource
-    );
+    this.vertexShader = this.createShader(gl.VERTEX_SHADER, this.vertex);
+    this.fragmentShader = this.createShader(gl.FRAGMENT_SHADER, this.fragment);
 
     /**
      * @todo Create check if program is already set up.
@@ -67,26 +65,24 @@ export class Program {
     }
   }
 
-  private registerAttrib(
-    gl: WebGLRenderingContext,
-    name: string
-  ) {
+  private registerAttrib(name: string) {
     if ( ! this.program) {
       throw new Error('Program not initialized yet');
     }
 
-    const location = gl.getAttribLocation(this.program, name);
+    const location = this.gl.getAttribLocation(this.program, name);
 
     this.attribLocations.set(name, location);
 
     return location;
   }
 
-  public updateAttrib(gl: WebGLRenderingContext, name: string, buffer: Buffer) {
+  public updateAttrib(name: string, buffer: Buffer) {
     let location = this.attribLocations.get(name);
+    const gl = this.gl;
 
     if ( ! location) {
-      location = this.registerAttrib(gl, name);
+      location = this.registerAttrib(name);
     }
 
     buffer.bind();
@@ -96,34 +92,28 @@ export class Program {
     return buffer.count;
   }
 
-  private registerUniform(
-    gl: WebGLRenderingContext,
-    name: string
-  ) {
+  private registerUniform(name: string) {
     if ( ! this.program) {
       throw new Error('Program not initialized yet');
     }
 
-    /** @todo check if uniform location was retrieved successfully */
-    const location = gl.getUniformLocation(this.program, name)!;
+    const location = this.gl.getUniformLocation(this.program, name);
 
-    this.uniformLocations.set(name, location);
+    if (location) {
+      this.uniformLocations.set(name, location);
 
-    return location;
+      return location;
+    }
   }
 
-  public updateUniform(
-    gl: WebGLRenderingContext,
-    name: string,
-    uniform: Uniform
-  ) {
+  public updateUniform(name: string, uniform: Uniform) {
     let value = uniform.value;
     const cacheEnabled = ! (UniformGroups.NUM & uniform.type);
     let location = this.uniformLocations.get(name);
     let valueCache = cacheEnabled ? this.uniformValueCache.get(name) : null;
 
     if ( ! location) {
-      location = this.registerUniform(gl, name);
+      location = this.registerUniform(name);
     }
 
     if ( ! valueCache && cacheEnabled) {
@@ -147,10 +137,21 @@ export class Program {
     }
 
     if (valueCache && typeof value === 'object' && ! (value instanceof Array)) {
-      if (typeof value.x === 'number') valueCache[0] = value.x;
-      if (typeof value.y === 'number') valueCache[1] = value.y;
-      if (typeof value.z === 'number') valueCache[2] = value.z;
-      if (typeof value.w === 'number') valueCache[3] = value.w;
+      if (typeof value.x === 'number') {
+        valueCache[0] = value.x;
+      }
+
+      if (typeof value.y === 'number') {
+        valueCache[1] = value.y;
+      }
+
+      if (typeof value.z === 'number') {
+        valueCache[2] = value.z;
+      }
+
+      if (typeof value.w === 'number') {
+        valueCache[3] = value.w;
+      }
     }
 
     if (valueCache && typeof value.length !== 'undefined') {
@@ -166,18 +167,18 @@ export class Program {
     if (UniformGroups.MAT & uniform.type) {
       const fncName = `uniformMatrix${UniformType[uniform.type].slice(-1)}fv`;
 
-      (gl as any)[fncName](location, false, value);
+      (this.gl as any)[fncName](location, false, value);
     } else if (UniformGroups.VEC & uniform.type) {
       const number = UniformType[uniform.type].slice(-1);
       const precision = UniformType.INT & uniform.type ? 'i' : 'f';
       const fncName = `uniform${number}${precision}v`;
 
-      (gl as any)[fncName](location, value);
+      (this.gl as any)[fncName](location, value);
     } else if (UniformGroups.NUM & uniform.type) {
       const precision = UniformType.INT & uniform.type ? 'i' : 'f';
       const fncName = `uniform1${precision}`;
 
-      (gl as any)[fncName](location, value);
+      (this.gl as any)[fncName](location, value);
     }
   }
 
@@ -201,32 +202,28 @@ export class Program {
     this.attribLocations.clear();
   }
 
-  public use(gl: WebGLRenderingContext) {
+  public use() {
     if ( ! this.program) {
       throw new Error('Program not ready yet');
     }
 
-    gl.useProgram(this.program);
+    this.gl.useProgram(this.program);
   }
 
-  protected createShader(
-    gl: WebGLRenderingContext,
-    type: GLenum,
-    source: string
-  ) {
-    const shader = gl.createShader(type);
+  protected createShader(type: GLenum, source: string) {
+    const shader = this.gl.createShader(type);
 
     if ( ! shader) {
       throw new Error('Failed to create shader');
     }
 
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
+    this.gl.shaderSource(shader, source);
+    this.gl.compileShader(shader);
 
-    if ( ! gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      const info = gl.getShaderInfoLog(shader);
+    if ( ! this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+      const info = this.gl.getShaderInfoLog(shader);
 
-      gl.deleteShader(shader);
+      this.gl.deleteShader(shader);
 
       throw new Error(`Shader compile failed: ${info}`);
     }

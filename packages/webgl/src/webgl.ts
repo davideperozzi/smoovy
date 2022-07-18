@@ -161,7 +161,7 @@ export class WebGL {
     const index = this.meshes.indexOf(mesh);
 
     if (index > -1) {
-      this.meshes.splice(index, 1).forEach(mesh => mesh.destroy(this.viewport));
+      this.meshes.splice(index, 1).forEach(m => m.destroy(this.viewport));
     }
 
     return this;

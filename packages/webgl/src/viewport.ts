@@ -1,15 +1,15 @@
 import { EventEmitter } from '@smoovy/event';
 import { Coordinate, isDef, mapRange, Size } from '@smoovy/utils';
 
-import { mat4, Mat4, mat4gt, mat4i, mat4p, mat4t, mat4ta, mat4tv } from './utils/math';
+import { mat4, Mat4, mat4i, mat4p, mat4t } from './utils/math';
 
 export interface ViewportConfig extends WebGLContextAttributes {
-  color?: [ number, number, number ],
+  color: [ number, number, number ];
   width?: number;
   height?: number;
-  fov?: number;
-  posZ?: number;
-  pixelRatio?: number;
+  fov: number;
+  posZ: number;
+  pixelRatio: number;
 }
 
 const defaultConfig: ViewportConfig = {
@@ -41,10 +41,7 @@ export class Viewport extends EventEmitter {
   ) {
     super();
 
-    this.config = {
-      ...defaultConfig,
-      ...config
-    };
+    this.config = { ...defaultConfig, ...config };
 
     const ctx = this.element.getContext('webgl2', this.config) ||
       this.element.getContext('webgl') ||
@@ -122,14 +119,14 @@ export class Viewport extends EventEmitter {
   public attach() {
     this.setSize(
       isDef(this.config.width)
-        ? this.config.width!
+        ? this.config.width
         : this.element.offsetWidth,
       isDef(this.config.height)
-        ? this.config.height!
+        ? this.config.height
         : this.element.offsetHeight
     );
 
-    const color = this.config.color!;
+    const color = this.config.color || [0, 0, 0];
     const alpha = this.config.alpha;
 
     this.gl.enable(this.gl.CULL_FACE);
@@ -144,6 +141,10 @@ export class Viewport extends EventEmitter {
 
   public get pixelRatio() {
     return this.config.pixelRatio || window.devicePixelRatio || 1;
+  }
+
+  public get fov() {
+    return this.config.fov || defaultConfig.fov;
   }
 
   public setSize(width: number, height: number) {
@@ -182,9 +183,9 @@ export class Viewport extends EventEmitter {
 
   public get viewSize() {
     /** @todo: Cache view size to prevent unecessary recalc */
-    let fovY = (this.config.fov! * Math.PI) / 180;
-    let height = 2 * Math.tan(fovY / 2) * Math.abs(this.config.posZ!);
-    let width = height * this.aspect;
+    const fovY = (this.config.fov * Math.PI) / 180;
+    const height = 2 * Math.tan(fovY / 2) * Math.abs(this.config.posZ);
+    const width = height * this.aspect;
 
     return { width, height };
   }
@@ -192,7 +193,7 @@ export class Viewport extends EventEmitter {
   private updateProjection() {
     this._projection = mat4p(
       mat4i(this._projection),
-      this.config.fov! * Math.PI / 180,
+      this.config.fov * Math.PI / 180,
       this.aspect,
       .1,
       100
