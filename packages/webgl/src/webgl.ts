@@ -9,7 +9,7 @@ import { GLPlane, GLPlaneConfig } from './meshes/plane';
 import { GLVideo, GLVideoConfig } from './meshes/video';
 import { Viewport, ViewportConfig, ViewportEvent } from './viewport';
 
-export interface WebGLConfig extends ViewportConfig {
+export interface WebGLConfig extends Partial<ViewportConfig> {
   /**
    * The canvas element you want to use. If you don't provide the config
    * with an element or selector a new canvas elemnt will be created and
