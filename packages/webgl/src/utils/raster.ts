@@ -1,4 +1,4 @@
-import { Coordinate, Size } from "@smoovy/utils";
+import { Coordinate, Size } from '@smoovy/utils';
 
 export enum SegmentMode {
   VERTEX = 1,

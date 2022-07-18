@@ -166,18 +166,18 @@ export class Program {
     if (UniformGroups.MAT & uniform.type) {
       const fncName = `uniformMatrix${UniformType[uniform.type].slice(-1)}fv`;
 
-      gl[fncName](location, false, value);
+      (gl as any)[fncName](location, false, value);
     } else if (UniformGroups.VEC & uniform.type) {
       const number = UniformType[uniform.type].slice(-1);
       const precision = UniformType.INT & uniform.type ? 'i' : 'f';
       const fncName = `uniform${number}${precision}v`;
 
-      gl[fncName](location, value);
+      (gl as any)[fncName](location, value);
     } else if (UniformGroups.NUM & uniform.type) {
       const precision = UniformType.INT & uniform.type ? 'i' : 'f';
       const fncName = `uniform1${precision}`;
 
-      gl[fncName](location, value);
+      (gl as any)[fncName](location, value);
     }
   }
 

@@ -1,9 +1,10 @@
 import { listenEl } from '@smoovy/event';
-import { Resolver, Size } from '@smoovy/utils';
+import { Resolver } from '@smoovy/utils';
 
 import { TextureAttrBuffer } from '../buffers';
-import { segmentateSquare, SegmentMode } from '../helpers';
 import { Program } from '../program';
+import { segmentateSquare, SegmentMode } from '../utils/raster';
+import { Viewport } from '../viewport';
 import { GLPlane, GLPlaneConfig } from './plane';
 
 export interface GLImageConfig extends GLPlaneConfig {
@@ -28,9 +29,10 @@ export class GLImage extends GLPlane {
   private imageLoading = false;
 
   public constructor(
+    protected viewport: Viewport,
     protected config: GLImageConfig
   ) {
-    super(config);
+    super(viewport, config);
 
     this.program = new Program(
       config.vertex || `
@@ -51,6 +53,7 @@ export class GLImage extends GLPlane {
         precision mediump float;
 
         uniform sampler2D image;
+        uniform float time;
 
         varying vec2 vTexCoord;
 
@@ -74,16 +77,9 @@ export class GLImage extends GLPlane {
   private handleLoad() {
     this.emit(GLImageEvent.LOADEND);
     this.loadResolver.resolve();
+    this.setSize(this.imageSize);
 
-    if (typeof this.config.width !== 'number') {
-      this.width = this.imageSize.width;
-    }
-
-    if (typeof this.config.height !== 'number') {
-      this.height = this.imageSize.height;
-    }
-
-    if (this.viewport && this.texture) {
+    if (this.texture) {
       const gl = this.viewport.gl;
 
       gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -122,7 +118,7 @@ export class GLImage extends GLPlane {
   }
 
   protected beforeDraw() {
-    if (this.viewport && this.texture) {
+    if (this.texture) {
       const gl = this.viewport.gl;
 
       gl.activeTexture(gl.TEXTURE0);
@@ -133,7 +129,7 @@ export class GLImage extends GLPlane {
   public recalc() {
     super.recalc();
 
-    if (this.viewport && this.texture) {
+    if (this.texture) {
       const gl = this.viewport.gl;
 
       gl.activeTexture(gl.TEXTURE0);
@@ -151,13 +147,15 @@ export class GLImage extends GLPlane {
   }
 
   public onCreate() {
-    if (this.viewport) {
-      this.texture = this.viewport.gl.createTexture()!;
-    }
+    super.onCreate();
+
+    this.texture = this.viewport.gl.createTexture()!;
   }
 
   public onDestroy() {
-    if (this.viewport && this.texture) {
+    super.onCreate();
+
+    if (this.texture) {
       this.viewport.gl.deleteTexture(this.texture);
     }
   }

@@ -2,8 +2,9 @@ import { listenCompose, listenEl, Unlisten } from '@smoovy/event';
 import { Ticker } from '@smoovy/ticker';
 
 import { TextureAttrBuffer } from '../buffers';
-import { segmentateSquare, SegmentMode } from '../helpers';
 import { Program } from '../program';
+import { segmentateSquare, SegmentMode } from '../utils/raster';
+import { Viewport } from '../viewport';
 import { GLPlane, GLPlaneConfig } from './plane';
 
 export interface GLVideoConfig extends GLPlaneConfig {
@@ -19,9 +20,10 @@ export class GLVideo extends GLPlane {
   private playing = false;
 
   public constructor(
+    protected viewport: Viewport,
     protected config: GLVideoConfig
   ) {
-    super(config);
+    super(viewport, config);
 
     this.video = config.source;
     this.program = new Program(
@@ -61,12 +63,26 @@ export class GLVideo extends GLPlane {
     );
   }
 
-  public onAttach() {
-    if (this.viewport) {
-      this.texture = this.viewport.gl.createTexture()!;
+  public onCreate() {
+    super.onCreate();
 
-      this.updateTexture();
+    this.texture = this.viewport.gl.createTexture()!;
+
+    this.updateTexture();
+  }
+
+  public onDestroy() {
+    super.onDestroy();
+
+    if ( this.texture) {
+      this.viewport.gl.deleteTexture(this.texture);
     }
+
+    if (this.unlistenVideo) {
+      this.unlistenVideo();
+    }
+
+    this.handleStop();
   }
 
   private handlePlay() {
@@ -117,17 +133,5 @@ export class GLVideo extends GLPlane {
         )
       );
     }
-  }
-
-  public onDetach() {
-    if (this.viewport && this.texture) {
-      this.viewport.gl.deleteTexture(this.texture);
-    }
-
-    if (this.unlistenVideo) {
-      this.unlistenVideo();
-    }
-
-    this.handleStop();
   }
 }

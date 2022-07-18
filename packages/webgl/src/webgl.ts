@@ -63,6 +63,7 @@ export class WebGL {
     if (this.config.fullscreen !== false) {
       const style = this.viewport.element.style;
 
+      style.pointerEvents = 'none';
       style.position = 'fixed';
       style.left = '0px';
       style.top = '0px';
@@ -151,10 +152,7 @@ export class WebGL {
   }
 
   public add(...meshes: GLMesh[]) {
-    meshes.forEach(mesh => {
-      mesh.create(this.viewport);
-      this.meshes.push(mesh);
-    });
+    meshes.forEach(mesh => this.meshes.push(mesh.create()));
 
     return this;
   }
@@ -163,9 +161,7 @@ export class WebGL {
     const index = this.meshes.indexOf(mesh);
 
     if (index > -1) {
-      this.meshes.splice(index, 1).forEach(mesh => {
-        mesh.destroy(this.viewport);
-      });
+      this.meshes.splice(index, 1).forEach(mesh => mesh.destroy(this.viewport));
     }
 
     return this;
@@ -182,7 +178,7 @@ export class WebGL {
   }
 
   private createMesh<T, C>(ctor: any, config: C, cb?: (mesh: T) => void): T {
-    const mesh = new ctor(config);
+    const mesh = new ctor(this.viewport, config);
 
     if (typeof cb === 'function') {
       cb(mesh);

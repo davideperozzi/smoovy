@@ -56,7 +56,7 @@ export class Observable<
     this._visibility = visibility;
 
     if (changed) {
-      this.emit(ObservableEvent.VISIBILITY_CHANGED, this._visibility);
+      this.emit(ObservableEvent.VISIBILITY_CHANGED, this);
     }
   }
 

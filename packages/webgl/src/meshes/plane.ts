@@ -1,29 +1,68 @@
-import { Coordinate } from '@smoovy/utils';
+import { listenCompose, Unlisten } from '@smoovy/event';
+import { Observable, observe } from '@smoovy/observer';
+import { Coordinate, Size } from '@smoovy/utils';
 
 import { VertexAttrBuffer } from '../buffers';
-import { segmentateSquare } from '../helpers';
 import { GLMesh, GLMeshConfig } from '../mesh';
 import { Program } from '../program';
 import { mat4gs, mat4s, mat4ta } from '../utils/math';
+import { segmentateSquare } from '../utils/raster';
+import { Viewport } from '../viewport';
 
 export interface GLPlaneConfig extends GLMeshConfig {
   x?: number;
   y?: number;
   width?: number;
   height?: number;
+
+  /**
+   * The number of segments to use for rasterization of the mesh
+   */
   segments?: Coordinate | number;
+
+  /**
+   * If provided with an element, this mesh will sync with the DOM
+   * element automatically
+   */
+  element?: HTMLElement;
+
+  /**
+   * If enabled the visiblity of the element will be watched automatically.
+   * If the element is not in the viewport, it'll be removed from the render
+   * queue. InterectionObserver will be used
+   *
+   * Default = true
+   */
+  elementCulling?: boolean;
+
+  /**
+   * Whether to redraw the element automatically if the size changes.
+   *
+   * Default = true
+   */
+  autoResize?: boolean;
+
+  /**
+   * Overwrites the default vertex shader with a custom one
+   */
   vertex?: string;
+
+  /**
+   * Overwrites the default fragment shader with a custom one
+   */
   fragment?: string;
 }
 
 export class GLPlane extends GLMesh {
   protected program: Program;
-  protected _translation: Coordinate = { x: 0, y: 0 };
+  protected observable?: Observable;
+  private unlistenElement?: Unlisten;
 
   public constructor(
+    protected viewport: Viewport,
     protected config: GLPlaneConfig
   ) {
-    super(config);
+    super(viewport, config);
 
     this.buffers.vertCoord = new VertexAttrBuffer(2);
     this.program = new Program(
@@ -53,20 +92,60 @@ export class GLPlane extends GLMesh {
     );
   }
 
-  public set x(pos: number) {
-    this.config.x = pos;
+  public onCreate() {
+    super.onCreate();
+
+    if (this.config.element) {
+      this.observable = observe(this.config.element);
+      this.unlistenElement = listenCompose(
+        this.observable.onUpdate((state) => {
+          this.setSize(state.offset);
+          this.translate(state.offset);
+        }),
+        this.config.elementCulling
+          ? this.observable.onVisibilityChanged((state) => {
+            this.disabled = !state.visibility;
+          })
+          : undefined
+      );
+    }
   }
 
-  public set y(pos: number) {
-    this.config.y = pos;
+  public onDestroy() {
+    super.onDestroy();
+
+    if (this.unlistenElement) {
+      this.unlistenElement();
+      delete this.unlistenElement;
+    }
   }
 
-  public set width(size: number) {
-    this.config.width = size;
+  public element(element: HTMLElement) {
+    this.config.element = element;
   }
 
-  public set height(size: number) {
-    this.config.height = size;
+  public setSize(size: Partial<Size>) {
+    let recalc = false;
+
+    if (typeof size.width === 'number') {
+      if (size.width !== this.config.width) {
+        recalc = true;
+      }
+
+      this.config.width = size.width;
+    }
+
+    if (typeof size.height === 'number') {
+      if (size.height !== this.config.height) {
+        recalc = true;
+      }
+
+      this.config.height = size.height;
+    }
+
+    if (recalc && this.config.autoResize !== false) {
+      this.recalc();
+    }
   }
 
   public get x() {
@@ -85,20 +164,20 @@ export class GLPlane extends GLMesh {
     return this.config.height || 0;
   }
 
-  public get scale() {
-    const scaling = mat4gs(this.model);
+  public get scaling() {
+    const [ x, y ] = mat4gs(this.model);
 
-    return {
-      x: scaling[0],
-      y: scaling[1]
-    };
+    return { x, y };
   }
 
   public get translation() {
-    return this._translation;
+    return {
+      x: this.config.x,
+      y: this.config.y
+    };
   }
 
-  public scaleTo(x: number, y: number) {
+  public scale(x: number, y: number) {
     const scaling = mat4gs(this.model);
     const scaleX = x / scaling[0];
     const scaleY = y / scaling[1];
@@ -106,17 +185,20 @@ export class GLPlane extends GLMesh {
     mat4s(this.model, [ scaleX, scaleY, 1 ]);
   }
 
-  public translateTo(x: number, y: number) {
-    if (this.viewport) {
-      this._translation.x = x;
-      this._translation.y = y;
+  public translate(pos: Partial<Coordinate>) {
+    if (typeof pos.x === 'number') {
+      mat4ta(this.model, [
+        this.viewport.getClipSpaceX(this.config.x = pos.x)
+      ]);
+    }
 
-      const coords = this.viewport.getClipsSpaceCoord(x, y);
-
-      mat4ta(this.model, [ coords.x, coords.y ]);
+    if (typeof pos.y === 'number') {
+      mat4ta(this.model, [
+        undefined,
+        this.viewport.getClipSpaceY(this.config.y = pos.y)
+      ]);
     }
   }
-
 
   public get segments(): Coordinate {
     if (typeof this.config.segments === 'number') {
@@ -136,21 +218,24 @@ export class GLPlane extends GLMesh {
   public recalc() {
     super.recalc();
 
-    if (this.viewport) {
-      this.buffers.vertCoord.update(
-        segmentateSquare(
-          this.segments,
-          this.viewport.getClipsSpaceSize(
-            this.config.width || 0,
-            this.config.height || 0
-          )
-        )
-      );
-
-      this.translateTo(
-        this.config.x || 0,
-        this.config.y || 0
-      );
+    if (this.observable) {
+      this.translate(this.observable.offset);
+      this.setSize(this.observable.offset);
+    } else {
+      this.translate({
+        x: this.config.x || 0,
+        y: this.config.y || 0
+      });
     }
+
+    this.buffers.vertCoord.update(
+      segmentateSquare(
+        this.segments,
+        this.viewport.getClipsSpaceSize(
+          this.config.width || 0,
+          this.config.height || 0
+        )
+      )
+    );
   }
 }

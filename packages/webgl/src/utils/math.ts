@@ -41,6 +41,7 @@ export function mat4tv(m: Mat4, v: Partial<Vec3>): Mat4 {
   return mat4t(m, [ v.x, v.y, v.z ]);
 }
 
+/** Translates matrix by a vector (absolute) */
 export function mat4ta(m: Mat4, t: [ number?, number?, number? ]): Mat4 {
   if (typeof t[0] !== 'undefined') m[12] = t[0];
   if (typeof t[1] !== 'undefined') m[13] = t[1];
@@ -115,18 +116,13 @@ export function mat4p(
   fovY: number,
   asp: number,
   near: number,
-  far?: number,
-  reset = false
+  far?: number
 ) {
   const fov = 1.0 / Math.tan(fovY / 2);
 
   mat[0] = fov / asp;
   mat[5] = fov;
   mat[11] = -1;
-
-  if (reset) {
-    mat[12] = mat[13] = 0;
-  }
 
   mat[1] = mat[2] = mat[3] = mat[4] = mat[6] = 0;
   mat[7] = mat[8] = mat[9] = mat[15] = 0;
@@ -135,7 +131,7 @@ export function mat4p(
     const nf = 1 / (near - far);
 
     mat[10] = (far + near) * nf;
-    mat[14] = 2 * far * near * nf;
+    mat[14] = (2 * far * near) * nf;
   } else {
     mat[10] = -1;
     mat[14] = -2 * near;

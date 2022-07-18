@@ -28,12 +28,12 @@ export class GLMesh extends EventEmitter {
   private animating = false;
   public disabled = false;
   protected program!: Program;
-  protected viewport?: Viewport;
   protected _buffers: { [name: string]: Buffer } = {};
   protected _uniforms: { [name: string]: Uniform } = {};
   public readonly model = mat4();
 
   public constructor(
+    protected viewport: Viewport,
     protected config: GLMeshConfig = {}
   ) {
     super();
@@ -54,7 +54,7 @@ export class GLMesh extends EventEmitter {
       return;
     }
 
-    if (this.viewport && this.animating) {
+    if (this.animating) {
       const gl = this.viewport.gl;
       let verticesCount = 0;
 
@@ -106,24 +106,24 @@ export class GLMesh extends EventEmitter {
     return this._buffers;
   }
 
-  public create(viewport: Viewport) {
-    this.viewport = viewport;
-
+  public create() {
     this._uniforms.projectionMatrix = {
       type: UniformType.MAT4,
-      value: viewport.projection
+      value: this.viewport.projection
     };
 
-    this.program.create(viewport.gl);
+    this.program.create(this.viewport.gl);
 
     for (const name in this._buffers) {
-      this._buffers[name].create(viewport.gl);
+      this._buffers[name].create(this.viewport.gl);
     }
 
     this.recalc();
     this.onCreate();
 
     this.animating = true;
+
+    return this;
   }
 
   public destroy(viewport: Viewport) {
@@ -140,7 +140,18 @@ export class GLMesh extends EventEmitter {
     this.onDestroy();
   }
 
-  public uniform(name: string, value: number[] | number) {
+  public uniform(
+    nameOrValues: string | { [name: string]: number[] | number },
+    value?: number[] | number
+  ) {
+    if (typeof nameOrValues === 'object') {
+      for (const name in nameOrValues) {
+        this.uniform(name, nameOrValues[name]);
+      }
+
+      return this;
+    }
+
     let type = UniformType.FLOAT;
 
     if (value instanceof Array) {
@@ -151,7 +162,7 @@ export class GLMesh extends EventEmitter {
       }
     }
 
-    this._uniforms[name] = { type, value };
+    this._uniforms[nameOrValues] = { type, value };
 
     return this;
   }

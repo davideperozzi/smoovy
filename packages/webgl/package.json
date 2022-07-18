@@ -22,9 +22,8 @@
     "serve": "NAME=$(basename \"$PWD\") && cd ../../ && npm run serve:package $NAME $1"
   },
   "keywords": [
-    "tween",
-    "smoovy",
-    "ticker"
+    "webgl",
+    "smoovy"
   ],
   "author": "Davide Perozzi",
   "license": "MIT",

@@ -1,7 +1,7 @@
 import { EventEmitter } from '@smoovy/event';
 import { Coordinate, isDef, mapRange, Size } from '@smoovy/utils';
 
-import { mat4, Mat4, mat4p, mat4t, mat4tv } from './utils/math';
+import { mat4, Mat4, mat4gt, mat4i, mat4p, mat4t, mat4ta, mat4tv } from './utils/math';
 
 export interface ViewportConfig extends WebGLContextAttributes {
   color?: [ number, number, number ],
@@ -24,14 +24,14 @@ const defaultConfig: ViewportConfig = {
 };
 
 export enum ViewportEvent {
-  RESIZE = 'resize'
+  RESIZE = 'resize',
+  SCROLL = 'scroll'
 }
 
 export class Viewport extends EventEmitter {
   private _gl: WebGLRenderingContext;
-  private _projection!: Mat4;
-  private position: Coordinate = { x: 0, y: 0 };
-  private scrollPosition: Coordinate = { x: 0, y: 0 };
+  private _projection: Mat4 = mat4();
+  private _scrollPosition: Coordinate = { x: 0, y: 0 };
   protected config: ViewportConfig;
   public size: Size = { width: 0, height: 0 };
 
@@ -55,6 +55,10 @@ export class Viewport extends EventEmitter {
     }
 
     this._gl = ctx as WebGLRenderingContext;
+  }
+
+  public get scrollPosition() {
+    return this._scrollPosition;
   }
 
   public get gl() {
@@ -151,35 +155,29 @@ export class Viewport extends EventEmitter {
     this.element.style.height = `${height}px`;
 
     this.updateProjection();
-    this.gl.viewport(0, 0, width * this.pixelRatio, height * this.pixelRatio);
+    this.gl.viewport(0, 0, width, height);
     this.emit(ViewportEvent.RESIZE, { ...this.size });
   }
 
   public scrollTo(pos: Partial<Coordinate>) {
-    const viewSize = this.viewSize;
-
-    if (typeof pos.x === 'number' && pos.x !== this.scrollPosition.x) {
-      const moveX = mapRange(pos.x, 0, this.width, 0, viewSize.width);
-
+    if (typeof pos.x === 'number') {
       mat4t(this._projection, [
-        moveX - this.position.x
+        this.getClipSpaceWidth(this._scrollPosition.x - pos.x)
       ]);
 
-      this.position.x = moveX;
-      this.scrollPosition.x = pos.x;
+      this._scrollPosition.x = pos.x;
     }
 
-    if (typeof pos.y === 'number' && pos.y !== this.scrollPosition.y) {
-      const moveY = mapRange(pos.y, 0, this.height, 0, viewSize.height);
-
+    if (typeof pos.y === 'number') {
       mat4t(this._projection, [
         undefined,
-        moveY - this.position.y
+        this.getClipSpaceHeight(pos.y - this._scrollPosition.y)
       ]);
 
-      this.position.y = moveY;
-      this.scrollPosition.y = pos.y;
+      this._scrollPosition.y = pos.y;
     }
+
+    this.emit(ViewportEvent.SCROLL, this._scrollPosition);
   }
 
   public get viewSize() {
@@ -193,13 +191,17 @@ export class Viewport extends EventEmitter {
 
   private updateProjection() {
     this._projection = mat4p(
-      this._projection || mat4(),
+      mat4i(this._projection),
       this.config.fov! * Math.PI / 180,
       this.aspect,
       .1,
       100
     );
 
-    mat4tv(this._projection, { z: this.config.posZ });
+    mat4t(this._projection, [
+      this.getClipSpaceWidth(this._scrollPosition.x),
+      this.getClipSpaceHeight(this._scrollPosition.y),
+      this.config.posZ
+    ]);
   }
 }
