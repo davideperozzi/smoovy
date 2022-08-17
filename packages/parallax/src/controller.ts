@@ -45,11 +45,14 @@ export class ParallaxController {
     }
   }
 
-  public remove(item: ParallaxItem) {
+  public remove(item: ParallaxItem, destroy = true) {
     const index = this._items.indexOf(item);
 
     if (index > -1) {
-      this._items[index].destroy();
+      if (destroy) {
+        this._items[index].destroy();
+      }
+
       this._items.splice(index, 1);
     }
   }
