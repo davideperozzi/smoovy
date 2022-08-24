@@ -101,7 +101,7 @@ export class ObservableController {
         entries.forEach(entry => {
           this.obervables.forEach(observable => {
             if (observable.target === entry.target) {
-              observable.visibility = entry.isIntersecting;
+              observable.visibility = entry.intersectionRatio > 0;
             }
           });
         });
