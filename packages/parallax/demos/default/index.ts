@@ -29,7 +29,7 @@ const elementItem1 = new ElementParallaxItem(
     culling: false,
     on: {
       update: (position, progress) =>  {
-        document.querySelector('.box1') .textContent = `${progress.y * 100}%`;
+        document.querySelector('.box1')!.textContent = `${progress.y * 100}%`;
       }
     }
   }
@@ -59,6 +59,12 @@ controller.add(vectorItem);
 controller.add(elementItem1);
 controller.add(elementItem2);
 controller.add(elementItem3);
+controller.add(new ElementParallaxItem(
+  document.querySelector('footer')!,
+  {
+    speed: 0.6
+  }
+));
 
 element.style.position = 'absolute';
 element.style.left = `${state.x}px`;

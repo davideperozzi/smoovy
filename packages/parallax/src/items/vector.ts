@@ -86,6 +86,9 @@ export class VectorParallaxItem<
     let shiftNormY = 0;
 
     if (true === this.config.normalize) {
+      const heightDiff = ctrlState.contentHeight - ctrlState.viewportHeight;
+      const widthDiff = ctrlState.contentHeight - ctrlState.viewportHeight;
+
       if (vecState.x < ctrlState.viewportWidth) {
         shiftNormX = viewMidX - vecMidX - vecState.x;
       }
@@ -94,7 +97,13 @@ export class VectorParallaxItem<
         shiftNormY = viewMidY - vecMidY - vecState.y;
       }
 
-      // @todo: Find normalization for the bottom of the page
+      if (vecState.y > heightDiff || vecState.y + vecState.height > heightDiff) {
+        shiftNormY = -(viewMidY - vecMidY);
+      }
+
+      if (vecState.x > widthDiff || vecState.x + vecState.width > widthDiff) {
+        shiftNormX = -(viewMidX - vecMidX);
+      }
     }
 
     // Calculate the shift value

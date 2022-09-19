@@ -49,8 +49,6 @@ export class ElementParallaxItem<
     if (this.config.observe) {
       ElementParallaxItem.observer.delete(this.observable);
     }
-
-    delete this.observable;
   }
 
   public recalc() {
