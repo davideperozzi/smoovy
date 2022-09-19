@@ -97,7 +97,10 @@ export class VectorParallaxItem<
         shiftNormY = viewMidY - vecMidY - vecState.y;
       }
 
-      if (vecState.y > heightDiff || vecState.y + vecState.height > heightDiff) {
+      if (
+        vecState.y > heightDiff ||
+        vecState.y + vecState.height > heightDiff
+      ) {
         shiftNormY = -(viewMidY - vecMidY);
       }
 
