@@ -99,7 +99,7 @@ export class ElementParallaxItem<
       ) {
         this.boundShiftSum = this.boundShift.x + this.boundShift.y;
 
-        if (this.boundShift.y > 0) {
+        if (this.speed.y !== 0) {
           if (this.boundShift.y < 0) {
             element.style.top = `-${this.boundShift.y * -1}px`;
             element.style.bottom = `-${this.boundShift.y * -1}px`;
@@ -109,7 +109,7 @@ export class ElementParallaxItem<
           }
         }
 
-        if (this.boundShift.x > 0) {
+        if (this.speed.x !== 0) {
           if (this.boundShift.x < 0) {
             element.style.left = `-${this.boundShift.x * -1}px`;
             element.style.right = `-${this.boundShift.x * -1}px`;
