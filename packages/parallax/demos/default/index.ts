@@ -35,6 +35,14 @@ const elementItem1 = new ElementParallaxItem(
   }
 );
 
+const imageBox = new ElementParallaxItem(
+  document.querySelector('.image-box .image-wrapper') as HTMLElement,
+  {
+    contained: document.querySelector('.image-box .image') as HTMLElement,
+    speed: { y: 0.1 },
+  }
+);
+
 const elementItem2 = new ElementParallaxItem(
   document.querySelector('.box2') as HTMLElement,
   {
@@ -55,6 +63,7 @@ const elementItem3 = new ElementParallaxItem(
   }
 );
 
+controller.add(imageBox);
 controller.add(vectorItem);
 controller.add(elementItem1);
 controller.add(elementItem2);
@@ -76,8 +85,7 @@ element.style.textAlign = `center`;
 element.style.lineHeight = `${state.height}px`;
 
 document.body.append(element);
-
-window.addEventListener('scroll', () => {
+const update = () => {
   controller.update({
     scrollPosX: window.scrollX,
     scrollPosY: window.scrollY,
@@ -86,4 +94,18 @@ window.addEventListener('scroll', () => {
     contentWidth: document.body.offsetWidth,
     contentHeight: document.body.offsetHeight
   });
+}
+
+window.addEventListener('scroll', () => update());
+
+[0, 10, 50, 100].forEach((ms) => {
+  setTimeout(() => {
+    controller.recalc();
+    update();
+  }, ms);
+})
+
+window.addEventListener('resize', () => {
+  controller.recalc();
+  update();
 });

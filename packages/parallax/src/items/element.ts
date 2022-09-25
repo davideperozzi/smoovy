@@ -13,13 +13,15 @@ export interface ElementParallaxItemConfig
   culling?: boolean;
   translate?: boolean;
   observe?: boolean;
-  mapShift?: (shift: Coordinate) => Coordinate;
+  contained?: HTMLElement;
+  mapShift?: (shift: Coordinate, boundShift?: Coordinate) => Coordinate;
 }
 
 export class ElementParallaxItem<
   C extends ElementParallaxItemConfig = ElementParallaxItemConfig
 > extends VectorParallaxItem<C> {
   public static observer = new ObservableController();
+  private boundShiftSum = 0;
   protected observable: Observable<HTMLElement>;
 
   public constructor(
@@ -62,10 +64,13 @@ export class ElementParallaxItem<
   }
 
   protected onUpdate(state: ParallaxControllerState) {
-    const culling = this.config.culling === false;
-    const viewportState = culling
-      ? { inside: true }
-      : this.observable.prepos(
+    const vpState = { inside: true };
+
+    if (this.config.culling !== false) {
+      if (this.config.contained) {
+        vpState.inside = this.observable.visibility;
+      } else {
+        const prepos = this.observable.prepos(
           {
             x: state.scrollPosX - this.shift.x,
             y: state.scrollPosY - this.shift.y
@@ -77,12 +82,43 @@ export class ElementParallaxItem<
           this.config.padding
         );
 
-    if (typeof this.config.mapShift === 'function') {
-      this.shift = this.config.mapShift.call(this, this.shift);
+        vpState.inside = prepos.inside;
+      }
     }
 
-    if (viewportState.inside) {
-      const element = this.observable.target;
+    if (typeof this.config.mapShift === 'function') {
+      this.shift = this.config.mapShift.call(this, this.shift, this.boundShift);
+    }
+
+    if (vpState.inside) {
+      const element = this.config.contained || this.observable.target;
+
+      if (
+        this.config.contained &&
+        this.boundShift.x + this.boundShift.y !== this.boundShiftSum
+      ) {
+        this.boundShiftSum = this.boundShift.x + this.boundShift.y;
+
+        if (this.boundShift.y > 0) {
+          if (this.boundShift.y < 0) {
+            element.style.top = `-${this.boundShift.y * -1}px`;
+            element.style.bottom = `-${this.boundShift.y * -1}px`;
+          } else {
+            element.style.top = `-${this.boundShift.y * .5}px`;
+            element.style.bottom = `-${this.boundShift.y * .5}px`;
+          }
+        }
+
+        if (this.boundShift.x > 0) {
+          if (this.boundShift.x < 0) {
+            element.style.left = `-${this.boundShift.x * -1}px`;
+            element.style.right = `-${this.boundShift.x * -1}px`;
+          } else {
+            element.style.left = `-${this.boundShift.x * .5}px`;
+            element.style.right = `-${this.boundShift.x * .5}px`;
+          }
+        }
+      }
 
       if (this.config.translate !== false) {
         element.style.transform = `

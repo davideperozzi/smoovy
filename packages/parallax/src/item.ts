@@ -3,7 +3,7 @@ import { Coordinate } from '@smoovy/utils';
 import { ParallaxControllerState, ParallaxItemState } from './state';
 
 export interface ParallaxItemConfig {
-  speed: Coordinate | number;
+  speed: Partial<Coordinate> | number;
   offset: Coordinate | number;
   state?: () => ParallaxItemState;
   on?: Partial<{

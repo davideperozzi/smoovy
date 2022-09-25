@@ -12,6 +12,7 @@ export class VectorParallaxItem<
 > implements ParallaxItem {
   protected shift: Coordinate = { x: 0, y: 0 };
   protected staticProgress: Coordinate = { x: 0, y: 0 };
+  public readonly boundShift = { x: 0, y: 0 };
   /**
    * @todo Find formula for dynamic progress.
    *
@@ -47,10 +48,10 @@ export class VectorParallaxItem<
     return {
       x: typeof this.config.speed === 'number'
             ? this.config.speed
-            : this.config.speed.x,
+            : this.config.speed.x || 0,
       y: typeof this.config.speed === 'number'
             ? this.config.speed
-            : this.config.speed.y
+            : this.config.speed.y || 0
     };
   }
 
@@ -113,8 +114,13 @@ export class VectorParallaxItem<
     const moveX = ctrlState.scrollPosX - shiftNormX;
     const moveY = ctrlState.scrollPosY - shiftNormY;
 
-    this.shift.x = (moveX + viewMidX - vecState.x - vecMidX) * this.speed.x;
-    this.shift.y = (moveY + viewMidY - vecState.y - vecMidY) * this.speed.y;
+    this.shift.x = (moveX - vecState.x + viewMidX - vecMidX) * this.speed.x;
+    this.shift.y = (moveY - vecState.y + viewMidY - vecMidY) * this.speed.y;
+
+    // these are fixed shift values when the element (without shift)
+    // enters and leaves the view
+    this.boundShift.x = (viewMidX - vecMidX + vecState.width) * this.speed.x;
+    this.boundShift.y = (viewMidY - vecMidY + vecState.height) * this.speed.y;
 
     this.onUpdate(ctrlState, ctrlOffset);
 

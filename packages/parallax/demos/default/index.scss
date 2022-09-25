@@ -19,9 +19,29 @@ section {
   background-color: orange;
 }
 
+.box .image-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.box .image {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: url(./cage.jpg) center no-repeat;
+  background-size: cover;
+}
+
 .box-wrapper {
   padding: 20%;
   overflow: hidden;
+}
+
+.image-box {
+  // overflow: hidden;
 }
 
 .box {
