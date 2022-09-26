@@ -39,18 +39,21 @@ export class ScrollerDom extends EventEmitter {
 
     this.container = new Observable(this.dynamic
       ? document.createElement('div')
-      : (config.element as ScrollerDomElement).container as HTMLElement
+      : (config.element as ScrollerDomElement).container as HTMLElement,
+      {
+        observeResize: true
+      }
     );
 
     this.wrapper = new Observable(this.dynamic
       ? document.createElement('div')
-      : (config.element as ScrollerDomElement).wrapper as HTMLElement
+      : (config.element as ScrollerDomElement).wrapper as HTMLElement,
+      {
+        observeResize: true
+      }
     );
 
     if (this.observer) {
-      this.observer.add(this.container);
-      this.observer.add(this.wrapper);
-
       this.wrapper.onUpdate(() => this.emit(ScrollerDomEvent.RECALC));
       this.container.onUpdate(() => this.emit(ScrollerDomEvent.RECALC));
     }
@@ -76,6 +79,11 @@ export class ScrollerDom extends EventEmitter {
   }
 
   public attach() {
+    if (this.observer) {
+      this.observer.add(this.container);
+      this.observer.add(this.wrapper);
+    }
+
     if (this.dynamic) {
       const rootElement = this.config.element as HTMLElement;
       const children = Array.from(rootElement.childNodes);
@@ -86,6 +94,11 @@ export class ScrollerDom extends EventEmitter {
   }
 
   public detach() {
+    if (this.observer) {
+      this.observer.add(this.container);
+      this.observer.add(this.wrapper);
+    }
+
     if (this.dynamic) {
       const rootElement = this.config.element as HTMLElement;
       const children = Array.from(this.wrapper.target.childNodes);

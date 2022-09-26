@@ -1,6 +1,6 @@
 import { listenCompose, listenEl, Unlisten } from '@smoovy/event';
 import { Browser, throttle } from '@smoovy/utils';
-import { Observable, ObservableTarget, ObservableEvent } from './observable';
+import { Observable, ObservableTarget, ObservableEvent, ObservableConfig } from './observable';
 
 interface ResizeObserverSize {
   blockSize: number;
@@ -50,14 +50,18 @@ declare class IntersectionObserver {
 }
 
 export interface ObservableControllerConfig {
-  resizeObserver: boolean;
-  intersectionObserver: boolean | IntersectionObserverConfig;
+  resizeObserver?: boolean;
+  intersectionObserver?: boolean | IntersectionObserverConfig;
+  forceIntersectionObserver?: boolean;
+  forceResizeObserver?: boolean;
 }
 
 /* istanbul ignore next */
 export const defaultControllerConfig: ObservableControllerConfig = {
   resizeObserver: true,
-  intersectionObserver: true
+  intersectionObserver: true,
+  forceIntersectionObserver: false,
+  forceResizeObserver: false
 };
 
 export class ObservableController {
@@ -167,7 +171,10 @@ export class ObservableController {
     return this.obervables.size > 0;
   }
 
-  public add<O extends ObservableTarget | Observable>(target: O) {
+  public add<O extends ObservableTarget | Observable>(
+    target: O,
+    config: Partial<ObservableConfig> = {}
+  ) {
     /* istanbul ignore else */
     if (typeof target !== 'object') {
       throw new Error(`Invalid target to observe (${target})`);
@@ -180,14 +187,22 @@ export class ObservableController {
 
     const observable = target instanceof Observable
       ? target as Exclude<O, ObservableTarget>
-      : new Observable<Exclude<O, Observable>>(target as any);
+      : new Observable<Exclude<O, Observable>>(target as any, {
+        ...config,
+        ...(this.config.forceIntersectionObserver ? {
+          observeVisibility: true
+        } : {}),
+        ...(this.config.forceResizeObserver ? {
+          observeResize: true
+        } : {})
+      });
 
     if (observable.target instanceof Element) {
-      if (this.resizeObserver) {
+      if (this.resizeObserver && observable.observeResize) {
         this.resizeObserver.observe(observable.target);
       }
 
-      if (this.intersecObserver) {
+      if (this.intersecObserver && observable.observeVisibility) {
         this.intersecObserver.observe(observable.target);
       }
     }

@@ -21,15 +21,22 @@ export enum ObservableEvent {
   VISIBILITY_CHANGED = 'visibility-changed'
 }
 
+export interface ObservableConfig {
+  observeResize?: boolean;
+  observeVisibility?: boolean;
+}
+
 export class Observable<
-  T extends ObservableTarget = ObservableTarget
+  T extends ObservableTarget = ObservableTarget,
+  C extends ObservableConfig = ObservableConfig
 > extends EventEmitter {
   private _visibility = false;
   public bounds: ObservableRect = { x: 0, y: 0, width: 0, height: 0 };
   public offset: ObservableRect = { x: 0, y: 0, width: 0, height: 0 };
 
   public constructor(
-    public readonly target: T
+    public readonly target: T,
+    protected config: Partial<C> = {}
   ) {
     super();
   }
@@ -47,7 +54,19 @@ export class Observable<
   }
 
   public onVisibilityChanged(listener: EventListenerCb<Observable>) {
+    if ( ! this.observeVisibility) {
+      console.warn('observable option "observeVisibility" not enabled');
+    }
+
     return this.on(ObservableEvent.VISIBILITY_CHANGED, listener);
+  }
+
+  public get observeVisibility() {
+    return !!this.config.observeVisibility;
+  }
+
+  public get observeResize() {
+    return !!this.config.observeResize;
   }
 
   public set visibility(visibility: boolean) {

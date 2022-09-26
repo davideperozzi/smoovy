@@ -1,5 +1,5 @@
 import {
-  ObservableController, Observable, observe,
+  ObservableController, Observable, observe, ObservableConfig,
 } from '@smoovy/observer';
 import { Coordinate } from '@smoovy/utils';
 
@@ -12,7 +12,7 @@ export interface ElementParallaxItemConfig
   padding?: Coordinate;
   culling?: boolean;
   translate?: boolean;
-  observe?: boolean;
+  observe?: boolean | ObservableConfig;
   contained?: HTMLElement;
   mapShift?: (shift: Coordinate, boundShift?: Coordinate) => Coordinate;
 }
@@ -21,34 +21,38 @@ export class ElementParallaxItem<
   C extends ElementParallaxItemConfig = ElementParallaxItemConfig
 > extends VectorParallaxItem<C> {
   public static observer = new ObservableController();
-  private boundShiftSum = 0;
-  protected observable: Observable<HTMLElement>;
+
+  protected boundShiftSum = 0;
+  protected observable?: Observable<HTMLElement>;
 
   public constructor(
-    protected element: HTMLElement | Observable<HTMLElement>,
+    protected element: HTMLElement,
     config: Partial<C> = {}
   ) {
     super(config);
 
-    this.observable = this.element instanceof Observable
-      ? this.element
-      : new Observable(this.element);
-
-    if ( ! (this.observable.target instanceof HTMLElement)) {
-      throw new Error('Parallax element has to be of type HTMLElement');
-    }
-
     if (config.observe !== false) {
-      ElementParallaxItem.observer.add(this.observable);
-    } else {
-      this.recalc();
+      this.observable = ElementParallaxItem.observer.add(this.element, {
+        observeVisibility: true,
+        observeResize: true,
+        ...(typeof config.observe === 'object'
+          ? config.observe as ObservableConfig
+          : {}
+        )
+      });
     }
+
+    if (this.config.contained) {
+
+    }
+
+    this.recalc();
   }
 
   public destroy() {
     super.destroy();
 
-    if (this.config.observe) {
+    if (this.observable) {
       ElementParallaxItem.observer.delete(this.observable);
     }
   }
@@ -56,7 +60,9 @@ export class ElementParallaxItem<
   public recalc() {
     super.recalc();
 
-    this.observable.update();
+    if (this.observable) {
+      this.observable.update();
+    }
   }
 
   protected get precision() {
@@ -66,7 +72,7 @@ export class ElementParallaxItem<
   protected onUpdate(state: ParallaxControllerState) {
     const vpState = { inside: true };
 
-    if (this.config.culling !== false) {
+    if (this.config.culling !== false && this.observable) {
       if (this.config.contained) {
         vpState.inside = this.observable.visibility;
       } else {
@@ -91,7 +97,7 @@ export class ElementParallaxItem<
     }
 
     if (vpState.inside) {
-      const element = this.config.contained || this.observable.target;
+      const element = this.config.contained || this.element;
 
       if (
         this.config.contained &&
@@ -133,11 +139,16 @@ export class ElementParallaxItem<
   }
 
   protected getState() {
-    return {
+    return this.observable ? {
       x: this.observable.offset.x,
       y: this.observable.offset.y,
       width: this.observable.offset.width,
       height: this.observable.offset.height
+    } : {
+      x: this.element.offsetLeft,
+      y: this.element.offsetTop,
+      width: this.element.offsetWidth,
+      height: this.element.offsetHeight
     };
   }
 }

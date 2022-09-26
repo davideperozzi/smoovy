@@ -1,5 +1,5 @@
 import { listenCompose, Unlisten } from '@smoovy/event';
-import { Observable, observe } from '@smoovy/observer';
+import { Observable, observe, unobserve } from '@smoovy/observer';
 import { Coordinate, Size } from '@smoovy/utils';
 
 import { VertexAttrBuffer } from '../buffers';
@@ -97,7 +97,11 @@ export class GLPlane extends GLMesh {
     super.onCreate();
 
     if (this.config.element) {
-      this.observable = observe(this.config.element);
+      this.observable = observe(this.config.element, {
+        observeResize: true,
+        observeVisibility: true
+      });
+
       this.unlistenElement = listenCompose(
         this.observable.onUpdate((state) => {
           this.setSize(state.offset);
@@ -118,6 +122,10 @@ export class GLPlane extends GLMesh {
     if (this.unlistenElement) {
       this.unlistenElement();
       delete this.unlistenElement;
+    }
+
+    if (this.observable) {
+      unobserve(this.observable);
     }
   }
 
