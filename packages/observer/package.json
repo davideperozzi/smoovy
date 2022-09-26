@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/observer",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "Observing states of elements",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
