@@ -79,7 +79,7 @@ describe('element', () => {
       }, 100);
 
       setTimeout(() => {
-        unobserve(observable, controller);
+        controller.delete(observable);
         expect(updateFn).toHaveBeenCalledTimes(2);
         expect(attachFn).toHaveBeenCalled();
         expect(deleteFn).toHaveBeenCalled();
