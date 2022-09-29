@@ -106,6 +106,10 @@ export class GLImage extends GLPlane {
     return this.imageLoading;
   }
 
+  public get loaded() {
+    return this.loadResolver.promise;
+  }
+
   public isLoaded() {
     return this.loadResolver.completed;
   }
