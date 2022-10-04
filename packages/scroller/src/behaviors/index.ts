@@ -1,6 +1,6 @@
 export { default as bypassFocus, BypassFocusConfig } from './bypassFocus';
 export { default as bypassNative, BypassNativeConfig } from './bypassNative';
-export { default as clampContent } from './clampContent';
+export { default as clampContent, ClampContentConfig } from './clampContent';
 export { default as keyboard, KeyboardConfig } from './keyboard';
 export { default as lerpContent, LerpContentConfig, LerpContentEvent } from './lerpContent';
 export { default as mouseWheel, MouseWheelConfig } from './mouseWheel';
@@ -10,3 +10,4 @@ export { default as touchInertia, TouchInertiaConfig } from './touchInertia';
 export { default as translate, TranslateConfig } from './translate';
 export { default as tweenTo, TweenToConfig } from './tweenTo';
 export { default as nativeScrollbar, NativeScrollbarConfig } from './nativeScrollbar';
+export { default as scrollContent, ScrollContentConfig } from './scrollContent';

@@ -27,7 +27,7 @@ if (typeof process.argv[2] === 'string') {
 
     app.use(bundler.middleware()).listen(port, '0.0.0.0');
 
-    console.log(`listening at http://localhost:${port}`);
+    console.log(`listening at http://0.0.0.0:${port}`);
   } else {
     console.log(`The package "${pkgName}" does not have any demos`);
   }

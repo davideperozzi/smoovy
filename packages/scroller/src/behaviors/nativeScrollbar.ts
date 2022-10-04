@@ -2,6 +2,7 @@ import { listenCompose, listenEl } from '@smoovy/event';
 import { Browser } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
+import { LerpContentEvent } from './lerpContent';
 
 interface Config {
   /**
@@ -9,10 +10,39 @@ interface Config {
    * Default: window
    */
   target?: HTMLElement | Window;
+
+  /**
+   * Whether to let the scrollbar emit delta events
+   * Default: false
+   */
+  nativeHandler?: boolean;
+
+  /**
+   * Whether to scrol to the scrollbar position immediately
+   * or use configured output position transformers.
+   *
+   * Only available when `nativeHandler = true`
+   *
+   * Default: true
+   */
+  immediate?: boolean;
+
+  /**
+   * The timeout (ms) used to detect that the user has finished scrolling.
+   * Basically after `resetTimeout` -> (scrolling = false)
+   *
+   * Only available when `nativeHandler = true`
+   *
+   * Default: 100
+   */
+  resetTimeout?: number;
 }
 
-const defaultConfig = {
-  target: Browser.client ? window : undefined
+const defaultConfig: Config = {
+  target: Browser.client ? window : undefined,
+  resetTimeout: 100,
+  nativeHandler: false,
+  immediate: true
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
@@ -35,16 +65,42 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       parentElement.append(contentSpan);
     }
 
+    let scrolling = false;
+    let dragging = false;
+    let timeout: any;
+
     return listenCompose(
       () => contentSpan.remove(),
       cfg.target
-        ? listenEl(cfg.target, 'scroll', () => (
-            scroller.emit(ScrollerEvent.DELTA, {
-              x: scroller.position.virtual.x - window.scrollX,
-              y: scroller.position.virtual.y - window.scrollY
-            }))
-          )
+        ? listenEl(cfg.target, 'scroll', (event) => {
+            if (cfg.nativeHandler) {
+              scroller.emit(ScrollerEvent.DELTA, {
+                x: scroller.position.virtual.x - window.scrollX,
+                y: scroller.position.virtual.y - window.scrollY
+              });
+            } else if ( ! scrolling) {
+              dragging = true;
+
+              scroller.scrollTo(
+                { x: window.scrollX, y: window.scrollY },
+                cfg.immediate
+              );
+            }
+          })
         : undefined,
+      !cfg.nativeHandler ? scroller.onVirtual((pos) => {
+        if (cfg.target && ! dragging) {
+          scrolling = true;
+
+          cfg.target.scrollTo(pos.x, pos.y);
+        }
+
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          scrolling = false;
+          dragging = false;
+        }, cfg.resetTimeout);
+      }) : undefined,
       scroller.on(ScrollerEvent.RECALC, () => {
         if ( ! scroller.isLocked()) {
           updateSize();

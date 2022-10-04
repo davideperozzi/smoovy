@@ -1,10 +1,10 @@
 import { easings } from '@smoovy/tween';
 import { getElementOffset } from '@smoovy/utils';
 
-import { nativeSmoothScroll, ScrollerEvent, smoothScroll } from '../../src';
+import { hypbridSmoothScroll, ScrollerEvent, smoothScroll } from '../../src';
 
 const element = document.querySelector('main') as HTMLElement;
-const scroller = nativeSmoothScroll(element);
+const scroller = hypbridSmoothScroll(element);
 
 document.querySelectorAll('[data-scrollto]').forEach(el => {
   const toSel = el.getAttribute('data-scrollto');
@@ -13,6 +13,5 @@ document.querySelectorAll('[data-scrollto]').forEach(el => {
 
   el.addEventListener('click', (event) => {
     event.preventDefault();
-    scroller.tweenTo(offset, { duration: 1500 });
   });
 });

@@ -1,4 +1,4 @@
-import { listenEl } from '@smoovy/event';
+import { listenCompose, listenEl } from '@smoovy/event';
 import { Browser } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
@@ -27,11 +27,19 @@ interface Config {
    * Default: 25
    */
   multiplierFirefox?: number;
+
+  /**
+   * Whether to enable platform multiplier. This detects which platform is
+   * being used and adjusts the given multiplier
+   * Default: true
+   */
+  enablePlatformMultiplier?: boolean;
 }
 
 const defaultConfig = {
   passive: false,
   multiplier: 1,
+  enablePlatformMultiplier: true,
   multiplierFirefox: 25
 };
 
@@ -42,16 +50,20 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     const target = cfg.target || document.documentElement;
     const listener = (event: WheelEvent) => {
       const delta = { x: 0, y: 0 };
+      let ratio = 1;
 
       if ( ! config.passive) {
         event.preventDefault();
       }
 
-      delta.x = (event as any).wheelDeltaX || event.deltaX * -1;
-      delta.y = (event as any).wheelDeltaY || event.deltaY * -1;
-      delta.x *= cfg.multiplier;
-      delta.y *= cfg.multiplier;
+      if (config.enablePlatformMultiplier && ! Browser.windows) {
+        ratio = 0.4;
+      }
 
+      delta.x = event.deltaX * -1;
+      delta.y = event.deltaY * -1;
+      delta.x *= cfg.multiplier * ratio;
+      delta.y *= cfg.multiplier * ratio;
 
       if (Browser.firefox && event.deltaMode === 1) {
         delta.x *= cfg.multiplierFirefox;
@@ -61,9 +73,11 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       scroller.emit(ScrollerEvent.DELTA, delta);
     };
 
-    return Browser.wheelEvent
-      ? listenEl(target, 'wheel', listener, { passive: cfg.passive })
-      : undefined;
+    return listenCompose(
+      Browser.wheelEvent
+        ? listenEl(target, 'wheel', listener, { passive: cfg.passive })
+        : undefined
+    )
   };
 };
 
