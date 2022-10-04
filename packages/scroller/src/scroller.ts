@@ -26,16 +26,14 @@ export const smoothScroll = (
   mouseWheel: coreBehaviors.mouseWheel(config.mouse),
   translate: coreBehaviors.translate(config.translate),
   styleContainer: coreBehaviors.styleContainer({
-    defaults: {
-      ...(config.scrollbar ? {
-        position: 'fixed',
-        left: '0px',
-        top: '0px',
-        width: '100%',
-        height: '100%',
-      } : {}),
+    defaults: (config.scrollbar ? {
+      position: 'fixed',
+      left: '0px',
+      top: '0px',
+      width: '100%',
+      height: '100%',
       ...config.styles
-    }
+    } : config.styles)
   }),
   keyboard: coreBehaviors.keyboard(config.keyboard),
   ...(config.scrollbar ? {
