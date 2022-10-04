@@ -39,10 +39,13 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
         if ( ! scrolling) {
           dragging = true;
 
-          const isWindow = target instanceof Window;
           const virtPos = scroller.position.virtual;
-          const scrollX = isWindow ? target.scrollX : target.scrollLeft;
-          const scrollY = isWindow ? target.scrollY : target.scrollTop;
+          const scrollX = target instanceof Window
+            ? target.scrollX
+            : target.scrollLeft;
+          const scrollY = target instanceof Window
+            ? target.scrollY
+            : target.scrollTop;
 
           scroller.muteEvents(ScrollerEvent.TRANSFORM_OUTPUT);
           scroller.updateDelta({

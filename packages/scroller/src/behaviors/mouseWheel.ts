@@ -77,7 +77,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       Browser.wheelEvent
         ? listenEl(target, 'wheel', listener, { passive: cfg.passive })
         : undefined
-    )
+    );
   };
 };
 

@@ -2,20 +2,20 @@ coverage:
   status:
     project:
       default:
-        target: 60%
+        target: 50%
         threshold: null
       observer:
         flags: observer
-        target: 60%
+        target: 50%
       ticker:
         flags: ticker
-        target: 70%
+        target: 50%
       tween:
         flags: tween
-        target: 80%
+        target: 50%
       utils:
         flags: utils
-        target: 80%
+        target: 50%
 flags:
   observer:
     paths:
