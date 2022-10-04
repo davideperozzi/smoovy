@@ -51,7 +51,7 @@ export class WebGL {
   public constructor(
     protected config: WebGLConfig = {}
   ) {
-    this.ticker = config.ticker || new Ticker();
+    this.ticker = config.ticker || new Ticker(Infinity);
     this.viewport = new Viewport(this.initCanvas(config.canvas), config);
 
     if (config.autoCreate !== false) {
@@ -170,8 +170,14 @@ export class WebGL {
   public render(time?: number) {
     this.meshes = this.meshes.sort((a, b) => b.model[14] - a.model[14]);
 
-    for (let i = 0, len = this.meshes.length; i < len; i++) {
-      this.meshes[i].render(time ?? this.lastTime);
+    const enabledMeshes = this.meshes.filter(mesh => !mesh.disabled);
+
+    if (enabledMeshes.length > 0) {
+      this.viewport.render();
+
+      for (let i = 0, len = enabledMeshes.length; i < len; i++) {
+        enabledMeshes[i].render(time ?? this.lastTime);
+      }
     }
 
     this.lastTime = time ?? this.lastTime;

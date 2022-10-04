@@ -107,12 +107,18 @@ export class GLPlane extends GLMesh {
           this.setSize(state.offset);
           this.translate(state.offset);
         }),
-        this.config.elementCulling
-          ? this.observable.onVisibilityChanged((state) => {
-            this.disabled = !state.visibility;
-          })
+        this.config.elementCulling !== false
+          ? this.observable.onVisibilityChanged(() => this.checkVisibility())
           : undefined
       );
+
+      setTimeout(() => this.checkVisibility());
+    }
+  }
+
+  private checkVisibility() {
+    if (this.observable) {
+      this.disabled = !this.observable.visibility;
     }
   }
 

@@ -9,7 +9,9 @@ function updateScroll() {
 window.addEventListener('scroll', updateScroll);
 setTimeout(() => updateScroll());
 
-webgl.plane({ width: 500, height: 500 }, (plane) => {
+webgl.plane({
+  element: document.querySelector('#box') as HTMLElement
+}, (plane) => {
   plane.uniform('color', [ 133, 7, 0 ]);
 });
 
