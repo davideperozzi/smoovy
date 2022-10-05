@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Smooth scrolling for the world",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
