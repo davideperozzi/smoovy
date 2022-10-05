@@ -73,22 +73,30 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
           const diffX = Math.abs(virtual.x - outputX);
           const diffY = Math.abs(virtual.y - outputY);
           const newPos = { x: outputX, y: outputY };
+          const changed = (
+            (diffX - cfg.precision) > 0 ||
+            (diffY - cfg.precision) > 0
+          );
 
-          if ( ! running) {
-            scroller.emit(Event.LERP_CONTENT_START, newPos);
+          if ( ! running && changed) {
             running = true;
+
+            scroller.emit(Event.LERP_CONTENT_START, newPos);
           }
 
           if (diffX < cfg.precision && diffY < cfg.precision) {
             kill();
-            Ticker.requestAnimationFrame(() => {
-              scroller.emit(Event.LERP_CONTENT_END, newPos);
-            });
-            running = false;
-            return;
-          }
 
-          step(newPos);
+            if (running) {
+              running = false;
+
+              Ticker.requestAnimationFrame(() => {
+                scroller.emit(Event.LERP_CONTENT_END, newPos);
+              });
+            }
+          } else {
+            step(newPos);
+          }
         });
       }
     );
