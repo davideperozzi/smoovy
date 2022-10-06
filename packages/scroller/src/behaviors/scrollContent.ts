@@ -82,7 +82,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
           if (cfg.target instanceof Window) {
             document.body.style.overflow = 'hidden';
           } else {
-            lockedPosX = scrollPos.x
+            lockedPosX = scrollPos.x;
             lockedPosY = scrollPos.y;
 
             container.style.height = '100vh';
