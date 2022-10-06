@@ -57,16 +57,20 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       scroller.on<Coordinate>(
         ScrollerEvent.OUTPUT,
         (pos) => {
-          const posX = parseFloat(pos.x.toFixed(cfg.precision));
-          const posY = parseFloat(pos.y.toFixed(cfg.precision));
+          if ( ! scroller.isLocked()) {
+            const posX = parseFloat(pos.x.toFixed(cfg.precision));
+            const posY = parseFloat(pos.y.toFixed(cfg.precision));
 
-          updateTransform(element, posX, posY, firefoxFix);
+            updateTransform(element, posX, posY, firefoxFix);
+          }
         }
       ),
       scroller.on(ScrollerEvent.RECALC, () => {
         const pos = scroller.position.virtual;
 
-        updateTransform(element, pos.x, pos.y, firefoxFix);
+        if ( ! scroller.isLocked()) {
+          updateTransform(element, pos.x, pos.y, firefoxFix);
+        }
       })
     );
 

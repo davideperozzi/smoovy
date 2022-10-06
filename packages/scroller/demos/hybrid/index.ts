@@ -15,3 +15,13 @@ document.querySelectorAll('[data-scrollto]').forEach(el => {
     event.preventDefault();
   });
 });
+
+window.addEventListener('keypress', (event) => {
+  if (event.key === 'g') {
+    if (scroller.isLocked()) {
+      scroller.unlock();
+    } else {
+      scroller.lock();
+    }
+  }
+});

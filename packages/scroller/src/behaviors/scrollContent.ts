@@ -33,6 +33,8 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     let dragging = false;
     let dragTimeout: any;
     let scrollTimeout: any;
+    let lockedPosX = 0;
+    let lockedPosY = 0;
 
     return listenCompose(
       listenEl(target, 'scroll', (event) => {
@@ -70,6 +72,36 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
 
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => scrolling = false, cfg.resetTimeout);
+      }),
+      scroller.on(ScrollerEvent.LOCK, () => {
+        const wrapper = scroller.dom.wrapper.target;
+        const container = scroller.dom.container.target;
+        const scrollPos = scroller.position.output;
+
+        if (scroller.isLocked()) {
+          if (cfg.target instanceof Window) {
+            document.body.style.overflow = 'hidden';
+          } else {
+            lockedPosX = scrollPos.x
+            lockedPosY = scrollPos.y;
+
+            container.style.height = '100vh';
+            container.style.overflow = 'hidden';
+            wrapper.style.transform = `
+              translate3d(-${lockedPosX}px, -${lockedPosY}px, 0)
+            `;
+          }
+        } else {
+          if (cfg.target instanceof Window) {
+            document.body.style.overflow = '';
+          } else {
+            container.style.height = '';
+            container.style.overflow = '';
+            wrapper.style.transform = '';
+
+            scroller.scrollTo({ x: lockedPosX, y: lockedPosY }, true);
+          }
+        }
       })
     );
   };
