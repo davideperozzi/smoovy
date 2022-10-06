@@ -202,6 +202,10 @@ export class Scroller extends EventEmitter {
   }
 
   protected updatePosition(virtPos?: Partial<Coordinate>) {
+    if (this.isLocked()) {
+      return;
+    }
+
     if (virtPos && isNum(virtPos.x)) {
       this.position.virtual.x = virtPos.x as number;
     }
@@ -237,6 +241,10 @@ export class Scroller extends EventEmitter {
   }
 
   protected updateOutput(pos: Coordinate) {
+    if (this.isLocked()) {
+      return;
+    }
+
     this.position.output.x = pos.x;
     this.position.output.y = pos.y;
 

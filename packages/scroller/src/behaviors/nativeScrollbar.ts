@@ -118,6 +118,10 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
 
           updateSize();
           scroller.scrollTo(restorePos, true);
+
+          if (cfg.target && !cfg.nativeHandler) {
+            cfg.target.scrollTo(restorePos.x, restorePos.y);
+          }
         }
       })
     );
