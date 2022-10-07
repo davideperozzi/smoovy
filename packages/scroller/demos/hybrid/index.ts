@@ -25,6 +25,8 @@ window.addEventListener('keypress', (event) => {
     }
   }
 
-  scroller.scrollTo({ x: 0, y: 0 }, true);
+  if (event.key === 'd') {
+    scroller.scrollTo({ x: 0, y: 0 }, true);
+  }
 });
 

@@ -110,7 +110,17 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
           scroller.muteEvents(ScrollerEvent.TRANSFORM_OUTPUT);
         }
 
-        scroller.updateDelta({ y: scroller.position.virtual.y - event.pos.y });
+        const delta = { x: 0, y: 0 };
+
+        if (typeof event.pos.x === 'number') {
+          delta.x = scroller.position.virtual.x - event.pos.x;
+        }
+
+        if (typeof event.pos.y === 'number') {
+          delta.y = scroller.position.virtual.y - event.pos.y;
+        }
+
+        scroller.updateDelta(delta);
 
         if (event.skipOutputTransform) {
           scroller.unmuteEvents(ScrollerEvent.TRANSFORM_OUTPUT);

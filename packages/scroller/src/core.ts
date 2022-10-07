@@ -281,20 +281,24 @@ export class Scroller extends EventEmitter {
     pos: Partial<Coordinate>,
     skipOutputTransform = false
   ) {
-    this.emit<ScrollToEvent>(
-      ScrollerEvent.SCROLL_TO,
-      { pos, skipOutputTransform }
-    );
+    if ( ! this.isLocked()) {
+      this.emit<ScrollToEvent>(
+        ScrollerEvent.SCROLL_TO,
+        { pos, skipOutputTransform }
+      );
+    }
   }
 
   public tweenTo(
     pos: Partial<Coordinate>,
     options: TweenToEvent['options'] = {}
   ) {
-    this.emit<TweenToEvent>(
-      ScrollerEvent.TWEEN_TO,
-      { pos, options }
-    );
+    if ( ! this.isLocked()) {
+      this.emit<TweenToEvent>(
+        ScrollerEvent.TWEEN_TO,
+        { pos, options }
+      );
+    }
   }
 
   public onVirtual(cb: EventListenerCb<Coordinate>) {
