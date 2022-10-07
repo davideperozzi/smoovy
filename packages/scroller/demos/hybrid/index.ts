@@ -24,4 +24,7 @@ window.addEventListener('keypress', (event) => {
       scroller.lock();
     }
   }
+
+  scroller.scrollTo({ x: 0, y: 0 }, true);
 });
+

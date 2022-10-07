@@ -24,3 +24,5 @@ scroller.onScroll((pos) => {
 
   item.style.transform = `translate3d(0, ${-shift}px, 0)`;
 });
+
+

@@ -37,7 +37,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     let lockedPosY = 0;
 
     return listenCompose(
-      listenEl(target, 'scroll', (event) => {
+      listenEl(target, 'scroll', () => {
         if ( ! scrolling) {
           dragging = true;
 

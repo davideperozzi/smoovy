@@ -1,3 +1,4 @@
+import { listenCompose } from '@smoovy/event';
 import { Ticker, TickerThread } from '@smoovy/ticker';
 import { Browser, lerp } from '@smoovy/utils';
 
@@ -101,10 +102,25 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       }
     );
 
-    return () => {
-      unlisten();
-      ticker.kill();
-    };
+    ;
+
+    return listenCompose(
+      scroller.on(ScrollerEvent.SCROLL_TO, (event: any) => {
+        thread.kill();
+
+        if (event.skipOutputTransform) {
+          scroller.muteEvents(ScrollerEvent.TRANSFORM_OUTPUT);
+        }
+
+        scroller.updateDelta({ y: scroller.position.virtual.y - event.pos.y });
+
+        if (event.skipOutputTransform) {
+          scroller.unmuteEvents(ScrollerEvent.TRANSFORM_OUTPUT);
+        }
+      }),
+      unlisten,
+      () => ticker.kill()
+    );
   };
 };
 
