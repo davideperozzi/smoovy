@@ -120,7 +120,7 @@ export const hybridSmoothScroll = (
     ...config.scrollTo
   }),
   bypassNative: coreBehaviors.bypassNative({
-    condition: () => Browser.mobile,
+    condition: () => Browser.mobile || window.innerWidth < 768,
     ...config.native
   }),
   clampContent: coreBehaviors.clampContent({

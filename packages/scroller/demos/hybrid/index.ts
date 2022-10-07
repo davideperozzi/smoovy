@@ -1,10 +1,10 @@
 import { easings } from '@smoovy/tween';
 import { getElementOffset } from '@smoovy/utils';
 
-import { hypbridSmoothScroll, ScrollerEvent, smoothScroll } from '../../src';
+import { hybridSmoothScroll, ScrollerEvent, smoothScroll } from '../../src';
 
 const element = document.querySelector('main') as HTMLElement;
-const scroller = hypbridSmoothScroll(element);
+const scroller = hybridSmoothScroll(element);
 
 document.querySelectorAll('[data-scrollto]').forEach(el => {
   const toSel = el.getAttribute('data-scrollto');

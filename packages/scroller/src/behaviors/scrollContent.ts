@@ -35,6 +35,45 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     let scrollTimeout: any;
     let lockedPosX = 0;
     let lockedPosY = 0;
+    let locked = false;
+    const wrapper = scroller.dom.wrapper.target;
+    const container = scroller.dom.container.target;
+    const scrollPos = scroller.position.output;
+
+    const unlock = () => {
+      locked = false;
+
+      if (cfg.target instanceof Window) {
+        document.body.style.overflow = '';
+      } else {
+        container.style.height = '';
+        container.style.overflow = '';
+        wrapper.style.transform = '';
+
+        scroller.scrollTo({ x: lockedPosX, y: lockedPosY }, true);
+      }
+    };
+
+    const lock = () => {
+      locked = true;
+
+      if (cfg.target instanceof Window) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        lockedPosX = scrollPos.x;
+        lockedPosY = scrollPos.y;
+
+        container.style.height = '100vh';
+        container.style.overflow = 'hidden';
+        wrapper.style.transform = `
+          translate3d(-${lockedPosX}px, -${lockedPosY}px, 0)
+        `;
+      }
+    }
+
+    if (scroller.isLocked()) {
+      lock();
+    }
 
     return listenCompose(
       listenEl(target, 'scroll', () => {
@@ -74,35 +113,17 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
         scrollTimeout = setTimeout(() => scrolling = false, cfg.resetTimeout);
       }),
       scroller.on(ScrollerEvent.LOCK, () => {
-        const wrapper = scroller.dom.wrapper.target;
-        const container = scroller.dom.container.target;
-        const scrollPos = scroller.position.output;
-
         if (scroller.isLocked()) {
-          if (cfg.target instanceof Window) {
-            document.body.style.overflow = 'hidden';
-          } else {
-            lockedPosX = scrollPos.x;
-            lockedPosY = scrollPos.y;
-
-            container.style.height = '100vh';
-            container.style.overflow = 'hidden';
-            wrapper.style.transform = `
-              translate3d(-${lockedPosX}px, -${lockedPosY}px, 0)
-            `;
-          }
+          lock();
         } else {
-          if (cfg.target instanceof Window) {
-            document.body.style.overflow = '';
-          } else {
-            container.style.height = '';
-            container.style.overflow = '';
-            wrapper.style.transform = '';
-
-            scroller.scrollTo({ x: lockedPosX, y: lockedPosY }, true);
-          }
+          unlock();
         }
-      })
+      }),
+      () => {
+        if (locked) {
+          unlock();
+        }
+      }
     );
   };
 };
