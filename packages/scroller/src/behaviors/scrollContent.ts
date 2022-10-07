@@ -69,7 +69,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
           translate3d(-${lockedPosX}px, -${lockedPosY}px, 0)
         `;
       }
-    }
+    };
 
     if (scroller.isLocked()) {
       lock();
