@@ -25,4 +25,15 @@ scroller.onScroll((pos) => {
   item.style.transform = `translate3d(0, ${-shift}px, 0)`;
 });
 
+window.addEventListener('keypress', (event) => {
+  if (event.key === 'g') {
+    if (scroller.isLocked()) {
+      scroller.unlock();
+    } else {
+      scroller.lock();
+    }
+  }
+
+  scroller.scrollTo({ x: 0, y: 0 }, true);
+});
 

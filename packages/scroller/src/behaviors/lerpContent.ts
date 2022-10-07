@@ -102,8 +102,6 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       }
     );
 
-    ;
-
     return listenCompose(
       scroller.on(ScrollerEvent.SCROLL_TO, (event: any) => {
         thread.kill();
