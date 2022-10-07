@@ -94,7 +94,7 @@ export const nativeSmoothScroll = (
   ...(config.behaviors || {})
 });
 
-export const hypbridSmoothScroll = (
+export const hybridSmoothScroll = (
   dom: ScrollerDomType,
   config: {
     lerp?: coreBehaviors.LerpContentConfig,
