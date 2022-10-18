@@ -16,6 +16,7 @@ export interface ComponentConfig {
 }
 
 export interface ComponentWrapper<T = any> {
+  config: ComponentConfig;
   element: HTMLElement;
   component: T;
   unlisten?: Unlisten;
@@ -56,9 +57,20 @@ export class ComponentManager {
       }
 
       scope.querySelectorAll(config.selector).forEach(element => {
-        if (filter(cls) && element instanceof HTMLElement) {
+        if (
+          filter(cls) &&
+          element instanceof HTMLElement &&
+          ! this.components.find(wrapper => (
+            wrapper.component instanceof cls as any &&
+            wrapper.element === element
+          ))
+        ) {
           const cmp = new cls(element);
-          const wrapper: ComponentWrapper = { component: cmp, element };
+          const wrapper: ComponentWrapper = {
+            component: cmp,
+            element,
+            config
+          };
 
           if (typeof cmp.onListen === 'function') {
             wrapper.unlisten = cmp.onListen();
@@ -82,7 +94,10 @@ export class ComponentManager {
     const indicies: number[] = [];
 
     this.components.forEach((wrapper, index) => {
-      if ( ! scope.contains(wrapper.element)) {
+      if (
+        ! scope.contains(wrapper.element) ||
+        ! wrapper.element.matches(wrapper.config.selector)
+      ) {
         if (wrapper.unlisten) {
           wrapper.unlisten();
           delete wrapper.unlisten;
@@ -96,7 +111,9 @@ export class ComponentManager {
       }
     });
 
-    indicies.forEach(index => this.components.splice(index, 1));
+    for (var i = indicies.length -1; i >= 0; i--) {
+      this.components.splice(indicies[i], 1);
+    }
   }
 
   public static query<T>(ctor: T, scope?: HTMLElement) {

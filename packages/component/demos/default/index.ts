@@ -24,3 +24,5 @@ export class Component2 implements OnListen {
 }
 
 ComponentManager.update();
+
+window['Manager'] = ComponentManager;
