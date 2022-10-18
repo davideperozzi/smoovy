@@ -111,7 +111,7 @@ export class ComponentManager {
       }
     });
 
-    for (var i = indicies.length -1; i >= 0; i--) {
+    for (let i = indicies.length - 1; i >= 0; i--) {
       this.components.splice(indicies[i], 1);
     }
   }
