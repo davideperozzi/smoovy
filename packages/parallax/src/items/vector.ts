@@ -88,7 +88,7 @@ export class VectorParallaxItem<
 
     if (true === this.config.normalize) {
       const heightDiff = ctrlState.contentHeight - ctrlState.viewportHeight;
-      const widthDiff = ctrlState.contentHeight - ctrlState.viewportHeight;
+      const widthDiff = ctrlState.contentWidth - ctrlState.viewportWidth;
 
       if (vecState.x < ctrlState.viewportWidth) {
         shiftNormX = viewMidX - vecMidX - vecState.x;
