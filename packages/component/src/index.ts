@@ -98,7 +98,7 @@ export class ComponentManager {
         ! scope.contains(wrapper.element) ||
         ! wrapper.element.matches(wrapper.config.selector)
       ) {
-        if (wrapper.unlisten) {
+        if (typeof wrapper.unlisten === 'function') {
           wrapper.unlisten();
           delete wrapper.unlisten;
         }
