@@ -84,35 +84,49 @@ export class ComponentManager {
     });
 
     if (purge) {
-      this.purge(scope);
+      this.purge();
     }
 
     return results;
   }
 
-  public static purge(scope: HTMLElement = this.root) {
-    const indicies: number[] = [];
+  public static purge() {
+    const removes: [ComponentWrapper, Promise<void>][] = [];
 
     this.components.forEach((wrapper, index) => {
       if (
-        ! scope.contains(wrapper.element) ||
+        ! this.root.contains(wrapper.element) ||
         ! wrapper.element.matches(wrapper.config.selector)
       ) {
-        if (typeof wrapper.unlisten === 'function') {
-          wrapper.unlisten();
-          delete wrapper.unlisten;
-        }
+        let promise = Promise.resolve();
 
         if (typeof wrapper.component.onDestroy === 'function') {
-          wrapper.component.onDestroy();
+          const destroy = wrapper.component.onDestroy();
+
+          if (destroy instanceof Promise) {
+            promise = destroy;
+          }
         }
 
-        indicies.push(index);
+        promise.then(() => {
+          if (typeof wrapper.unlisten === 'function') {
+            wrapper.unlisten();
+            delete wrapper.unlisten;
+          }
+        });
+
+        removes.push([wrapper, promise]);
       }
     });
 
-    for (let i = indicies.length - 1; i >= 0; i--) {
-      this.components.splice(indicies[i], 1);
+    for (let i = removes.length - 1; i >= 0; i--) {
+      removes[i][1].then(() => {
+        const index = this.components.indexOf(removes[i][0]);
+
+        if (index > -1) {
+          this.components.splice(index, 1);
+        }
+      });
     }
   }
 

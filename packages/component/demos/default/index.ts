@@ -21,6 +21,16 @@ export class Component2 implements OnListen {
       console.log('unlistening');
     });
   }
+
+  public async onDestroy() {
+    console.log('removing...');
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        console.log('now removed');
+        resolve();
+      }, 10000);
+    });
+  }
 }
 
 ComponentManager.update();
