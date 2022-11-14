@@ -1,13 +1,18 @@
 import { Unlisten } from '@smoovy/event';
+import { create } from 'domain';
 
 export interface Component extends OnDestroy, OnListen {}
 
 export interface OnDestroy {
-  onDestroy(): void;
+  onDestroy(): void | Promise<void>;
+}
+
+export interface OnCreate {
+  onCreate(): void | Promise<void>;
 }
 
 export interface OnListen {
-  onListen(): Unlisten;
+  onListen(): Unlisten | Promise<Unlisten>;
 }
 
 export interface ComponentConfig {
@@ -66,14 +71,19 @@ export class ComponentManager {
           ))
         ) {
           const cmp = new cls(element);
-          const wrapper: ComponentWrapper = {
-            component: cmp,
-            element,
-            config
-          };
+          const wrapper: ComponentWrapper = { component: cmp, element, config };
+          let created = Promise.resolve();
+
+          if (typeof cmp.onCreate === 'function') {
+            const createRet = cmp.onCreate();
+
+            if (createRet instanceof Promise)  {
+              created = createRet;
+            }
+          }
 
           if (typeof cmp.onListen === 'function') {
-            wrapper.unlisten = cmp.onListen();
+            created.then(() => wrapper.unlisten = cmp.onListen());
           }
 
           results.push(wrapper);

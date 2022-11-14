@@ -1,6 +1,6 @@
 import { listenCompose } from '@smoovy/event';
 
-import { component, ComponentManager, OnListen } from '../../src';
+import { component, ComponentManager, OnCreate, OnListen } from '../../src';
 
 @component('[data-cmp1]')
 export class Component1 {
@@ -10,9 +10,13 @@ export class Component1 {
 }
 
 @component('[data-cmp2]')
-export class Component2 implements OnListen {
+export class Component2 implements OnListen, OnCreate {
   constructor(element: HTMLElement) {
     element.textContent += ' CMP 2';
+  }
+
+  async onCreate() {
+    await new Promise(resolve => setTimeout(resolve, 1500));
   }
 
   public onListen() {
