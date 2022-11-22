@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/component",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Simple component manager",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -30,7 +30,7 @@
   "license": "MIT",
   "dependencies": {
     "@smoovy/event": "^0.2.1",
-    "@smoovy/observer": "^0.5.0",
+    "@smoovy/observer": "^0.5.1",
     "@smoovy/utils": "^0.1.16",
     "tslib": "^1.9.3"
   }
