@@ -42,10 +42,6 @@ export class ElementParallaxItem<
       });
     }
 
-    if (this.config.contained) {
-
-    }
-
     this.recalc();
   }
 
@@ -98,32 +94,16 @@ export class ElementParallaxItem<
 
     if (vpState.inside) {
       const element = this.config.contained || this.element;
+      let scale = 1;
 
-      if (
-        this.config.contained &&
-        this.boundShift.x + this.boundShift.y !== this.boundShiftSum
-      ) {
-        this.boundShiftSum = this.boundShift.x + this.boundShift.y;
+      if (this.config.contained) {
+        const currentState = this.getState();
+        const boundShift = Math.max(this.boundShift.x, this.boundShift.y);
+        const boundSize = this.boundShift.x > this.boundShift.y
+          ? currentState.width
+          : currentState.height;
 
-        if (this.speed.y !== 0) {
-          if (this.boundShift.y < 0) {
-            element.style.top = `-${this.boundShift.y * -1}px`;
-            element.style.bottom = `-${this.boundShift.y * -1}px`;
-          } else {
-            element.style.top = `-${this.boundShift.y * .5}px`;
-            element.style.bottom = `-${this.boundShift.y * .5}px`;
-          }
-        }
-
-        if (this.speed.x !== 0) {
-          if (this.boundShift.x < 0) {
-            element.style.left = `-${this.boundShift.x * -1}px`;
-            element.style.right = `-${this.boundShift.x * -1}px`;
-          } else {
-            element.style.left = `-${this.boundShift.x * .5}px`;
-            element.style.right = `-${this.boundShift.x * .5}px`;
-          }
-        }
+        scale = 1 + (boundShift * 2 / boundSize);
       }
 
       if (this.config.translate !== false) {
@@ -133,6 +113,7 @@ export class ElementParallaxItem<
             ${this.shift.y.toFixed(this.precision)}px,
             0
           )
+          scale(${scale})
         `;
       }
     }

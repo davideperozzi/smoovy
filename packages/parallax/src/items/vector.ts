@@ -90,7 +90,7 @@ export class VectorParallaxItem<
       const heightDiff = ctrlState.contentHeight - ctrlState.viewportHeight;
       const widthDiff = ctrlState.contentWidth - ctrlState.viewportWidth;
 
-      if (vecState.x < ctrlState.viewportWidth) {
+      if (vecState.x + vecState.width < ctrlState.viewportWidth) {
         shiftNormX = viewMidX - vecMidX - vecState.x;
       }
 
@@ -119,8 +119,8 @@ export class VectorParallaxItem<
 
     // these are fixed shift values when the element (without shift)
     // enters and leaves the view
-    this.boundShift.x = (viewMidX - vecMidX + vecState.width) * this.speed.x;
-    this.boundShift.y = (viewMidY - vecMidY + vecState.height) * this.speed.y;
+    this.boundShift.x = (viewMidX - vecMidX - shiftNormX) * this.speed.x;
+    this.boundShift.y = (viewMidY - vecMidY - shiftNormY) * this.speed.y;
 
     this.onUpdate(ctrlState, ctrlOffset);
 
