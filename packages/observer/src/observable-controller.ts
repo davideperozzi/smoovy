@@ -109,7 +109,10 @@ export class ObservableController {
             }
           });
         });
-      }, typeof intersecConfig === 'object' ? intersecConfig : undefined);
+      }, {
+        threshold: [0, 0.01],
+        ...(typeof intersecConfig === 'object' ? intersecConfig : {})
+      });
     }
 
     // split window resize events into two listeners
