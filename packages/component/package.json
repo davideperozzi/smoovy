@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/component",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Simple component manager",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
