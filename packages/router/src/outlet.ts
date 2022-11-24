@@ -15,7 +15,7 @@ export enum RouterOutletEvent {
 
 export class RouterOutlet extends EventEmitter {
   private activeAction?: ActionArgs;
-  protected root: HTMLElement;
+  protected _root: HTMLElement;
 
   public constructor(
     protected selector: string
@@ -34,7 +34,11 @@ export class RouterOutlet extends EventEmitter {
       );
     }
 
-    this.root = rootEl;
+    this._root = rootEl;
+  }
+
+  public get root() {
+    return this._root;
   }
 
   private async processTransitions(
@@ -52,22 +56,27 @@ export class RouterOutlet extends EventEmitter {
     }
   }
 
-  public async update(
-    payload: HTMLElement,
-    transitions: RouterTransition[] = [],
-    trigger: ActionArgs['trigger'] = 'user'
-  ) {
-    const toRoot = payload.querySelector(this.selector);
+  public parsePayload(payload: HTMLElement) {
+    const scopeElement = payload.querySelector(this.selector);
 
-    if ( ! toRoot) {
+    if ( ! scopeElement) {
       throw new Error(
         `Child with selector "${this.selector}" not found in payload`
       );
     }
 
+    return scopeElement;
+  }
+
+  public async update(
+    payload: HTMLElement,
+    transitions: RouterTransition[] = [],
+    trigger: ActionArgs['trigger'] = 'user'
+  ) {
+    const toRoot = this.parsePayload(payload);
     const action = {
-      root: this.root,
-      from: this.root.firstElementChild as HTMLElement,
+      root: this._root,
+      from: this._root.firstElementChild as HTMLElement,
       to: toRoot.firstElementChild as HTMLElement,
       trigger
     };
@@ -93,8 +102,8 @@ export class RouterOutlet extends EventEmitter {
 
     this.emit(RouterOutletEvent.CONTENT_BEFORE_ENTER_END, event);
 
-    if ( ! this.root.contains(action.to)) {
-      this.root.appendChild(action.to);
+    if ( ! this._root.contains(action.to)) {
+      this._root.appendChild(action.to);
     }
 
     this.emit(RouterOutletEvent.CONTENT_AFTER_ENTER_START, event);
@@ -120,8 +129,8 @@ export class RouterOutlet extends EventEmitter {
 
     this.emit(RouterOutletEvent.CONTENT_BEFORE_LEAVE_END, event);
 
-    if (this.root.contains(action.from)) {
-      this.root.removeChild(action.from);
+    if (this._root.contains(action.from)) {
+      this._root.removeChild(action.from);
     }
 
     this.emit(RouterOutletEvent.CONTENT_AFTER_LEAVE_START, event);

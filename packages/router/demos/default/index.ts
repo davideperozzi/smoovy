@@ -1,6 +1,6 @@
 import { listenEl } from '@smoovy/event';
 
-import { Router, RouterEvent, RouterOutletEvent } from '../../src';
+import { Route, Router, RouterEvent, RouterOutletEvent } from '../../src';
 import { FadeTransition } from '../../src/transitions/fade';
 
 const router = new Router(
@@ -21,8 +21,44 @@ document.querySelectorAll('a').forEach(link => {
     event.preventDefault();
 
     const target = event.currentTarget as HTMLAnchorElement;
+    console.log(target.href);
 
     router.navigate(target.href);
   });
 });
+
+
+// manual steering: baypassing all events
+// async function main() {
+//   const url = 'http://localhost:1234/sample.html';
+//   const text = await router.preload(url);
+//   const prev = { ...router.state.current } as Route;
+
+//   if (text) {
+//     const { element, title } = router.prepareContent(text);
+
+//     setTimeout(() => {
+//       router.replace(url, true);
+
+//       if (router.outlet) {
+//         const viewElement = router.outlet.parsePayload(element);
+
+//         router.outlet.root.appendChild(viewElement);
+
+//         setTimeout(() => {
+//           if (router.outlet) {
+//             router.outlet.root.removeChild(viewElement);
+//             router.replace(prev as Route, true)
+//           }
+//         }, 1500);
+//       }
+
+//       if (title) {
+//         document.title = title;
+//       }
+//     }, 1500);
+//   }
+// }
+
+// main();
 

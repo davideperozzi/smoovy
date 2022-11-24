@@ -23,6 +23,12 @@ export interface RouteChangeEvent {
   trigger: 'popstate' | 'user';
 }
 
+export interface NavigateConfig {
+  outlet?: boolean;
+  history?: boolean;
+  trigger?: RouteChangeEvent['trigger'];
+}
+
 export enum RouterEvent {
   INIT = 'init',
   NAVIGATION_START = 'navigationstart',
@@ -95,7 +101,7 @@ export class Router extends EventEmitter {
       window,
       'popstate',
       (event: PopStateEvent) => {
-        this.navigate(event.state, false, 'popstate');
+        this.navigate(event.state, { history: false, trigger: 'popstate' });
       }
     );
   }
@@ -144,7 +150,11 @@ export class Router extends EventEmitter {
     emptyConstraints.forEach(constr => this.transitions.delete(constr));
   }
 
-  private replace(route: Route, history = false) {
+  public replace(route: Route | string, history = false) {
+    if (typeof route === 'string') {
+      route = this.routeFromUrl(route);
+    }
+
     this._state.current = route;
 
     if (history) {
@@ -152,7 +162,11 @@ export class Router extends EventEmitter {
     }
   }
 
-  private push(route: Route, history = false) {
+  public push(route: Route | string, history = false) {
+    if (typeof route === 'string') {
+      route = this.routeFromUrl(route);
+    }
+
     this._state.current = route;
 
     if (history) {
@@ -166,6 +180,16 @@ export class Router extends EventEmitter {
     parser.innerHTML = html;
 
     return parser;
+  }
+
+  public prepareContent(html: string) {
+    const element = this.parseContent(html);
+    const titleEl = element.querySelector('title');
+
+    return {
+      element,
+      title: titleEl && titleEl.textContent
+    };
   }
 
   private async loadContent(event: RouteChangeEvent) {
@@ -197,18 +221,17 @@ export class Router extends EventEmitter {
     const content = this.contentCache.get(event.to.load);
 
     if (content) {
-      const payload = this.parseContent(content);
-      const titleEl = payload.querySelector('title');
+      const prepared = this.prepareContent(content);
 
-      if (titleEl && titleEl.textContent) {
-        document.title = titleEl.textContent;
+      if (prepared.title) {
+        document.title = prepared.title;
       }
 
       this.emit<RouteChangeEvent>(
         RouterEvent.CONTENT_LOAD_END,
         {
           ...event,
-          payload,
+          payload: prepared.element,
         }
       );
 
@@ -228,7 +251,7 @@ export class Router extends EventEmitter {
           }
         });
 
-        await this.outlet.update(payload, transitions, event.trigger);
+        await this.outlet.update(prepared.element, transitions, event.trigger);
       }
     }
   }
@@ -237,7 +260,20 @@ export class Router extends EventEmitter {
     return Object.freeze({ ...this._state });
   }
 
-  public async preload(route: Route) {
+  private routeFromUrl(loadUrl: string) {
+    const url = parseUrl(loadUrl);
+
+    return {
+      url: `${url.pathname}${url.search}${url.hash}`,
+      load: loadUrl,
+    } as Route;
+  }
+
+  public async preload(route: Route | string) {
+    if (typeof route === 'string') {
+      route = this.routeFromUrl(route);
+    }
+
     if ( ! this.contentCache.has(route.load)) {
       this.fetch = goFetch(route.load);
 
@@ -245,24 +281,25 @@ export class Router extends EventEmitter {
 
       if (content) {
         this.contentCache.set(route.load, content);
+
+        return content;
       }
     }
+
+    return this.contentCache.get(route.load);
   }
 
   public async navigate(
     toRoute: Route | string,
-    history = true,
-    trigger: RouteChangeEvent['trigger'] = 'user'
+    config: NavigateConfig = {}
   ) {
     const fromRoute = this._state.current;
+    const useHistory = typeof config.history === 'undefined'
+      ? true
+      : config.history;
 
     if (typeof toRoute === 'string') {
-      const url = parseUrl(toRoute);
-
-      toRoute = {
-        url: `${url.pathname}${url.search}${url.hash}`,
-        load: toRoute,
-      };
+      toRoute = this.routeFromUrl(toRoute);
     }
 
     if ( ! fromRoute) {
@@ -283,7 +320,7 @@ export class Router extends EventEmitter {
     this.pendingEvent = {
       from: fromRoute,
       to: toRoute,
-      trigger
+      trigger: config.trigger || 'user'
     };
 
     this.emit<RouteChangeEvent>(
@@ -291,7 +328,7 @@ export class Router extends EventEmitter {
       this.pendingEvent
     );
 
-    this.push(toRoute, history);
+    this.push(toRoute, useHistory);
     await this.loadContent(this.pendingEvent);
     this.emit<RouteChangeEvent>(RouterEvent.NAVIGATION_END, this.pendingEvent);
     delete this.pendingEvent;
