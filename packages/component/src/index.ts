@@ -83,7 +83,16 @@ export class ComponentManager {
           }
 
           if (typeof cmp.onListen === 'function') {
-            created.then(() => wrapper.unlisten = cmp.onListen());
+
+            created.then(async () => {
+              const unlisten = cmp.onListen();
+
+              if (unlisten instanceof Promise) {
+                wrapper.unlisten = await unlisten;
+              } else {
+                wrapper.unlisten = unlisten;
+              }
+            });
           }
 
           results.push(wrapper);
