@@ -83,7 +83,6 @@ export class ComponentManager {
           }
 
           if (typeof cmp.onListen === 'function') {
-
             created.then(async () => {
               const unlisten = cmp.onListen();
 

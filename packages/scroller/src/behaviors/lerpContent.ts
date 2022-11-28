@@ -104,7 +104,9 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
 
     return listenCompose(
       scroller.on(ScrollerEvent.SCROLL_TO, (event: any) => {
-        thread.kill();
+        if (thread) {
+          thread.kill();
+        }
 
         if (event.skipOutputTransform) {
           scroller.muteEvents(ScrollerEvent.TRANSFORM_OUTPUT);
