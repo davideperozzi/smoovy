@@ -21,6 +21,7 @@ export class ElementParallaxItem<
   C extends ElementParallaxItemConfig = ElementParallaxItemConfig
 > extends VectorParallaxItem<C> {
   public static observer = new ObservableController();
+  private initialUpdate = false;
 
   protected boundShiftSum = 0;
   protected observable?: Observable<HTMLElement>;
@@ -92,7 +93,9 @@ export class ElementParallaxItem<
       this.shift = this.config.mapShift.call(this, this.shift, this.boundShift);
     }
 
-    if (vpState.inside) {
+    if (vpState.inside || ! this.initialUpdate) {
+      this.initialUpdate = true;
+
       const element = this.config.contained || this.element;
       let scale = 1;
 

@@ -64,16 +64,16 @@ const elementItem3 = new ElementParallaxItem(
 );
 
 controller.add(imageBox);
-// controller.add(vectorItem);
-// controller.add(elementItem1);
-// controller.add(elementItem2);
-// controller.add(elementItem3);
-// controller.add(new ElementParallaxItem(
-//   document.querySelector('footer')!,
-//   {
-//     speed: 0.6
-//   }
-// ));
+controller.add(vectorItem);
+controller.add(elementItem1);
+controller.add(elementItem2);
+controller.add(elementItem3);
+controller.add(new ElementParallaxItem(
+  document.querySelector('footer')!,
+  {
+    speed: 0.6
+  }
+));
 
 element.style.position = 'absolute';
 element.style.left = `${state.x}px`;
