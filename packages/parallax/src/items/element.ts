@@ -21,8 +21,6 @@ export class ElementParallaxItem<
   C extends ElementParallaxItemConfig = ElementParallaxItemConfig
 > extends VectorParallaxItem<C> {
   public static observer = new ObservableController();
-  private initialUpdate = false;
-
   protected boundShiftSum = 0;
   protected observable?: Observable<HTMLElement>;
 
@@ -93,8 +91,10 @@ export class ElementParallaxItem<
       this.shift = this.config.mapShift.call(this, this.shift, this.boundShift);
     }
 
-    if (vpState.inside || ! this.initialUpdate) {
-      this.initialUpdate = true;
+    if (vpState.inside) {
+      if (this.config.culling !== false) {
+        this.element.style.visibility = '';
+      }
 
       const element = this.config.contained || this.element;
       let scale = 1;
@@ -116,8 +116,11 @@ export class ElementParallaxItem<
             ${this.shift.y.toFixed(this.precision)}px,
             0
           )
-          scale(${scale})
-        `;
+        ` + (scale !== 1 ? `scale(${scale})` : '');
+      }
+    } else {
+      if (this.config.culling !== false) {
+        this.element.style.visibility = 'hidden';
       }
     }
   }
