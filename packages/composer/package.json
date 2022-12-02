@@ -1,0 +1,31 @@
+{
+  "name": "@smoovy/composer",
+  "version": "1.0.0",
+  "description": "Component Manager, Service Manager all in one",
+  "homepage": "https://github.com/davideperozzi/smoovy",
+  "repository": "https://github.com/davideperozzi/smoovy",
+  "main": "./index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "esbuild --minify ./src/**/* --outdir=dist && tsc",
+    "lint": "eslint ./src",
+    "dev": "vite",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "smoovy",
+    "component",
+    "manager",
+    "service",
+    "di",
+    "dependency injection"
+  ],
+  "dependencies": {
+    "@smoovy/listener": "1.0.0"
+  },
+  "author": "Davide Perozzi",
+  "license": "MIT"
+}

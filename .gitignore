@@ -1,45 +1,22 @@
-# dependencies
-node_modules
-
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# misc
-lerna-debug.log
-/.sass-cache
-.cache
-/connect.lock
-/libpeerconnection.log
-npm-debug.log
-.dev
-yarn-error.log
-testem.log
-.r*_cache*
-.coverage
-/coverage
-.tmp
-
-# System Files
-.DS_Store
-Thumbs.db
-
-# Package files
-dist
+# Project Custom Ignores
 .history
+node_modules
+packages/**/*/dist
+packages/**/*/coverage
+**/*.tsbuildinfo
+.parcel-cache
+.dev
+.yarn
 
-# Plain module files
-packages/*/m
-packages/webgl/src/old
+# Turbo Ignores
+.turbo
+
+# Yarn Not-Zero-Installs
+# https://yarnpkg.com/getting-started/qa/#which-files-should-be-gitignored
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

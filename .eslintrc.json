@@ -1,0 +1,25 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "ignorePatterns": ["dist", "node_modules", "examples", "scripts"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "extends": [
+    "eslint:recommended",
+    "standard",
+    "prettier",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-use-before-define": "off",
+    "no-useless-constructor": "off",
+    "n/no-callback-literal": "off",
+    "@typescript-eslint/no-empty-function": "off"
+  },
+  "plugins": ["@typescript-eslint"],
+  "env": {
+    "es6": true,
+    "node": true
+  }
+}

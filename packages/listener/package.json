@@ -1,0 +1,29 @@
+{
+  "name": "@smoovy/listener",
+  "version": "1.0.0",
+  "description": "Helpers for listening when it gets too verbose to hear",
+  "main": "./index.js",
+  "homepage": "https://github.com/davideperozzi/smoovy",
+  "repository": "https://github.com/davideperozzi/smoovy",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "esbuild ./src/** --outdir=dist && tsc",
+    "lint": "eslint ./src",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "smoovy",
+    "event",
+    "listener",
+    "helpers",
+    "dom"
+  ],
+  "author": "Davide Perozzi",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^0.25.3"
+  }
+}
