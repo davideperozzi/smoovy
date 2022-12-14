@@ -1,29 +1,30 @@
 {
-  "name": "@smoovy/listener",
+  "name": "@smoovy/scroller",
   "version": "1.0.0",
-  "description": "Helpers for listening when it gets too verbose to hear",
-  "main": "./src/index.ts",
+  "description": "smooth scrolling for the world",
+  "main": "./index.js",
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist/**"
+  ],
   "scripts": {
     "build": "esbuild ./src/** --outdir=dist && tsc",
     "lint": "eslint ./src",
-    "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "test": "vitest"
   },
   "keywords": [
     "smoovy",
-    "event",
-    "listener",
-    "helpers",
-    "dom"
+    "tween",
+    "scroller",
+    "smooth",
+    "scrolling",
+    "raf"
   ],
   "author": "Davide Perozzi",
-  "license": "MIT",
-  "devDependencies": {
-    "vitest": "^0.25.3"
-  }
+  "license": "MIT"
 }

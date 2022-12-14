@@ -1,8 +1,8 @@
 {
-  "name": "@smoovy/emitter",
+  "name": "@smoovy/ticker",
   "version": "1.0.0",
-  "description": "Simple event emitter",
-  "main": "./src/index.ts",
+  "description": "Simple and easy-to-use ticker",
+  "main": "./index.js",
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",
   "publishConfig": {
@@ -14,22 +14,15 @@
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
-  "files": [
-    "dist/**"
-  ],
   "keywords": [
     "smoovy",
-    "event",
-    "emitter",
-    "event-emitter"
+    "ticker",
+    "raf",
+    "fps"
   ],
   "author": "Davide Perozzi",
   "license": "MIT",
-  "dependencies": {
-    "@smoovy/listener": "1.0.0"
-  },
   "devDependencies": {
-    "@vitest/coverage-c8": "^0.25.3",
     "vitest": "^0.25.3"
   }
 }

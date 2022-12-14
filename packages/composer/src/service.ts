@@ -15,15 +15,15 @@ export class Service<
   private _resolved = false;
   private _activated = false;
   protected defaultConfig: Partial<C> = {} as C;
-  public resolveFn!: (value?: T | PromiseLike<T>) => void;
-  public rejectFn!: (reason?: any) => void;
+  public resolveFn?: (value?: T | PromiseLike<T>) => void;
+  public rejectFn?: (reason?: any) => void;
 
   constructor(
     protected config: C = {} as C,
     value?: T
   ) {
-    let resolveFn: (value?: T | PromiseLike<T>) => void;
-    let rejectFn: (reason?: any) => void;
+    let resolveFn: any;
+    let rejectFn: any;
 
     super((resolve, reject) => {
       resolveFn = resolve as any;
@@ -31,8 +31,8 @@ export class Service<
     });
 
     this.config = { ...this.defaultConfig, ...config };
-    this.resolveFn = resolveFn!;
-    this.rejectFn = rejectFn!;
+    this.resolveFn = resolveFn;
+    this.rejectFn = rejectFn;
 
     if (value) {
       this.resolve(value);

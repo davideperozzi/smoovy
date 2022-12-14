@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@smoovy/observer</title>
+  <style>
+    html { font-family: Arial; }
+
+    [data-sample-element-1],
+    [data-sample-element-2] {
+      position: relative;
+      padding: 20px;
+    }
+
+    [data-sample-element-1] {
+      width: 50vw;
+      margin-top: 500px;
+      margin-bottom: 500px;
+      margin-left: 10vw;
+      height: 50vw;
+      background: lightgray;
+    }
+
+    [data-sample-element-2] {
+      width: 30vw;
+      margin-top: 1200px;
+      margin-bottom: 30%;
+      margin-left: 50vw;
+      height: 80vh;
+      background: lightcoral;
+    }
+  </style>
+</head>
+<body>
+  <div data-sample-element-1></div>
+  <div data-sample-element-2></div>
+  <script async type="module" src="./index.ts"></script>
+</body>
+</html>

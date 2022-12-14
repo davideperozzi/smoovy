@@ -1,7 +1,7 @@
 {
-  "name": "@smoovy/emitter",
+  "name": "@smoovy/observer",
   "version": "1.0.0",
-  "description": "Simple event emitter",
+  "description": "Simple and easy-to-use ticker",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",
@@ -11,25 +11,23 @@
   "scripts": {
     "build": "esbuild ./src/** --outdir=dist && tsc",
     "lint": "eslint ./src",
+    "dev": "vite",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
-  "files": [
-    "dist/**"
-  ],
   "keywords": [
     "smoovy",
-    "event",
-    "emitter",
-    "event-emitter"
+    "ticker",
+    "raf",
+    "fps"
   ],
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/listener": "1.0.0"
+    "@smoovy/emitter": "^1.0.0",
+    "@smoovy/listener": "^1.0.0"
   },
   "devDependencies": {
-    "@vitest/coverage-c8": "^0.25.3",
     "vitest": "^0.25.3"
   }
 }
