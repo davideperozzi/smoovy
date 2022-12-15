@@ -29,7 +29,9 @@ export function observe<T extends ObservableTarget>(
   return new Observable({ target, ...(config || {}) });
 }
 
-export function unobserve(observable: Observable) {
+export function unobserve<T extends ObservableTarget>(
+observable: Observable<T>
+) {
   observable.destroy();
 }
 
@@ -67,6 +69,13 @@ export class Observable<
     private config: ObservableConfig<T>
   ) {
     super();
+
+    if (
+      ! (config.target instanceof HTMLElement) &&
+      ! (config.target instanceof Window)
+    ) {
+      throw new Error('target type is not valid: ' + typeof config.target);
+    }
 
     if (Observable.items.has(config.target)) {
       Observable.items.get(config.target)?.push(this);
@@ -285,7 +294,6 @@ export class Observable<
     }
 
     this.emit(ObservableEventType.VISIBILITY_CHANGE, this);
-
   }
 
   private getIdFromConfig<C>(config: C) {

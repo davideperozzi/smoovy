@@ -27,7 +27,7 @@ export class Ticker {
   private _ticking = false;
 
   public static now() {
-    return window.performance.now();
+    return Date.now();
   }
 
   public get ticking() {
@@ -60,8 +60,8 @@ export class Ticker {
   }
 
   public animate() {
-    window.requestAnimationFrame((time) => {
-      this.update(time);
+    window.requestAnimationFrame(() => {
+      this.update();
 
       if (this._ticking && ! this.override && this.threads.length > 0) {
         this.animate();

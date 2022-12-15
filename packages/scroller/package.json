@@ -2,20 +2,18 @@
   "name": "@smoovy/scroller",
   "version": "1.0.0",
   "description": "smooth scrolling for the world",
-  "main": "./index.js",
+  "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist/**"
-  ],
   "scripts": {
     "build": "esbuild ./src/** --outdir=dist && tsc",
     "lint": "eslint ./src",
-    "coverage": "vitest run --coverage",
-    "test": "vitest"
+    "dev": "vite --root ./demo",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "keywords": [
     "smoovy",

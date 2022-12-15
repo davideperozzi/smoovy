@@ -11,7 +11,7 @@
   "scripts": {
     "build": "esbuild ./src/** --outdir=dist && tsc",
     "lint": "eslint ./src",
-    "dev": "vite",
+    "dev": "vite --root ./demo",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },

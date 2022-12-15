@@ -1344,10 +1344,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smoovy/ticker@workspace:packages/ticker":
+"@smoovy/ticker@^1.0.0, @smoovy/ticker@workspace:packages/ticker":
   version: 0.0.0-use.local
   resolution: "@smoovy/ticker@workspace:packages/ticker"
   dependencies:
+    vitest: ^0.25.3
+  languageName: unknown
+  linkType: soft
+
+"@smoovy/tween@workspace:packages/tween":
+  version: 0.0.0-use.local
+  resolution: "@smoovy/tween@workspace:packages/tween"
+  dependencies:
+    "@smoovy/ticker": ^1.0.0
     vitest: ^0.25.3
   languageName: unknown
   linkType: soft

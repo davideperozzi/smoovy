@@ -1,5 +1,4 @@
 /* eslint-disable no-useless-constructor */
-
 import { component, Composer, composer, Service, service } from '../src';
 
 export class TestService extends Service<any, TestService> {
@@ -14,7 +13,7 @@ export class TestService extends Service<any, TestService> {
 
 export class SampleService extends Service<string, SampleService> {
   @service(TestService)
-  private testService: TestService;
+  private testService!: TestService;
 
   protected get child() {
     return SampleService;
@@ -28,13 +27,10 @@ export class SampleService extends Service<string, SampleService> {
 @component('[data-sample-component]')
 class SampleComponent {
   @service(SampleService, true)
-  protected message: string;
+  protected message!: string;
 
   @composer()
-  protected composer: Composer;
-
-  // @manager()
-  // protected manager: ComposerManager;
+  protected composer!: Composer;
 
   constructor(
     private element: HTMLElement
@@ -56,11 +52,12 @@ class SampleComponent {
 })
 class App {
   @composer()
-  private composer: Composer;
+  private composer!: Composer;
 
   onCreate() {
     console.log(this.composer);
   }
 }
 
-const app = new App();
+// eslint-disable-next-line no-new
+new App();

@@ -1,7 +1,7 @@
 {
-  "name": "@smoovy/ticker",
+  "name": "@smoovy/tween",
   "version": "1.0.0",
-  "description": "Simple and easy-to-use ticker",
+  "description": "simple and easy-to-use tween lib",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",
@@ -11,17 +11,20 @@
   "scripts": {
     "build": "esbuild ./src/** --outdir=dist && tsc",
     "lint": "eslint ./src",
+    "dev": "vite --config ./vite.demo.ts",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
   "keywords": [
+    "tween",
     "smoovy",
-    "ticker",
-    "raf",
-    "fps"
+    "ticker"
   ],
   "author": "Davide Perozzi",
   "license": "MIT",
+  "dependencies": {
+    "@smoovy/ticker": "^1.0.0"
+  },
   "devDependencies": {
     "vitest": "^0.25.3"
   }
