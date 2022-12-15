@@ -1,0 +1,29 @@
+{
+  "name": "@smoovy/utils",
+  "version": "1.0.0",
+  "description": "Some basic functionality to make better websites",
+  "main": "./src/index.ts",
+  "homepage": "https://github.com/davideperozzi/smoovy",
+  "repository": "https://github.com/davideperozzi/smoovy",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "esbuild ./src/** --outdir=dist && tsc",
+    "lint": "eslint ./src",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "smoovy",
+    "utils",
+    "helpers",
+    "math",
+    "promise"
+  ],
+  "author": "Davide Perozzi",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^0.25.3"
+  }
+}
