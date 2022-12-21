@@ -12,5 +12,3 @@ export const isObj = (val: any): val is Record<any, any> => {
     type === 'function'
   );
 }
-
-

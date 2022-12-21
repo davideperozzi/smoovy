@@ -1,21 +1,18 @@
 import { Observable, observe, unobserve } from '@smoovy/observer';
-import {
-  between, Coordinate, isFunc, isNum, isObj, isStr,
-} from '@smoovy/utils';
+import { between, Coordinate, isFunc } from '@smoovy/utils';
 
 import { ParallaxResolver } from './resolver';
-import { ParallaxState, createState } from './state';
+import { createState, ParallaxState } from './state';
 
 export interface ParallaxElementConfig {
   target: HTMLElement;
-  masking?: boolean | HTMLElement;
-  culling?: boolean;
   translate?: boolean;
 }
 
 export interface ParallaxConfig {
   context?: string;
-  clamping?: boolean;
+  culling?: boolean;
+  masking?: boolean | HTMLElement;
   normalize?: boolean;
   speed?: Partial<Coordinate>;
   element?: HTMLElement | ParallaxElementConfig;
@@ -29,7 +26,8 @@ export function parallax(config: ParallaxConfig) {
 
 export class Parallax {
   private static registry = new Map<string, Parallax[]>();
-  protected observable?: Observable<HTMLElement>;
+  protected target?: Observable<HTMLElement>;
+  protected parent?: Observable<HTMLElement>;
   protected state = createState();
   protected resolvers: Coordinate<ParallaxResolver> = {
     x: new ParallaxResolver(this.config),
@@ -52,9 +50,18 @@ export class Parallax {
         ? config.element
         : config.element.target;
 
-      this.observable = observe(element, { resizeDetection: true });
+      this.target = observe(element, {
+        resizeDetection: true,
+        visibilityDetection: true
+      });
 
-      this.observable.onDimChange((observable) => {
+      if (config.masking && element.parentElement instanceof HTMLElement) {
+        this.parent = observe(element.parentElement, {
+          visibilityDetection: true
+        });
+      }
+
+      this.target.onDimChange((observable) => {
         this.state.x = observable.left;
         this.state.y = observable.top;
         this.state.width = observable.width;
@@ -83,17 +90,29 @@ export class Parallax {
   }
 
   get speed() {
-    return { x: 0, y: 0, ...(this.config.speed || {}) }
+    return { x: 0, y: 0, ...(this.config.speed || {}) };
   }
 
   get progress() {
     return { x: this.resolvers.x.progress, y: this.resolvers.y.progress };
   }
 
+  get scale() {
+    if (this.config.masking) {
+      const state = this.state;
+      const mX = this.resolvers.x.maskShift;
+      const mY = this.resolvers.y.maskShift;
+
+      return 1 + (mX > mY ? mX / state.width : mY / state.height);
+    }
+
+    return 1;
+  }
+
   private updateResolvers() {
     const state = this.state;
     const speed = this.speed;
-    const clamp = this.config.clamping !== false;
+    const culling = this.config.culling !== false && !this.config.masking;
 
     this.resolvers.x.update({
       pos: state.x,
@@ -113,8 +132,8 @@ export class Parallax {
       viewSize: state.viewHeight
     });
 
-    state.shiftX = this.resolvers.x.shift(clamp);
-    state.shiftY = this.resolvers.y.shift(clamp);
+    state.shiftX = this.resolvers.x.shift(culling);
+    state.shiftY = this.resolvers.y.shift(culling);
     state.startX = this.resolvers.x.state.shiftStart;
     state.startY = this.resolvers.y.state.shiftStart;
     state.endX = this.resolvers.x.state.shiftEnd;
@@ -122,38 +141,39 @@ export class Parallax {
   }
 
   private updateObservable() {
-    if ( ! this.observable) {
+    if ( ! this.target) {
       return;
     }
 
     const state = this.state;
-    const config = this.config.element as ParallaxElementConfig;
-    const visible = (
+    const config = this.config;
+    const scale = this.scale;
+    const maskingTarget = this.parent || this.target;
+    const elementConfig = this.config.element as ParallaxElementConfig;
+    const visible = config.masking ? maskingTarget.visible : (
       between(state.shiftY, state.startY, state.endY) ||
       between(state.shiftX, state.startX, state.endX)
     );
 
+    // console.log(state.shiftY, state.startY, state.endY);
+
     if ((config.culling !== false && visible) || config.culling === false) {
       let transform = '';
 
-      if (config.translate !== false) {
-        transform += `translate3d(
-          ${state.shiftX.toFixed(3)}px,
-          ${state.shiftY.toFixed(3)}px,
-          0
-        )`;
+      if (elementConfig.translate !== false) {
+        transform += `translate3d(`
+          + `${state.shiftX.toFixed(3)}px,`
+          + `${state.shiftY.toFixed(3)}px,`
+          + `0`
+        + `)`;
       }
 
-      if (config.masking) {
-        const mX = this.resolvers.x.maskShift;
-        const mY = this.resolvers.y.maskShift;
-        const scale = mX > mY ? mX / state.width : mY / state.height;
-
-        transform += ` scale(${1 + scale})`;
+      if (scale !== 1) {
+        transform += ` scale(${scale})`;
       }
 
       if (transform) {
-        this.observable.ref.style.transform = transform;
+        this.target.ref.style.transform = transform;
       }
     }
   }
@@ -183,8 +203,8 @@ export class Parallax {
       }
     }
 
-    if (this.observable) {
-      unobserve(this.observable);
+    if (this.target) {
+      unobserve(this.target);
     }
 
     return false;

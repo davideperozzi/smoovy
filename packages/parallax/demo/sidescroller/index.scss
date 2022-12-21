@@ -1,4 +1,8 @@
-@import "@dorfjungs/scss-base/base/reset";
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
 
 html {
   height: 100%;

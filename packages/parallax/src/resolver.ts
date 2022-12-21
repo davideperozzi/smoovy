@@ -44,16 +44,13 @@ export class ParallaxResolver {
   }
 
   get progress() {
-    return roundDec(
-      mapRange(
-        this.shift(true),
-        Math.min(this.state.shiftStart, this.state.shiftEnd),
-        Math.max(this.state.shiftStart, this.state.shiftEnd),
-        0,
-        1
-      ) || 0,
-      3
-    );
+    const state = this.state;
+    const shift = this.shift(true);
+
+    return Math.abs(
+      (shift - state.shiftStart) /
+      (state.shiftEnd - state.shiftStart)
+    ) || 0;
   }
 
   get norm() {
@@ -70,8 +67,8 @@ export class ParallaxResolver {
 
   get maskShift() {
     return this.state.speed < 0
-      ? Math.abs((this.midView + this.mid) * 2 * this.state.speed)
-      : (this.midView - this.mid) * 2 * this.state.speed;
+      ? Math.abs((this.midView + this.mid - this.norm) * 2 * this.state.speed)
+      : (this.midView - this.mid - this.norm) * 2 * this.state.speed;
   }
 
   update(newState: Partial<ParallaxResolverState>) {
@@ -80,7 +77,7 @@ export class ParallaxResolver {
     if (this.checksum !== this.lastChecksum) {
       this.lastChecksum = this.checksum;
 
-      const maxShift = this.maxShift();
+      const maxShift = Math.abs(this.maxShift());
 
       state.shiftStart = state.speed < 0 ? maxShift : -maxShift;
       state.shiftEnd = state.speed < 0 ? -maxShift : maxShift;
