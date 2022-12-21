@@ -1,4 +1,4 @@
-import { clamp, isNum, mapRange, roundDec } from '@smoovy/utils';
+import { clamp, isNum } from '@smoovy/utils';
 
 export interface ParallaxResolverState {
   pos: number;

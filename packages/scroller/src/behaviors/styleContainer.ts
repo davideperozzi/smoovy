@@ -1,5 +1,4 @@
 import { ScrollBehavior } from '../core';
-import { objectDeepMerge } from '@smoovy/utils';
 
 interface Config {
   /**

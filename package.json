@@ -19,6 +19,7 @@
     "format": "turbo run --concurrency=4 format",
     "lint": "turbo run --concurrency=4 lint",
     "postinstall": "husky install",
+    "precommit": "turbo run --concurrency=4 precommit",
     "release": "yarn build && changeset publish",
     "test": "turbo run --concurrency=4 test",
     "test:ci": "turbo run --concurrency=2 test -- --maxWorkers=2 --forceExit",

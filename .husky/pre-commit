@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+yarn turbo run --concurrency=4 --filter=[HEAD^1] lint
 yarn turbo run --concurrency=1 --filter=[HEAD^1] precommit

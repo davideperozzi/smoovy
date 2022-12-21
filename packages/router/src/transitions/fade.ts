@@ -1,4 +1,4 @@
-import { Tween, easings, tweenFromTo } from '@smoovy/tween';
+import { easings, tweenFromTo } from '@smoovy/tween';
 
 import { ActionArgs, RouterTransition } from '../transition';
 

@@ -71,7 +71,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     return listenCompose(
       () => contentSpan.remove(),
       cfg.target
-        ? listen(cfg.target, 'scroll', (event) => {
+        ? listen(cfg.target, 'scroll', () => {
             if (cfg.nativeHandler) {
               scroller.emit(ScrollerEvent.DELTA, {
                 x: scroller.position.virtual.x - window.scrollX,

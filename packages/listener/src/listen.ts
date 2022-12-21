@@ -18,16 +18,16 @@ export function listen<K extends keyof WindowEventMap>(
   listener: (event: WindowEventMap[K]) => any,
   options?: boolean | AddEventListenerOptions
 ): Unlisten;
-// export function listen<
-//   K extends keyof (HTMLElementEventMap | DocumentEventMap | WindowEventMap)
-// >(
-//   obj: HTMLElement | Window | Document,
-//   type: (K | string) | (K | string)[],
-//   listener: (
-//     event: (HTMLElementEventMap | DocumentEventMap | WindowEventMap)[K]
-//   ) => any,
-//   options?: boolean | AddEventListenerOptions
-// ): Unlisten;
+export function listen<
+  K extends keyof (HTMLElementEventMap | DocumentEventMap | WindowEventMap)
+>(
+  obj: HTMLElement | Window | Document,
+  type: (K | string) | (K | string)[],
+  listener: (
+    event: (HTMLElementEventMap | DocumentEventMap | WindowEventMap)[K]
+  ) => any,
+  options?: boolean | AddEventListenerOptions
+): Unlisten;
 export function listen(
   obj: any,
   type: any,

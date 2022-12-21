@@ -108,6 +108,7 @@ export function mat4s(m: Mat4, s: [ number, number, number ]): Mat4 {
 }
 
 /** Rotates the matrix by a vector */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function mat4r(m: Mat4, r: [ number, number, number ]): Mat4 {
   // @todo: do quick mafs
   return m;
