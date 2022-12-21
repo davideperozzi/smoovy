@@ -29,17 +29,17 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
   }
 
   return (scroller) => {
-    const target = scroller.dom.container.target;
+    const target = scroller.dom.container.ref;
 
     for (const x in cfg.defaults) {
-      if (cfg.defaults.hasOwnProperty(x)) {
+      if (Object.prototype.hasOwnProperty.call(cfg.defaults, x)) {
         (target.style as any)[x] = cfg.defaults[x];
       }
     }
 
     return () => {
       for (const x in cfg.defaults) {
-        if (cfg.defaults.hasOwnProperty(x)) {
+        if (Object.prototype.hasOwnProperty.call(cfg.defaults, x)) {
           (target.style as any)[x] = '';
         }
       }

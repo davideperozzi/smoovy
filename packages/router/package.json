@@ -1,0 +1,36 @@
+{
+  "name": "@smoovy/router",
+  "version": "1.0.0",
+  "description": "Simple router",
+  "main": "./src/index.ts",
+  "homepage": "https://github.com/davideperozzi/smoovy",
+  "repository": "https://github.com/davideperozzi/smoovy",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "esbuild ./src/** --outdir=dist && tsc",
+    "lint": "eslint ./src",
+    "dev": "vite --config ./vite.demo.ts",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "smoovy",
+    "router",
+    "ajax",
+    "loading",
+    "page transition"
+  ],
+  "author": "Davide Perozzi",
+  "license": "MIT",
+  "dependencies": {
+    "@smoovy/emitter": "^1.0.0",
+    "@smoovy/listener": "^1.0.0",
+    "@smoovy/tween": "^1.0.0",
+    "@smoovy/utils": "^1.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^0.25.3"
+  }
+}

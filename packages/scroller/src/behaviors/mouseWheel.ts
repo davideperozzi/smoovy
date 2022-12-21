@@ -1,4 +1,4 @@
-import { listenCompose, listenEl } from '@smoovy/event';
+import { listenCompose, listen } from '@smoovy/listener';
 import { Browser } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
@@ -75,7 +75,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
 
     return listenCompose(
       Browser.wheelEvent
-        ? listenEl(target, 'wheel', listener, { passive: cfg.passive })
+        ? listen(target, 'wheel', listener, { passive: cfg.passive })
         : undefined
     );
   };

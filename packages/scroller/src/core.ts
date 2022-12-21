@@ -1,8 +1,5 @@
-import {
-  EventEmitter, EventListenerCb, listenCompose, Unlisten,
-} from '@smoovy/event';
-import { Ticker } from '@smoovy/ticker';
-import { TweenOptions } from '@smoovy/tween';
+import { EventEmitter, EventListenerCb } from '@smoovy/emitter';
+import { listenCompose, Unlisten } from '@smoovy/listener';
 import { Coordinate, isNum } from '@smoovy/utils';
 
 import { ScrollerDom, ScrollerDomConfig, ScrollerDomEvent } from './dom';
@@ -24,17 +21,9 @@ export interface OutputTransformEvent {
   step: (pos: Coordinate) => void;
 }
 
-export interface TweenToEvent {
-  pos: Partial<Coordinate>;
-  options: Partial<
-    Pick<TweenOptions<any>, 'duration' | 'easing'> &
-    { force: boolean }
-  >;
-}
-
 export interface ScrollToEvent {
   pos: Partial<Coordinate>;
-  skipOutputTransform: boolean;
+  immediate: boolean;
 }
 
 export enum ScrollerEvent {
@@ -81,7 +70,7 @@ export class Scroller extends EventEmitter {
     }
 
     for (const name in behaviors) {
-      if (behaviors.hasOwnProperty(name)) {
+      if (Object.prototype.hasOwnProperty.call(behaviors, name)) {
         this.setBehavior(name, behaviors[name]);
       }
     }
@@ -95,7 +84,7 @@ export class Scroller extends EventEmitter {
       this.unlisten = listenCompose(
         this.dom.on<Coordinate>(ScrollerDomEvent.RECALC, () => {
           this.updateDelta({ x: 0, y: 0 });
-          Ticker.requestAnimationFrame(() => this.emit(ScrollerEvent.RECALC));
+          requestAnimationFrame(() => this.emit(ScrollerEvent.RECALC));
         }),
         this.on<Coordinate>(ScrollerEvent.DELTA, (delta) => {
           if ( ! this.isLocked()) {
@@ -133,7 +122,7 @@ export class Scroller extends EventEmitter {
     this.dom.recalc(async);
 
     if (async) {
-      Ticker.requestAnimationFrame(() => this.emit(ScrollerEvent.RECALC));
+      requestAnimationFrame(() => this.emit(ScrollerEvent.RECALC));
     } else {
       this.emit(ScrollerEvent.RECALC);
     }
@@ -279,24 +268,12 @@ export class Scroller extends EventEmitter {
 
   public scrollTo(
     pos: Partial<Coordinate>,
-    skipOutputTransform = false
+    immediate = false
   ) {
     if ( ! this.isLocked()) {
       this.emit<ScrollToEvent>(
         ScrollerEvent.SCROLL_TO,
-        { pos, skipOutputTransform }
-      );
-    }
-  }
-
-  public tweenTo(
-    pos: Partial<Coordinate>,
-    options: TweenToEvent['options'] = {}
-  ) {
-    if ( ! this.isLocked()) {
-      this.emit<TweenToEvent>(
-        ScrollerEvent.TWEEN_TO,
-        { pos, options }
+        { pos, immediate }
       );
     }
   }

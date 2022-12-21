@@ -1,8 +1,7 @@
-import { listenCompose, listenEl } from '@smoovy/event';
+import { listen, listenCompose } from '@smoovy/listener';
 import { Browser } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
-import { LerpContentEvent } from './lerpContent';
 
 interface Config {
   /**
@@ -52,9 +51,9 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     let locked = false;
     const restorePos = { x: 0, y: 0 };
     const contentSpan = document.createElement('div');
-    const parentElement = scroller.dom.container.target.parentElement;
+    const parentElement = scroller.dom.container.ref.parentElement;
     const updateSize = (height?: number) => {
-      const wrapperHeight = scroller.dom.wrapper.offset.height;
+      const wrapperHeight = scroller.dom.wrapper.height;
 
       contentSpan.style.height = `${height ?? wrapperHeight}px`;
     };
@@ -72,7 +71,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     return listenCompose(
       () => contentSpan.remove(),
       cfg.target
-        ? listenEl(cfg.target, 'scroll', (event) => {
+        ? listen(cfg.target, 'scroll', (event) => {
             if (cfg.nativeHandler) {
               scroller.emit(ScrollerEvent.DELTA, {
                 x: scroller.position.virtual.x - window.scrollX,

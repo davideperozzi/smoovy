@@ -1,12 +1,7 @@
-import { listenCompose, listenEl, Unlisten } from '@smoovy/event';
-import { Ticker } from '@smoovy/ticker';
-import { Tween } from '@smoovy/tween';
+import { listen, listenCompose, Unlisten } from '@smoovy/listener';
 import { isNum } from '@smoovy/utils';
 
-import {
-  ScrollBehavior, ScrollerEvent, ScrollToEvent, TweenToEvent,
-} from '../core';
-import { getDeltaByKeyEvent } from '../utils/keyboard';
+import { ScrollBehavior, ScrollerEvent, ScrollToEvent } from '../core';
 
 interface Config {
   /**
@@ -29,9 +24,7 @@ const defaultConfig = {
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = Object.assign(defaultConfig, config);
-  let self: ReturnType<ScrollBehavior>;
-
-  return self = (scroller) => {
+  const self: ReturnType<ScrollBehavior> = (scroller) => {
     const target = cfg.target || window;
     const detachedBehaviors: string[] = [];
     let unlisten: Unlisten | undefined;
@@ -63,7 +56,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
         });
 
         unlisten = listenCompose(
-          listenEl(target, 'scroll', () => {
+          listen(target as HTMLElement, 'scroll', () => {
             const pos = getPos();
 
             scroller.emit(ScrollerEvent.DELTA, {
@@ -80,43 +73,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
                 isNum(pos.y) ? pos.y as number : defPos.y
               );
             }
-          }),
-          scroller.on<TweenToEvent>(
-            ScrollerEvent.TWEEN_TO,
-            ({ pos, options }) => {
-              const force = !!options.force;
-              let tween: Tween | undefined;
-              const shallowStop = () => {
-                if (tween && ! force) {
-                  tween.stop();
-                  tween = undefined;
-                }
-              };
-
-              const unlistenTween = listenCompose(
-                listenEl(window, 'touchstart', shallowStop),
-                listenEl(window, 'wheel', shallowStop),
-                listenEl(window, 'keydown', (event) => {
-                  const delta = getDeltaByKeyEvent(event);
-
-                  if (event.key === 'Tab' || delta.x !== 0 || delta.y !== 0) {
-                    shallowStop();
-                  }
-                })
-              );
-
-              tween = Tween.fromTo(scroller.position.virtual, pos, {
-                mutate: false,
-                duration: options.duration,
-                easing: options.easing,
-                on: {
-                  update: (newPos) => window.scrollTo(newPos.x, newPos.y),
-                  complete: unlistenTween,
-                  stop: unlistenTween
-                }
-              });
-            }
-          )
+          })
         );
       } else if (active && ! willActivate) {
         active = false;
@@ -127,7 +84,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
         }
 
         detachedBehaviors.forEach(name => scroller.attachBehavior(name));
-        Ticker.requestAnimationFrame(() => scroller.dom.recalc());
+        requestAnimationFrame(() => scroller.dom.recalc());
       }
     };
 
@@ -135,6 +92,8 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
 
     return scroller.on(ScrollerEvent.RECALC, check);
   };
+
+  return self;
 };
 
 export { Config as BypassNativeConfig };

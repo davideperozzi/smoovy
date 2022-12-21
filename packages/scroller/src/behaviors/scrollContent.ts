@@ -1,5 +1,5 @@
-import { listenCompose, listenEl } from '@smoovy/event';
-import { Browser, Coordinate } from '@smoovy/utils';
+import { listen, listenCompose } from '@smoovy/listener';
+import { Browser } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
 
@@ -28,7 +28,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = Object.assign(defaultConfig, config);
 
   return (scroller) => {
-    const target = cfg.target || scroller.dom.wrapper.target;
+    const target = cfg.target || scroller.dom.wrapper.ref;
     let scrolling = false;
     let dragging = false;
     let dragTimeout: any;
@@ -36,8 +36,8 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     let lockedPosX = 0;
     let lockedPosY = 0;
     let locked = false;
-    const wrapper = scroller.dom.wrapper.target;
-    const container = scroller.dom.container.target;
+    const wrapper = scroller.dom.wrapper.ref;
+    const container = scroller.dom.container.ref;
     const scrollPos = scroller.position.output;
 
     const unlock = () => {
@@ -76,7 +76,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     }
 
     return listenCompose(
-      listenEl(target, 'scroll', () => {
+      listen(target, 'scroll', () => {
         if ( ! scrolling) {
           dragging = true;
 
@@ -110,7 +110,9 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
         }
 
         clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => scrolling = false, cfg.resetTimeout);
+        scrollTimeout = setTimeout(() => {
+          scrolling = false;
+        }, cfg.resetTimeout);
       }),
       scroller.on(ScrollerEvent.LOCK, () => {
         if (scroller.isLocked()) {

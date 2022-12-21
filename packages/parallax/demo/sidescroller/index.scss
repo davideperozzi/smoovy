@@ -1,0 +1,52 @@
+@import "@dorfjungs/scss-base/base/reset";
+
+html {
+  height: 100%;
+}
+
+body {
+  background-image: url(bg.png);
+  height: 100%;;
+  display: inline-flex;
+}
+
+section {
+  position: relative;
+  z-index: 1;
+  width: 80vw;
+  height: 100%;
+  overflow: hidden;
+  background-color: orange;
+
+  &:nth-child(2n) {
+    background-color: lightcoral;
+  }
+
+  &:nth-child(3n) {
+    background-color: green;
+  }
+
+  &:nth-child(4n) {
+    background-color: gray;
+  }
+}
+
+section.small {
+  width: 768px;
+}
+section.medium {
+  width: 1024px;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+
+  .image-content {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    width: 100%;
+    height: 100%;
+  }
+}

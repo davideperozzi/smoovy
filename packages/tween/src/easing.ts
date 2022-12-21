@@ -1,3 +1,5 @@
+export type Easing = (x: number) => number;
+
 /**
  * ![](https://raw.githubusercontent.com/trenskow/TrAnimate/master/assets/curves/linear.png)
  *

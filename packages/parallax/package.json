@@ -1,0 +1,35 @@
+{
+  "name": "@smoovy/parallax",
+  "version": "0.4.5",
+  "description": "Parallax effects library",
+  "main": "dist/bundles/index.js",
+  "module": "dist/bundles/index.esm.js",
+  "unpkg": "dist/bundles/index.umd.js",
+  "source": "src/index.ts",
+  "types": "dist/typings/index.d.ts",
+  "homepage": "https://github.com/davideperozzi/smoovy",
+  "repository": "https://github.com/davideperozzi/smoovy",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "esbuild ./src/** --outdir=dist && tsc",
+    "lint": "eslint ./src",
+    "dev": "vite --config ./vite.demo.ts",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "smoovy",
+    "parallax",
+    "scrolling"
+  ],
+  "author": "Davide Perozzi",
+  "license": "MIT",
+  "dependencies": {
+    "@smoovy/emitter": "^1.0.0",
+    "@smoovy/listener": "^1.0.0",
+    "@smoovy/observer": "^1.0.0",
+    "@smoovy/utils": "^1.0.0"
+  }
+}

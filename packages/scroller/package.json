@@ -11,18 +11,29 @@
   "scripts": {
     "build": "esbuild ./src/** --outdir=dist && tsc",
     "lint": "eslint ./src",
-    "dev": "vite --root ./demo",
-    "test": "vitest",
+    "dev": "vite --config ./vite.demo.ts",
     "coverage": "vitest run --coverage"
   },
   "keywords": [
     "smoovy",
     "tween",
+    "parallax",
     "scroller",
     "smooth",
     "scrolling",
     "raf"
   ],
+  "dependencies": {
+    "@smoovy/emitter": "^1.0.0",
+    "@smoovy/listener": "^1.0.0",
+    "@smoovy/observer": "^1.0.0",
+    "@smoovy/ticker": "^1.0.0",
+    "@smoovy/utils": "^1.0.0"
+  },
   "author": "Davide Perozzi",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/dat.gui": "^0.7.7",
+    "dat.gui": "^0.7.9"
+  }
 }

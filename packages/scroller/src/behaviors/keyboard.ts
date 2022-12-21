@@ -1,4 +1,4 @@
-import { listenEl } from '@smoovy/event';
+import { listen } from '@smoovy/listener';
 import { Browser } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
@@ -78,7 +78,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     };
 
     return Browser.wheelEvent
-      ? listenEl(
+      ? listen(
           target,
           cfg.eventName,
           listener as any,

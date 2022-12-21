@@ -13,11 +13,21 @@ export function listen<K extends keyof DocumentEventMap>(
   options?: boolean | AddEventListenerOptions
 ): Unlisten;
 export function listen<K extends keyof WindowEventMap>(
-  obj: Document,
+  obj: Window,
   type: (K | string) | (K | string)[],
   listener: (event: WindowEventMap[K]) => any,
   options?: boolean | AddEventListenerOptions
 ): Unlisten;
+// export function listen<
+//   K extends keyof (HTMLElementEventMap | DocumentEventMap | WindowEventMap)
+// >(
+//   obj: HTMLElement | Window | Document,
+//   type: (K | string) | (K | string)[],
+//   listener: (
+//     event: (HTMLElementEventMap | DocumentEventMap | WindowEventMap)[K]
+//   ) => any,
+//   options?: boolean | AddEventListenerOptions
+// ): Unlisten;
 export function listen(
   obj: any,
   type: any,

@@ -1,4 +1,4 @@
-import { listenCompose } from '@smoovy/event';
+import { listenCompose } from '@smoovy/listener';
 import { observe, unobserve } from '@smoovy/observer';
 import { clamp, Coordinate } from '@smoovy/utils';
 
@@ -21,10 +21,10 @@ interface Config {
 const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
   const dom = scroller.dom;
   const wrapper = config.wrapper
-    ? observe(config.wrapper, { observeResize: true })
+    ? observe(config.wrapper, { resizeDetection: true })
     : dom.wrapper;
   const container = config.container
-    ? observe(config.container, { observeResize: true })
+    ? observe(config.container, { resizeDetection: true })
     : dom.container;
 
   if (config.container) {
@@ -39,10 +39,8 @@ const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
     scroller.on<Coordinate>(
       ScrollerEvent.TRANSFORM_VIRTUAL,
       (virtual) => {
-        const wSize = wrapper.offset;
-        const cSize = container.offset;
-        const maxScrollX = Math.max(wSize.width - cSize.width, 0);
-        const maxScrollY = Math.max(wSize.height - cSize.height, 0);
+        const maxScrollX = Math.max(wrapper.width - container.width, 0);
+        const maxScrollY = Math.max(wrapper.height - container.height, 0);
 
         return {
           x: clamp(virtual.x, 0, maxScrollX),

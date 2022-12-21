@@ -6,7 +6,6 @@
       "cache": false
     },
     "dev": {
-      "dependsOn": ["^dev"],
       "cache": false
     },
     "clean": {},

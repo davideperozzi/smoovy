@@ -1,0 +1,80 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-image: url(bg.png);
+}
+
+footer {
+  width: 100%;
+  height: 120vh;
+  position: relative;
+  z-index: 2;
+  background-color: green;
+}
+
+section {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 120vh;
+  background-color: orange;
+}
+
+.footer-wrapper {
+}
+
+.box .image-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.box .image {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: url(./cage.jpg) center no-repeat;
+  background-size: cover;
+}
+
+.box-wrapper {
+  padding: 20%;
+  overflow: hidden;
+}
+
+.image-box {
+  // overflow: hidden;
+}
+
+.box {
+  &.medium {
+    width: 300px;
+    height: 300px;
+    background-color: #273c75;
+  }
+
+  &.small {
+    width: 150px;
+    height: 150px;
+    margin-left: 40%;
+    background-color: #40739e;
+  }
+
+  &.large {
+    width: 400px;
+    height: 400px;
+    background-color: darkgoldenrod;
+    margin-left: 50%
+  }
+}
+
+.spacer {
+  &.medium {
+    height: 200px;
+  }
+}

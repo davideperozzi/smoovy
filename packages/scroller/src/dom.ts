@@ -1,8 +1,5 @@
-import { EventEmitter } from '@smoovy/event';
-import {
-  defaultControllerConfig, Observable, ObservableController,
-  ObservableControllerConfig,
-} from '@smoovy/observer';
+import { EventEmitter } from '@smoovy/emitter';
+import { Observable, ObservableConfig, observe, unobserve } from '@smoovy/observer';
 
 export interface ScrollerDomElement {
   container: HTMLElement | Observable;
@@ -10,7 +7,7 @@ export interface ScrollerDomElement {
 }
 
 export interface ScrollerDomConfig {
-  observer?: ObservableControllerConfig | false;
+  observer?: ObservableConfig | false;
   element: HTMLElement | ScrollerDomElement;
 }
 
@@ -21,7 +18,6 @@ export enum ScrollerDomEvent {
 export class ScrollerDom extends EventEmitter {
   public container: Observable<HTMLElement>;
   public wrapper: Observable<HTMLElement>;
-  public observer: ObservableController;
   private dynamic = false;
 
   public constructor(
@@ -29,40 +25,35 @@ export class ScrollerDom extends EventEmitter {
   ) {
     super();
 
+    const observableConfig: Omit<ObservableConfig<HTMLElement>, 'target'> = {
+      ...(config.observer || { resizeDetection : false }),
+      autoAttach: false
+    };
+
     this.dynamic = config.element instanceof HTMLElement;
+    this.container = observe(
+      this.dynamic
+        ? document.createElement('div')
+        : (config.element as ScrollerDomElement).container as HTMLElement,
+      observableConfig
+    );
+
+    this.wrapper = observe(
+      this.dynamic
+        ? document.createElement('div')
+        : (config.element as ScrollerDomElement).wrapper as HTMLElement,
+      observableConfig
+    );
 
     if (config.observer !== false) {
-      this.observer = new ObservableController(
-        config.observer || defaultControllerConfig
-      );
-    }
-
-    this.container = new Observable(this.dynamic
-      ? document.createElement('div')
-      : (config.element as ScrollerDomElement).container as HTMLElement,
-      {
-        observeResize: true
-      }
-    );
-
-    this.wrapper = new Observable(this.dynamic
-      ? document.createElement('div')
-      : (config.element as ScrollerDomElement).wrapper as HTMLElement,
-      {
-        observeResize: true
-      }
-    );
-
-    if (this.observer) {
-      this.wrapper.onUpdate(() => this.emit(ScrollerDomEvent.RECALC));
-      this.container.onUpdate(() => this.emit(ScrollerDomEvent.RECALC));
+      this.wrapper.onChange(() => this.emit(ScrollerDomEvent.RECALC));
+      this.container.onChange(() => this.emit(ScrollerDomEvent.RECALC));
     }
 
     if (this.dynamic) {
-      this.container.target.className += 'smoovy-container';
-      this.wrapper.target.className += 'smoovy-wrapper';
-
-      this.container.target.appendChild(this.wrapper.target);
+      this.container.ref.classList.add('smoovy-container');
+      this.wrapper.ref.classList.add('smoovy-wrapper');
+      this.container.ref.appendChild(this.wrapper.ref);
     }
   }
 
@@ -79,32 +70,28 @@ export class ScrollerDom extends EventEmitter {
   }
 
   public attach() {
-    if (this.observer) {
-      this.observer.add(this.container);
-      this.observer.add(this.wrapper);
-    }
+    this.wrapper.attach();
+    this.container.attach();
 
     if (this.dynamic) {
       const rootElement = this.config.element as HTMLElement;
       const children = Array.from(rootElement.childNodes);
 
-      rootElement.appendChild(this.container.target);
-      this.wrapper.target.append(...children);
+      rootElement.appendChild(this.container.ref);
+      this.wrapper.ref.append(...children);
     }
   }
 
   public detach() {
-    if (this.observer) {
-      this.observer.add(this.container);
-      this.observer.add(this.wrapper);
-    }
+    unobserve(this.wrapper);
+    unobserve(this.container);
 
     if (this.dynamic) {
       const rootElement = this.config.element as HTMLElement;
-      const children = Array.from(this.wrapper.target.childNodes);
+      const children = Array.from(this.wrapper.ref.childNodes);
 
       rootElement.append(...children);
-      rootElement.removeChild(this.container.target);
+      rootElement.removeChild(this.container.ref);
     }
   }
 }

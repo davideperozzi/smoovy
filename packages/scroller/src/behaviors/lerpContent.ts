@@ -1,4 +1,4 @@
-import { listenCompose } from '@smoovy/event';
+import { listenCompose } from '@smoovy/listener';
 import { Ticker, TickerThread } from '@smoovy/ticker';
 import { Browser, lerp } from '@smoovy/utils';
 
@@ -34,6 +34,17 @@ interface Config {
   multiplyDelta?: boolean;
 
   /**
+   * The hertz value to base the delta value on. In general this will be the
+   * assumed most covered refresh rate by the users. This is only being used
+   * if `multiplyDelta` hasn't been disabled. Basicall the calculation is
+   * the following: `deltaMs * (deltaBaseHz / 1000)`. This ensures a value
+   * that is around 1 all the time. Mostly between 0.95 to 1.05
+   *
+   * Default: 60
+   */
+  deltaBaseHz?: number;
+
+  /**
    * A custom ticker to use for the animation
    */
   ticker?: Ticker;
@@ -48,7 +59,8 @@ const defaultConfig = {
   damping: 0.1,
   precision: 0.009,
   mobileDamping: 0.18,
-  multiplyDelta: true
+  multiplyDelta: true,
+  deltaBaseHz: 60
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
@@ -67,7 +79,8 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
         }
 
         thread = ticker.add((delta, _time, kill) => {
-          const lerpDamp = damping * (cfg.multiplyDelta ? delta : 1);
+          const hzDelta = delta * (cfg.deltaBaseHz / 1000);
+          const lerpDamp = damping * (cfg.multiplyDelta ? hzDelta : 1);
           const virtual = scroller.position.virtual;
           const outputX = lerp(pos.x, virtual.x, lerpDamp);
           const outputY = lerp(pos.y, virtual.y, lerpDamp);
@@ -91,7 +104,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
             if (running) {
               running = false;
 
-              Ticker.requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
                 scroller.emit(Event.LERP_CONTENT_END, newPos);
               });
             }

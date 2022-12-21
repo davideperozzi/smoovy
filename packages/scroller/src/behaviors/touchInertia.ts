@@ -1,7 +1,8 @@
-import { ScrollBehavior, ScrollerEvent } from '../core';
-import { listenCompose, listenEl } from '@smoovy/event';
+import { listenCompose, listen } from '@smoovy/listener';
 import { Ticker } from '@smoovy/ticker';
-import { lerp, between } from '@smoovy/utils';
+import { between, lerp } from '@smoovy/utils';
+
+import { ScrollBehavior, ScrollerEvent } from '../core';
 
 interface Config {
   /**
@@ -130,14 +131,14 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     };
 
     return listenCompose(
-      listenEl(
+      listen(
         target,
         'touchstart',
         handleTouchStart,
         { passive: cfg.passive }
       ),
-      listenEl(doc, 'touchend', handleTouchEnd, { passive: cfg.passive }),
-      listenEl(doc, 'touchmove', handleTouchMove, { passive: cfg.passive }),
+      listen(doc, 'touchend', handleTouchEnd, { passive: cfg.passive }),
+      listen(doc, 'touchmove', handleTouchMove, { passive: cfg.passive }),
     );
   };
 };

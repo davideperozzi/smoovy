@@ -1,4 +1,4 @@
-import { listenCompose } from '@smoovy/event';
+import { listenCompose } from '@smoovy/listener';
 import { Browser, Coordinate } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
@@ -52,7 +52,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
   const firefoxFix = cfg.firefoxFix && Browser.firefox;
 
   return (scroller) => {
-    const element = scroller.dom.wrapper.target;
+    const element = scroller.dom.wrapper.ref;
     const unlisten = listenCompose(
       scroller.on<Coordinate>(
         ScrollerEvent.OUTPUT,

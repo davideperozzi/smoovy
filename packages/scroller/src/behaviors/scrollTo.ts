@@ -1,9 +1,8 @@
-import { Unlisten } from '@smoovy/event';
-import { Ticker } from '@smoovy/ticker';
+import { Unlisten } from '@smoovy/listener';
 import { Coordinate } from '@smoovy/utils';
 
 import {
-  ScrollBehavior as SmoovyScrollBehavior, ScrollerEvent, ScrollToEvent,
+  ScrollBehavior as SmoovyScrollBehavior, ScrollerEvent, ScrollToEvent
 } from '../core';
 
 interface Config {
@@ -24,7 +23,7 @@ const behavior: SmoovyScrollBehavior<Config> = (config = {}) => (scroller) => {
   return scroller.on<ScrollToEvent>(ScrollerEvent.SCROLL_TO, (event) => {
     let unmute: Unlisten;
 
-    if (event.skipOutputTransform) {
+    if (event.immediate) {
       unmute = scroller.muteEvents(ScrollerEvent.TRANSFORM_OUTPUT);
     }
 
@@ -42,7 +41,7 @@ const behavior: SmoovyScrollBehavior<Config> = (config = {}) => (scroller) => {
       }
 
       config.nativeTarget.scrollTo({
-        behavior: event.skipOutputTransform
+        behavior: event.immediate
           ? 'auto'
           : (config.nativeBehavior || 'smooth'),
         ...position
@@ -61,7 +60,7 @@ const behavior: SmoovyScrollBehavior<Config> = (config = {}) => (scroller) => {
       scroller.updateDelta(delta);
     }
 
-    Ticker.requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
       if (unmute) {
         unmute();
       }

@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "./src",
+    "composite": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "references": [
+    { "path": "../emitter" },
+    { "path": "../listener" },
+    { "path": "../tween" },
+    { "path": "../utils" }
+  ],
+}

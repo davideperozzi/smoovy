@@ -1,8 +1,6 @@
-import { listenCompose, listenEl } from '@smoovy/event';
-import { Ticker } from '@smoovy/ticker';
+import { listen, listenCompose } from '@smoovy/listener';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
-import { Browser } from '@smoovy/utils';
 
 interface Config {
   /**
@@ -25,8 +23,8 @@ interface Config {
 }
 
 const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
-  const focusTarget = config.focusTarget || Browser.client ? window : undefined;
-  const container = scroller.dom.container.target;
+  const focusTarget = config.focusTarget || window;
+  const container = scroller.dom.container.ref;
   const ignoreIn = config.ignoreInside || [];
   const scrollListener = (event: Event) => {
     event.preventDefault();
@@ -35,7 +33,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
   };
 
   const focusListener = (event: FocusEvent) => {
-    Ticker.requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
       let activeEl = event.target as HTMLElement;
 
       while (activeEl.shadowRoot && activeEl.shadowRoot.activeElement) {
@@ -50,7 +48,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
 
       if ( ! ignore && activeEl) {
         const bounds = activeEl.getBoundingClientRect();
-        const targetSize = scroller.dom.container.bounds;
+        const targetSize = scroller.dom.container.ref.getBoundingClientRect();
         const visible = (
           bounds.bottom > 0 &&
           bounds.top < targetSize.height &&
@@ -78,9 +76,9 @@ const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
   };
 
   return listenCompose(
-    listenEl(container, 'scroll', scrollListener),
+    listen(container, 'scroll', scrollListener),
     focusTarget
-      ? listenEl(focusTarget, 'focus', focusListener, true)
+      ? listen(focusTarget as any, 'focus', focusListener, true)
       : undefined
   );
 };

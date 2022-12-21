@@ -8,6 +8,7 @@ export interface ObservableConfig<
 > {
   target: T;
   useBounds?: boolean;
+  autoAttach?: boolean;
   visibilityDetection?: boolean | IntersectionObserverInit;
   visibilityDelay?: number;
   detectVisibilityOnce?: boolean;
@@ -69,6 +70,91 @@ export class Observable<
     private config: ObservableConfig<T>
   ) {
     super();
+
+    if (config.autoAttach !== false) {
+      this.attach();
+    }
+  }
+
+  get resizeDebounce() {
+    return this.config.resizeDebounce || 16.6;
+  }
+
+  get resizeDetection() {
+    return this.config.resizeDetection;
+  }
+
+  get visibilityDelay() {
+    return this.config.visibilityDelay || 0;
+  }
+
+  get visibilityThreshold() {
+    return typeof this.config.visibilityDetection === 'object'
+      ? this.config.visibilityDetection.threshold || 0
+      : 0;
+  }
+
+  get ref() {
+    return this.config.target;
+  }
+
+  get visible() {
+    return this._visible
+  }
+
+  set visible(visible: boolean) {
+    if (visible !== this._visible) {
+      clearTimeout(this.visibilityTimer);
+
+      if (this.visibilityDelay > 0) {
+        this.visibilityTimer = setTimeout(
+          () => this.emitVisibility(visible),
+          this.visibilityDelay
+        ) as any;
+      } else {
+        this.emitVisibility(visible);
+      }
+    }
+  }
+
+  get left() {
+    return this._left;
+  }
+
+  get top() {
+    return this._top;
+  }
+
+  get x() {
+    return this._left;
+  }
+
+  get y() {
+    return this._top;
+  }
+
+  get width() {
+    return this._width;
+  }
+
+  get height() {
+    return this._height;
+  }
+
+  get size() {
+    return { width: this.width, height: this.height };
+  }
+
+  get pos() {
+    return { left: this.left, top: this.top };
+  }
+
+  get coord() {
+    return { x: this.left, y: this.top };
+  }
+
+  attach() {
+    const config = this.config;
 
     if (
       ! (config.target instanceof HTMLElement) &&
@@ -147,71 +233,6 @@ export class Observable<
     requestAnimationFrame(() => this.update());
   }
 
-  get resizeDebounce() {
-    return this.config.resizeDebounce || 16.6;
-  }
-
-  get resizeDetection() {
-    return this.config.resizeDetection;
-  }
-
-  get visibilityDelay() {
-    return this.config.visibilityDelay || 0;
-  }
-
-  get visibilityThreshold() {
-    return typeof this.config.visibilityDetection === 'object'
-      ? this.config.visibilityDetection.threshold || 0
-      : 0;
-  }
-
-  get ref() {
-    return this.config.target;
-  }
-
-  get visible() {
-    return this._visible
-  }
-
-  set visible(visible: boolean) {
-    if (visible !== this._visible) {
-      clearTimeout(this.visibilityTimer);
-
-      if (this.visibilityDelay > 0) {
-        this.visibilityTimer = setTimeout(
-          () => this.emitVisibility(visible),
-          this.visibilityDelay
-        ) as any;
-      } else {
-        this.emitVisibility(visible);
-      }
-    }
-  }
-
-  get left() {
-    return this._left;
-  }
-
-  get top() {
-    return this._top;
-  }
-
-  get x() {
-    return this._left;
-  }
-
-  get y() {
-    return this._top;
-  }
-
-  get width() {
-    return this._width;
-  }
-
-  get height() {
-    return this._height;
-  }
-
   onDimChange(listener: ObservableChangeListener) {
     return this.on(ObservableEventType.DIMENSIONS_CHANGE, listener);
   }
@@ -259,7 +280,7 @@ export class Observable<
       this._left = rect.left;
       this._top = rect.top;
       this._width = rect.width;
-      this._height = rect.width;
+      this._height = rect.height;
 
       this.emit(ObservableEventType.DIMENSIONS_CHANGE, this);
     }
