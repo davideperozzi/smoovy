@@ -728,7 +728,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smoovy/composer@workspace:packages/composer"
   dependencies:
-    "@smoovy/listener": 1.0.0
+    "@smoovy/listener": ^1.0.0
   languageName: unknown
   linkType: soft
 
@@ -736,13 +736,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smoovy/emitter@workspace:packages/emitter"
   dependencies:
-    "@smoovy/listener": 1.0.0
+    "@smoovy/listener": ^1.0.0
     "@vitest/coverage-c8": ^0.25.3
     vitest: ^0.25.3
   languageName: unknown
   linkType: soft
 
-"@smoovy/listener@1.0.0, @smoovy/listener@^1.0.0, @smoovy/listener@workspace:packages/listener":
+"@smoovy/listener@^1.0.0, @smoovy/listener@workspace:packages/listener":
   version: 0.0.0-use.local
   resolution: "@smoovy/listener@workspace:packages/listener"
   dependencies:
