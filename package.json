@@ -1,7 +1,6 @@
 {
   "name": "smoovy-v2",
   "packageManager": "yarn@3.3.0",
-  "type": "module",
   "private": true,
   "workspaces": [
     "packages/*"
