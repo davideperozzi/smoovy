@@ -1,4 +1,4 @@
-import { Router } from '../src';
+import { describe, it } from 'vitest';
 
 describe('router', () => {
   it('empty test', () => {});

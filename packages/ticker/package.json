@@ -9,7 +9,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "esbuild ./src/** --outdir=dist && tsc",
+    "build": "esbuild ./src/**/*.ts --outdir=dist && tsc",
     "lint": "eslint ./src",
     "test": "vitest",
     "coverage": "vitest run --coverage"

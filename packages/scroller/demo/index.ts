@@ -2,7 +2,9 @@ import * as dat from 'dat.gui';
 
 import { queryEl } from '@smoovy/utils';
 
-import { hybridSmoothScroll, nativeSmoothScroll, Scroller, smoothScroll } from '../src';
+import {
+  hybridSmoothScroll, nativeSmoothScroll, Scroller, smoothScroll,
+} from '../src';
 
 function createScroller(type: string) {
   const doc = document.documentElement;

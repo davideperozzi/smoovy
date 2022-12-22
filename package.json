@@ -11,21 +11,19 @@
     "yarn": "3.3.0"
   },
   "scripts": {
-    "build": "turbo run --concurrency=4 build",
-    "dev": "turbo run dev",
-    "clean": "turbo run clean",
-    "coverage": "turbo run --concurrency=4 coverage",
-    "coverage:ci": "turbo run --concurrency=2 coverage -- --maxWorkers=2 --forceExit",
-    "format": "turbo run --concurrency=4 format",
-    "lint": "turbo run --concurrency=4 lint",
+    "build": "turbo run --no-daemon --concurrency=4 build",
+    "dev": "turbo run --no-daemon dev",
+    "clean": "turbo run --no-daemon clean",
+    "coverage": "turbo run --no-daemon --concurrency=2 coverage",
+    "lint": "turbo run --no-daemon --concurrency=4 lint",
     "postinstall": "husky install",
-    "precommit": "turbo run --concurrency=4 precommit",
+    "precommit": "turbo run --no-daemon --concurrency=4 precommit",
     "release": "yarn build && changeset publish",
-    "test": "turbo run --concurrency=4 test",
-    "test:ci": "turbo run --concurrency=2 test -- --maxWorkers=2 --forceExit",
+    "test": "turbo run --no-daemon --concurrency=2 test",
     "version": "changeset version && yarn install"
   },
   "dependencies": {
+    "@changesets/cli": "^2.26.0",
     "@commitlint/cli": "^17.3.0",
     "@commitlint/config-conventional": "^17.3.0",
     "@commitlint/config-lerna-scopes": "^17.2.1",
@@ -42,8 +40,8 @@
     "eslint-plugin-promise": "^6.1.1",
     "husky": "^8.0.0",
     "jsdom": "^20.0.3",
-    "parcel": "^2.8.0",
     "prettier": "^2.8.0",
+    "sass": "^1.56.2",
     "tsconfig-paths": "^4.1.1",
     "turbo": "^1.6.3",
     "typescript": "^4.9.3",
@@ -53,7 +51,6 @@
   "devDependencies": {
     "@types/eslint": "^8",
     "@types/jsdom": "^20",
-    "@types/prettier": "^2",
-    "sass": "^1.56.2"
+    "@types/prettier": "^2"
   }
 }

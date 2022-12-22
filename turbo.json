@@ -3,6 +3,7 @@
   "baseBranch": "origin/main",
   "pipeline": {
     "build": {
+      "dependsOn": ["^build"],
       "cache": false
     },
     "dev": {
@@ -12,9 +13,6 @@
     "coverage": {
       "inputs": ["src/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}", "test/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}", "package.json"],
       "outputs": ["coverage/**"]
-    },
-    "format": {
-      "inputs": ["src/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}", "test/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}", "package.json"]
     },
     "lint": {
       "inputs": ["src/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}", "test/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}", "package.json"]

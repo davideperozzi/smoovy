@@ -9,6 +9,10 @@
     "src/**/*"
   ],
   "references": [
-    { "path": "../ticker" }
+    { "path": "../emitter" },
+    { "path": "../listener" },
+    { "path": "../observer" },
+    { "path": "../ticker" },
+    { "path": "../utils" }
   ]
 }

@@ -1,4 +1,4 @@
-export const isDef = <T>(val: T): val is T => val !== undefined;
+export const isDef = <T>(val: T | undefined | null): val is T => val !== undefined;
 export const isFunc = (val: any): val is CallableFunction => typeof val === 'function';
 export const isNum = (val: any): val is number => typeof val === 'number';
 export const isStr = (val: any): val is string => typeof val === 'string';

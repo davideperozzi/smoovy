@@ -1,0 +1,30 @@
+---
+kind: pipeline
+name: "build, test and deploy"
+trigger:
+  branch:
+    - main
+  event:
+    - push
+steps:
+  - name: test
+    image: 18.12-alpine3.17
+    environment:
+      CODECOV_TOKEN:
+        from_secret: codecov_token
+    commands:
+      - apk add --no-cache libc6-compat
+      - corepack enable && corepack prepare --activate
+      - yarn install
+      - yarn lint
+      - yarn test
+      - yarn report
+      - yarn build
+  - name: publish
+    image: 18.12-alpine3.17
+    environment:
+      NPM_TOKEN:
+        from_secret: npm_publish_token
+    commands:
+      - echo "//registry.npmjs.org/:_authToken=$${NPM_TOKEN}" > .npmrc
+      - npm run lerna publish from-git -- --yes || true
