@@ -9,7 +9,6 @@
     "dev": {
       "cache": false
     },
-    "clean": {},
     "coverage": {
       "inputs": ["src/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}", "test/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}", "package.json"],
       "outputs": ["coverage/**"]

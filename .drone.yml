@@ -1,6 +1,6 @@
 ---
 kind: pipeline
-name: build
+name: build & test
 trigger:
   branch:
     - main

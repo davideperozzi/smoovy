@@ -6,6 +6,6 @@
     "composite": true
   },
   "include": [
-    "src/**/*"
+    "./src/**/*"
   ]
 }

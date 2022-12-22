@@ -9,7 +9,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "esbuild ./src/**/*.ts --outdir=dist && tsc",
+    "build": "yarn run -T ts-node --esm ../../scripts/build.ts",
     "lint": "eslint ./src",
     "coverage": "vitest run --coverage"
   },
