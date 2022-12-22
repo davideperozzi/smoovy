@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/listener",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Helpers for listening when it gets too verbose to hear",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",

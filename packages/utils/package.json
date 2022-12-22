@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/utils",
-  "version": "1.0.0",
+  "version": "0.1.16",
   "description": "Some basic functionality to make better websites",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
