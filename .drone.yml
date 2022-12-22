@@ -8,7 +8,7 @@ trigger:
     - push
 steps:
   - name: test
-    image: 18.12-alpine3.17
+    image: node:18.12-alpine3.17
     environment:
       CODECOV_TOKEN:
         from_secret: codecov_token
@@ -21,7 +21,7 @@ steps:
       - yarn coverage
       - yarn build
   # - name: publish
-  #   image: 18.12-alpine3.17
+  #   image: node:18.12-alpine3.17
   #   environment:
   #     NPM_TOKEN:
   #       from_secret: npm_publish_token
