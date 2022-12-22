@@ -24,7 +24,7 @@
     "dependency injection"
   ],
   "dependencies": {
-    "@smoovy/listener": "1.0.0"
+    "@smoovy/listener": "^1.0.0"
   },
   "author": "Davide Perozzi",
   "license": "MIT"

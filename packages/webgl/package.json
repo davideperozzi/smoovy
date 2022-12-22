@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/webgl",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "description": "Easier WebGL animations for websites",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -26,10 +26,10 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/emitter": "^0.0.0",
-    "@smoovy/listener": "^0.0.0",
-    "@smoovy/observer": "^0.5.1",
-    "@smoovy/ticker": "^0.1.11",
-    "@smoovy/utils": "^0.1.16"
+    "@smoovy/emitter": "^1.0.0",
+    "@smoovy/listener": "^1.0.0",
+    "@smoovy/observer": "^1.0.0",
+    "@smoovy/ticker": "^1.0.0",
+    "@smoovy/utils": "^1.0.0"
   }
 }

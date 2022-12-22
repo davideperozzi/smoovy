@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/observer",
-  "version": "0.5.1",
+  "version": "1.0.0",
   "description": "Simple and easy-to-use ticker",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
@@ -24,8 +24,8 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/emitter": "^0.0.0",
-    "@smoovy/listener": "^0.0.0"
+    "@smoovy/emitter": "^1.0.0",
+    "@smoovy/listener": "^1.0.0"
   },
   "devDependencies": {
     "vitest": "^0.25.3"
