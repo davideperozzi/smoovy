@@ -27,4 +27,4 @@ steps:
     commands:
       - apk add --no-cache libc6-compat git
       - echo "//registry.npmjs.org/:_authToken=$${NPM_TOKEN}" > .npmrc
-      - yarn release
+      - yarn release && git push --tags
