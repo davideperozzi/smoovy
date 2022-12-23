@@ -1,16 +1,15 @@
 # @smoovy/emitter
-[![Version](https://flat.badgen.net/npm/v/@smoovy/event)](https://www.npmjs.com/package/@smoovy/event) ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/event)
-
+[![Version](https://flat.badgen.net/npm/v/@smoovy/emitter)](https://www.npmjs.com/package/@smoovy/emitter) ![Size](https://flat.badgen.net/bundlephobia/minzip/@smoovy/emitter)
 
 ## Installation
 ```sh
-npm install --save @smoovy/event
+npm install --save @smoovy/emitter
 ```
 
-## The Event emitter
+## The event emitter
 Import the emitter as usual:
 ```js
-import { EventEmitter } from '@smoovy/event';
+import { EventEmitter } from '@smoovy/emitter';
 ```
 
 ### Usage
@@ -63,7 +62,7 @@ emitter.off('eventName', listener);
 When you have many listeners going wild in your application, you can use this litte helper function to stack those:
 
 ```js
-import { listenCompose } from '@smoovy/event';
+import { listenCompose } from '@smoovy/listener';
 
 const unlisten = listenCompose(
   emitter.on('eventName1', () => {}),
@@ -131,21 +130,6 @@ emitter.emit('eventName1', 'reflected'); // Displays 'reflected'
 
 // Remove reflected emitters
 emitter.unreflectEvents();
-```
-
-## Development commands
-```js
-// Serve with parcel
-npm run serve
-
-// Build with rollup
-npm run build
-
-// Run Jest unit tests
-npm run test
-
-// Run TSLinter
-npm run lint
 ```
 
 ## License
