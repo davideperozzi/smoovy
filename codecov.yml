@@ -1,0 +1,40 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 50%
+        threshold: null
+      composer:
+        flags: composer
+        target: 50%
+      observer:
+        flags: observer
+        target: 50%
+      ticker:
+        flags: ticker
+        target: 50%
+      tween:
+        flags: tween
+        target: 50%
+      utils:
+        flags: utils
+        target: 50%
+flags:
+  composer:
+    paths:
+      - packages/composer/src
+  observer:
+    paths:
+      - packages/observer/src
+  ticker:
+    paths:
+      - packages/ticker/src
+  tween:
+    paths:
+      - packages/tween/src
+  router:
+    paths:
+      - packages/router/src
+  utils:
+    paths:
+      - packages/utils/src

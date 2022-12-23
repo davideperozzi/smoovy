@@ -15,9 +15,6 @@
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
-  "files": [
-    "dist/**"
-  ],
   "keywords": [
     "smoovy",
     "event",

@@ -11,8 +11,7 @@
   },
   "scripts": {
     "build": "yarn run -T ts-node --esm ../../scripts/build.ts",
-    "lint": "eslint ./src",
-    "coverage": "vitest run --coverage"
+    "lint": "eslint ./src"
   },
   "keywords": [
     "smoovy",
