@@ -25,5 +25,6 @@ steps:
       NPM_TOKEN:
         from_secret: npm_publish_token
     commands:
-      - apk add --no-cache libc6-compat
+      - apk add --no-cache libc6-compat git
+      - echo "//registry.npmjs.org/:_authToken=$${NPM_TOKEN}" > .npmrc
       - yarn release
