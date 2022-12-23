@@ -10,6 +10,7 @@
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",
   "publishConfig": {
+    "directory": "./dist",
     "access": "public"
   },
   "scripts": {

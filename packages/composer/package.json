@@ -6,6 +6,7 @@
   "repository": "https://github.com/davideperozzi/smoovy",
   "main": "./src/index.ts",
   "publishConfig": {
+    "directory": "./dist",
     "access": "public"
   },
   "scripts": {
