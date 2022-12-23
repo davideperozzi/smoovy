@@ -1,5 +1,11 @@
 # @smoovy/emitter
 
+## 1.0.1
+
+### Patch Changes
+
+- fixed invalid files path in package json
+
 ## 1.0.0
 
 ### Major Changes

@@ -20,7 +20,7 @@
     "precommit": "turbo run --no-daemon --concurrency=4 precommit",
     "release": "yarn build && changeset publish",
     "test": "turbo run --no-daemon --concurrency=2 test",
-    "version": "changeset version && yarn install"
+    "version": "changeset && changeset version && yarn install"
   },
   "dependencies": {
     "@changesets/cli": "^2.26.0",
