@@ -1,5 +1,11 @@
 # @smoovy/composer
 
+## 1.0.2
+
+### Patch Changes
+
+- added boolean type to component config + name to services
+
 ## 1.0.1
 
 ### Patch Changes
