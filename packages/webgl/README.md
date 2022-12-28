@@ -5,6 +5,10 @@ Easy WebGL handler to connect the DOM with your WebGL scene and more.
 
 ## Installation
 ```sh
+yarn add @smoovy/webgl
+```
+or
+```sh
 npm install --save @smoovy/webgl
 ```
 
@@ -109,21 +113,6 @@ webgl.plane({
     }
   `
 });
-```
-
-## Development commands
-```js
-// Serve with parcel
-npm run serve
-
-// Build with rollup
-npm run build
-
-// Run Jest unit tests
-npm run test
-
-// Run TSLinter
-npm run lint
 ```
 
 ## License

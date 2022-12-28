@@ -7,7 +7,14 @@
   <title>@smoovy/composer</title>
 </head>
 <body>
-  <div data-sample-component></div>
+  <div
+    data-sample-component='{ "message": 42 }'
+    data-sample-component-message="12"
+  >
+    <div class="select-me">Select Me</div>
+    <div class="select-me" id="imuniq">Select Me | Uniq</div>
+    <div class="select-me">Select Me</div>
+  </div>
   <script async type="module" src="./index.ts"></script>
 </body>
 </html>

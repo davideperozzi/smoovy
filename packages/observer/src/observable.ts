@@ -6,13 +6,63 @@ export type ObservableTarget = HTMLElement | Window;
 export interface ObservableConfig<
   T extends ObservableTarget = ObservableTarget
 > {
+  /**
+   * The target to observe. Can be HTMLElement or Window
+   */
   target: T;
+
+  /**
+   * Use `getBoundingClientRect()` instead of offsetWidth etc.
+   *
+   * Default = false
+   */
   useBounds?: boolean;
+
+  /**
+   * Automatically listen for changes, resizes and updates once created
+   *
+   * Default = true
+   */
   autoAttach?: boolean;
+
+  /**
+   * Whether to use visibility detection via the IntersectionObserver API.
+   * You can configure it with a custom threshold.
+   *
+   * Default = false
+   */
   visibilityDetection?: boolean | IntersectionObserverInit;
+
+  /**
+   * If `visiblityDetection` is enabled, this will delay the visibile
+   * event by a defined number (ms)
+   *
+   * Default = 0
+   */
   visibilityDelay?: number;
+
+  /**
+   * If `visibiltiyDetection` is enabled, remove the target from the
+   * IntersectionObserver once it has been marked as visible
+   *
+   * Default = false
+   */
   detectVisibilityOnce?: boolean;
+
+  /**
+   * Whether to detect dimension changes via the ResizeObserver API
+   *
+   * Default = false
+   */
   resizeDetection?: boolean | ResizeObserverOptions;
+
+  /**
+   * Debounce is the number of milliseconds to wait for the next change.
+   * So if the delta value is below this threshold the resize event will
+   * be discarded and therefore the observable will not be updated.
+   *
+   * Default = 16.6
+   */
   resizeDebounce?: number;
 }
 

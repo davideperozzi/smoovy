@@ -1,5 +1,4 @@
 # smoovy
-
 [![Build Status](https://cicd.davideperozzi.com/api/badges/davideperozzi/smoovy/status.svg)](https://cicd.davideperozzi.com/davideperozzi/smoovy)
 [![Codecov](https://img.shields.io/codecov/c/gh/davideperozzi/smoovy.svg?style=flat-square)](https://codecov.io/gh/davideperozzi/smoovy)
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat-square)
@@ -32,7 +31,6 @@ or
 npm install --save @smoovy/<package>
 ```
 
-
 ## Workflow
 This is a simple monorepo consisting of some of the packages mentioned above.
 
@@ -43,7 +41,7 @@ yarn build --scope=<name>
 ```
 
 ### Testing a package
-Packages will be tested with `jest` and `puppeteer`. The sources files will be used for testing.
+Packages will be tested with `vitest`.
 ```sh
 yarn test --scope=<name>
 ```
@@ -56,7 +54,7 @@ yarn dev --scope=<name>
 ```
 
 ### Linting a package
-The `ESLinter` is used for linting packages. Everything except the `src` folder will be ignored.
+The `ESLinter` is being used for linting packages. Everything except the `src` folder will be ignored.
 ```sh
 yarn lint --scope=<name>
 ```

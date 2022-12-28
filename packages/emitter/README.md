@@ -3,6 +3,10 @@
 
 ## Installation
 ```sh
+yarn add @smoovy/emitter
+```
+or
+```sh
 npm install --save @smoovy/emitter
 ```
 

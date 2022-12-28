@@ -9,7 +9,7 @@ export function service(service: new () => Service, async = false) {
 export class Service<
   T = any,
   F extends Service = any,
-  C extends Record<string, unknown> = any
+  C extends Record<string, any> = any
 > extends Promise<T> {
   private children = new Map<string, Service<T, F>>();
   private _resolved = false;

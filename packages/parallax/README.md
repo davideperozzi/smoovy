@@ -3,162 +3,131 @@
 
 Predictable parallax effects
 
-## Usage
+## Installation
+```sh
+yarn add @smoovy/parallax
+```
+or
 ```sh
 npm install --save @smoovy/parallax
 ```
 
-### The controller
-The controller is responsible to distribute the scroll position, viewport size, ... among the parallax items. You can create it like this:
+## Usage
+A parallax item is simply a point that moves by the mangament of the state inside a context.
+So if a state is updated all parallax items assgined to the context will be updated as well.
 
+### Creating a parallax item
 ```js
-import { ParallaxController } from '@smoovy/parallax';
+import { parallax } from '@smoovy/parallax';
 
-const controller = new ParallaxController();
+const item = parallax({
+  speed: { y: 0.3 },
+  context: 'custom-optional-context',
+  element: document.querySelector('[data-parallax]'),
+  onUpdate: (state, progress) => {
+    console.log('current progress', progress * 100);
+    console.log('current shift', state.shiftY);
+  }
+});
 ```
 
-#### The controller offset
-You can determine the center point of the viewport for all items contained by the controller:
+### Updating the state
+States are always assigned to a context. The default context is named `default`.
+This ensure that you can have different groups of items and calculations with
+the same API.
 
 ```js
-new ParallaxController({
-  offset: {
-    x: 0.5,
+import { Parallax } from '@smoovy/parallax';
 
-    // 20% from the top
-    // of the viewport
-    y: 0.2
-  }
+window.addEventListener('scroll', () => {
+  Parallax.update({
+    scrollX: window.scrollX,
+    scrollY: window.scrollY,
+    viewWidth: window.innerWidth,
+    viewHeight: window.innerHeight,
+    maxWidth: document.body.offsetWidth,
+    maxHeight: document.body.offsetHeight
+  }, 'custom-optional-context' /** default: default */);
+});
+```
+> You should consider all of these calls (e.g. with @smoovy/observer)
+
+### More options
+```js
+parallax({
+  /**
+   * Context to tell tell which updates to
+   * listen to and which state to use
+   *
+   * @default default
+   */
+  context?: string;
+
+  /**
+   * Whether to enable "out-of-viewport" detection and stop updating
+   * once the coordinates aren't visible to the user anymore
+   *
+   * @default true
+   */
+  culling?: boolean;
+
+  /**
+   * This enabled a special mode where the parallax item moves inside a
+   * container. Usually an element with `overflow: hidden`. This applies
+   * a scale to the item, so it won't show a gap when the user scrolls
+   * by this item. It's as simple as: 1 + (gap * 2) / size. If there's
+   * an element available it will be transformed.
+   *
+   * @default false
+   */
+  masking?: boolean;
+
+  /**
+   * Whether to normalize the shift value. If this is enabled, a value
+   * for compensating starting and ending positions will be added to the
+   * shift value. So if you have an item at the first section of your
+   * viewport the starting position will be adjusted, so the shift will
+   * be 0 if the scroll position is 0.
+   *
+   * @default true
+   */
+  normalize?: boolean;
+
+  /**
+   * The speed tells how fast the item should move in relation to the
+   * scroll position. The initial position will always be reached when
+   * the center position of the item and the viewport match. This means
+   * if the item is in the center of the viewport the shift is 0.
+   * A speed value of 0 means no shift, 1 means basicall fixed and everthing
+   * in between, below and above will generate parallax effect
+   *
+   * @default { x: 0, y: 0 }
+   */
+  speed?: Partial<Coordinate>;
+
+  /**
+   * This will be used as a target, so the shift will be applied as
+   * translate3d and the mask (if enabled) with `scale`
+   *
+   * @default null
+   */
+  element?: HTMLElement | {
+    target: HTMLElement;
+    transform?: boolean;
+  };
+
+  /**
+   * Simply notifies you about the current state of the item and only will
+   * be triggered if the item position has changed. You can make modifications
+   * to the state here. For example remap the y value to x so it moves
+   * horizontally when the user scrolls vertically
+   */
+  onUpdate?: (state: ParallaxState, progress: Coordinate) => void;
 })
 ```
-> Default: `{ x: 0.5, y: 0.5 }`
 
-#### Updating the controller
-To update the controller and all it items you simply call this method everytime the desired state is not fulfilled. As an example, you could connect it to the window scroll event:
-
-```js
-window.addEventListener('scroll', () => {
-  // Note: You should consider caching all these
-  // calls (e.g. with @smoovy/observer)
-  controller.update({
-    scrollPosX: window.scrollX,
-    scrollPosY: window.scrollY,
-    viewportWidth: window.innerWidth,
-    viewportHeight: window.innerHeight,
-    contentWidth: document.body.offsetWidth,
-    contentHeight: document.body.offsetHeight
-  });
-});
-```
-
-### The parallax item
-A parallax item is simply a point that moves by the mangament of the controller. So if a controller is updated the parallax item will be updated as well.
-
-#### The vector parallax item
-The most basic parallax item is the `VectorParallaxItem`. You can use it like this:
-
-```js
-import { VectorParallaxItem } from '@smoovy/parallax';
-
-const item = new VectorParallaxItem({
-  speed: {
-    x: 0,
-    y: 0.2
-  },
-  state: () => {
-    x: 100,
-    y: 300,
-    width: 300,
-    height: 300
-  },
-  on: {
-    update: (shift, progress) => {
-      // Use the shift position to do
-      // translations or other animations
-    },
-    destroy: () => {
-      // The item was destroyed
-    }
-  }
-});
-```
-
-#### The element parallax item
-If you want to move a element to the shift value automatically, you can use the `ParallaxElementItem`. It's basically the vector parallax item with some extra features:
-
-```js
-import { ElementParallaxItem } from '@smoovy/parallax';
-
-const element = document.querySelector('.some-element');
-const item = new ElementParallaxItem(element, {
-  // The speed of the element. From -1 to 1
-  //
-  // Default: 0
-  speed: 0.3,
-
-  // Disable automatic "in-viewport" check.
-  //
-  // Default: true
-  culling: false,
-
-  // Disable automatic recalc on resize.
-  //
-  // Default: true
-  observe: false,
-
-  // Defines the center point of the element.
-  // The line will meet with the viewport center line
-  // on the initial element position
-  //
-  // Default { x: 0.5, y: 0.5 }
-  offset: {
-    x: 0.5,
-    y: 1
-  },
-
-  // Disable translation on the element
-  //
-  // Default: true
-  translate: false
-
-  // Defines the precision of the latest translation value
-  //
-  // Default: 2
-  precision: 1,
-
-  // Defines the padding for the "in-viewport" check
-  //
-  // Default: { x: 0, y: 0 }
-  padding: {
-    x: 0,
-    y: 0
-  },
-
-  // Map the shift value to the desired shift value (e.g. y to x)
-  //
-  // Default: undefined
-  mapShift: (shift) => {
-    shfit.x = shift.y;
-    shift.y = 0;
-
-    return shift;
-  },
-
-  // Events
-  on: {
-    update: (shift, progress) => {
-      // Use the shift position to do
-      // translations or other animations
-    },
-    destroy: () => {
-      // The item was destroyed
-    }
-  }
-});
-```
-
-#### Choosing the right speed value
-The speed value defines how fast the element will move according to it's initial position:
+### Choosing the perfect speed value
+The speed value defines how fast the point will move relative to it's initial position:
 
 `0` means static. No movement
 
@@ -167,22 +136,6 @@ The speed value defines how fast the element will move according to it's initial
 `-1` means "reverse sticky". It moves against the scroll position.
 
 everything in between is a fraction of the scroll position (negative or positive).
-
-
-## Development commands
-```js
-// Serve with parcel
-npm run serve
-
-// Build with rollup
-npm run build
-
-// Run Jest unit tests
-npm run test
-
-// Run TSLinter
-npm run lint
-```
 
 ## License
 See the [LICENSE](../../LICENSE) file for license rights and limitations (MIT).

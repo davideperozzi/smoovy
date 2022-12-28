@@ -12,7 +12,7 @@
   "scripts": {
     "build": "yarn run -T ts-node --esm ../../scripts/build.ts",
     "lint": "eslint ./src",
-    "dev": "vite",
+    "dev": "vite --config ./vite.demo.ts",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },

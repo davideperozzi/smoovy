@@ -14,29 +14,38 @@ export function defineInjectors(id: symbol, data?: any) {
   };
 }
 
-export async function inject<T, V>(
+export async function inject<T>(
   id: symbol,
-  instance: any,
-  values: V[] = []
+  target: any,
+  parse: (name: string, config: any, target: any) => Promise<any>
 ): Promise<T> {
-  const injections = instance[id];
+  const injections = target[id];
 
   for (const name in injections) {
-    const config = injections[name];
-    const clazz = config.class;
-    const async = config.async === true;
-    const value = values.find(val => val instanceof clazz);
-
-    if ( ! clazz || ! value) {
-      continue;
-    }
-
-    if (async) {
-      instance[name] = await value;
-    } else {
-      instance[name] = value;
-    }
+    await parse(name, injections[name], target);
   }
 
-  return instance as T;
+  return target as T;
+}
+
+export async function injectInstances<V>(
+  id: symbol,
+  target: any,
+  instances: V[] = []
+) {
+  return inject(id, target, async (name, config) => {
+    const clazz = config.class;
+    const async = config.async === true;
+    const value = instances.find(val => val instanceof clazz);
+
+    if ( ! clazz || ! value) {
+      return;
+    }
+
+    if (async && value instanceof Promise) {
+      target[name] = await value;
+    } else {
+      target[name] = value;
+    }
+  });
 }

@@ -1,5 +1,7 @@
-import { ComponentWrapper } from './component';
-import { defineInjectors, inject } from './injector';
+import { componentConfigKey, ComponentWrapper } from './component';
+import { configInjector } from './config';
+import { defineInjectors, inject, injectInstances } from './injector';
+import { queryAllInjector, queryInjector } from './query';
 import { Service, serviceInjector } from './service';
 
 export interface ComposerConfig {
@@ -20,7 +22,7 @@ export function composer(config?: ComposerConfig) {
         constructor() {
           super();
 
-          inject(composerInjector, this, [manager]).then(() => {
+          injectInstances(composerInjector, this, [manager]).then(() => {
             if (typeof this.onCreate === 'function') {
               this.onCreate();
             }
@@ -47,7 +49,7 @@ export class Composer {
 
     if (services) {
       for (let i = 0, len = services.length; i < len; i++) {
-        inject(serviceInjector, services[i], this.config.services)
+        injectInstances(serviceInjector, services[i], this.config.services)
       }
 
       for (let i = 0, len = services.length; i < len; i++) {
@@ -66,11 +68,80 @@ export class Composer {
 
   private async inject(wrapper: ComponentWrapper) {
     await Promise.all([
-      inject(composerInjector, wrapper.component, [this]),
-      inject(serviceInjector, wrapper.component, this.config.services)
+      injectInstances(composerInjector, wrapper.component, [this]),
+      injectInstances(serviceInjector, wrapper.component, this.config.services),
+      inject(queryInjector, wrapper.component, async (name, config, target) => {
+        let result = wrapper.element.querySelector(config.selector);
+
+        if (typeof config.parse === 'function') {
+          result = config.parse(result);
+        }
+
+        if (result) {
+          target[name] = result;
+        }
+      }),
+      inject(
+        queryAllInjector,
+        wrapper.component,
+        async (name, config, target) => {
+          let result = wrapper.element.querySelectorAll(config.selector);
+
+          if (typeof config.parse === 'function') {
+            result = config.parse(result);
+          }
+
+          if (result) {
+            target[name] = result;
+          }
+        }
+      ),
+      inject(
+        configInjector,
+        wrapper.component,
+        async (name, config, target) => this.parseComponentConfig(
+          wrapper,
+          name,
+          config,
+          target
+        )
+      )
     ]);
 
     return wrapper;
+  }
+
+  private parseComponentConfig(
+    wrapper: ComponentWrapper,
+    name: string,
+    config: any,
+    target: any
+  ) {
+    if (name === config.key) {
+      const clazz = wrapper.ctor as any;
+      const dataset = clazz[componentConfigKey].dataset;
+
+      if ( ! dataset) {
+        throw new Error(
+          `${clazz.name} has no dataset attr defined. ` +
+          `Define it via "dataset" in the component config`
+        );
+      }
+
+      const dataStr = wrapper.element.dataset[dataset];
+      const keyCam = name.replace(/-./g, x=>x[1].toUpperCase());
+      const keyDat = keyCam.charAt(0).toUpperCase() + keyCam.slice(1);
+      const dataValue = wrapper.element.dataset[`${dataset}${keyDat}`];
+      const dataObj = dataStr ? JSON.parse(dataStr || '{}') : {};
+      const parser = config.type || String;
+      let value = parser(dataValue || dataObj[name] || target[name]);
+
+      if (typeof config.parse === 'function') {
+        value = config.parse(value);
+      }
+
+      target[name] = value;
+    }
   }
 
   public update(
@@ -122,7 +193,7 @@ export class Composer {
     cb: (wrapper: ComponentWrapper) => void
   ) {
     (this.config.components || []).forEach((Clazz) => {
-      const config = Reflect.get(Clazz, '__config') || {};
+      const config = Clazz[componentConfigKey] || {};
 
       if (config.condition && ! config.condition()) {
         return;
@@ -137,7 +208,12 @@ export class Composer {
             wrapper.element === element
           ))
         ) {
-          cb({ ctor: Clazz, component: new Clazz(element), config, element });
+          cb({
+            ctor: Clazz,
+            component: new Clazz(element),
+            config,
+            element
+          });
         }
       });
     });

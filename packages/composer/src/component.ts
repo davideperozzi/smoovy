@@ -14,6 +14,7 @@ export interface OnListen {
 
 export interface ComponentConfig {
   selector: string;
+  dataset?: string;
   condition?: () => boolean;
 }
 
@@ -25,11 +26,16 @@ export interface ComponentWrapper<T = any> {
   unlisten?: Unlisten;
 }
 
+export const componentConfigKey = Symbol(undefined);
+
 export function component(config: ComponentConfig | string) {
   return (target: any) => {
-    config = typeof config === 'string' ? { selector: config } : config;
+    config = typeof config === 'string' ? {
+      selector: `[data-${config}]`,
+      dataset: config.replace(/-./g, x=>x[1].toUpperCase())
+    } : config;
 
-    target.__config = config;
+    target[componentConfigKey] = config;
 
     return target;
   };

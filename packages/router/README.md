@@ -207,26 +207,5 @@ RouterOutletEvent.CONTENT_AFTER_LEAVE_START;
 RouterOutletEvent.CONTENT_AFTER_LEAVE_END;
 ```
 
-
-## Next steps
-- [ ] Add unit tests
-- [ ] Add browser tests
-- [ ] Add more basic transitions
-
-## Development commands
-```js
-// Serve with parcel
-npm run serve
-
-// Build with rollup
-npm run build
-
-// Run Jest unit tests
-npm run test
-
-// Run TSLinter
-npm run lint
-```
-
 ## License
 See the [LICENSE](../../LICENSE) file for license rights and limitations (MIT).

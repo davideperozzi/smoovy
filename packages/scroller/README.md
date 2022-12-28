@@ -3,6 +3,10 @@
 
 ## Installation
 ```sh
+yarn add @smoovy/scroller
+```
+or
+```sh
 npm install --save @smoovy/scroller
 ```
 
