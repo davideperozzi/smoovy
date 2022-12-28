@@ -48,6 +48,12 @@ export class Composer {
     const services = this.config.services;
 
     if (services) {
+      const serviceNames = services.map(svc => svc.name);
+
+      if (serviceNames.length !== new Set(serviceNames).size) {
+        throw new Error('duplicate services found: ' + serviceNames.join(', '));
+      }
+
       for (let i = 0, len = services.length; i < len; i++) {
         injectInstances(serviceInjector, services[i], this.config.services)
       }
@@ -64,6 +70,10 @@ export class Composer {
     if (config.initUpdate !== false) {
       this.update();
     }
+  }
+
+  get services() {
+    return this.config.services;
   }
 
   private async inject(wrapper: ComponentWrapper) {
@@ -134,7 +144,19 @@ export class Composer {
       const dataValue = wrapper.element.dataset[`${dataset}${keyDat}`];
       const dataObj = dataStr ? JSON.parse(dataStr || '{}') : {};
       const parser = config.type || String;
-      let value = parser(dataValue || dataObj[name] || target[name]);
+      const plainVal = dataValue || dataObj[name] || target[name];
+      let value = parser(plainVal);
+
+      if (
+        parser === Boolean &&
+        (
+          plainVal === '0' ||
+          plainVal === 'no' ||
+          plainVal === 'false'
+        )
+      ) {
+        value = false;
+      }
 
       if (typeof config.parse === 'function') {
         value = config.parse(value);
@@ -144,7 +166,7 @@ export class Composer {
     }
   }
 
-  public update(
+  update(
     scope: HTMLElement = this.root,
     purge = true,
     filter: (cls: any) => boolean = () => true
@@ -259,7 +281,7 @@ export class Composer {
     }
   }
 
-  public query<T>(ctor: T, scope?: HTMLElement) {
+  query<T>(ctor: T, scope?: HTMLElement) {
     const results: ComponentWrapper<T>[] = [];
 
     this.components.forEach(wrapper => {

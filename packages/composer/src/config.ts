@@ -1,7 +1,7 @@
 import { defineInjectors } from './injector';
 
 export interface ConfigInjectorConfig {
-  type?: StringConstructor | NumberConstructor;
+  type?: StringConstructor | NumberConstructor | BooleanConstructor;
   parse?: (value: any) => any
 }
 

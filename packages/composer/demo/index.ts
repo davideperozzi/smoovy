@@ -4,9 +4,8 @@ import { config } from '../src/config';
 import { query, queryAll } from '../src/query';
 
 export class TestService extends Service<any, TestService> {
-  protected get child() {
-    return TestService;
-  }
+  get name() { return 'test'; }
+  get child() { return TestService; }
 
   async init() {
     this.resolve('test-service');
@@ -17,9 +16,8 @@ export class SampleService extends Service<string, SampleService> {
   @service(TestService)
   private testService!: TestService;
 
-  protected get child() {
-    return SampleService;
-  }
+  get name() { return 'sample'; }
+  get child() { return SampleService; }
 
   async init() {
     this.resolve(await this.testService);

@@ -18,6 +18,10 @@ export class Service<
   public resolveFn?: (value?: T | PromiseLike<T>) => void;
   public rejectFn?: (reason?: any) => void;
 
+  static get [Symbol.species]() {
+    return Promise;
+  }
+
   constructor(
     protected config: C = {} as C,
     value?: T
@@ -37,14 +41,6 @@ export class Service<
     if (value) {
       this.resolve(value);
     }
-  }
-
-  static get [Symbol.species]() {
-    return Promise;
-  }
-
-  protected get child(): new (config: C, value?: T) => F {
-    return Service as any;
   }
 
   addChild(name: string, config: C = {} as C, value?: T) {
@@ -88,24 +84,32 @@ export class Service<
     return this.children.get(name);
   }
 
-  public get available() {
+  get available() {
     return this._resolved;
   }
 
-  public get activated() {
+  get activated() {
     return this._activated;
   }
 
-  public activate() {
+  get child(): new (config: C, value?: T) => F {
+    return Service as any;
+  }
+
+  get name(): string {
+    throw new Error('service name not defined for ' + this.constructor.name);
+  }
+
+  activate() {
     this._activated = true;
 
     return this;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public async init() {}
+  async init() {}
 
-  public resolve(value: T) {
+  resolve(value: T) {
     if (this.resolveFn && ! this._resolved) {
       this._resolved = true;
       this.resolveFn(value);
