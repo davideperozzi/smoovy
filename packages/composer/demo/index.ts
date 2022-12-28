@@ -12,14 +12,27 @@ export class TestService extends Service<any, TestService> {
   }
 }
 
+export class TestService2 extends Service<any, TestService> {
+  get name() { return 'test2'; }
+  get child() { return TestService2; }
+
+  async init() {
+    this.resolve('test-service2');
+  }
+}
+
 export class SampleService extends Service<string, SampleService> {
   @service(TestService)
   private testService!: TestService;
+
+  @service(TestService2)
+  private testService2!: TestService2;
 
   get name() { return 'sample'; }
   get child() { return SampleService; }
 
   async init() {
+    // console.log(this.testService2);
     this.resolve(await this.testService);
   }
 }
@@ -55,6 +68,7 @@ class SampleComponent {
 @composer({
   services: [
     new SampleService(),
+    new TestService2(),
     new TestService()
   ],
   components: [
@@ -65,8 +79,11 @@ class App {
   @composer()
   private composer!: Composer;
 
-  onCreate() {
-    // console.log(this.composer);
+  @service(TestService2)
+  private testService2!: TestService2;
+
+  async onCreate() {
+    console.log('->', await this.testService2);
   }
 }
 

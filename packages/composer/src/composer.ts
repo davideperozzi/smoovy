@@ -23,9 +23,17 @@ export function composer(config?: ComposerConfig) {
           super();
 
           injectInstances(composerInjector, this, [manager]).then(() => {
-            if (typeof this.onCreate === 'function') {
-              this.onCreate();
-            }
+            injectInstances(
+              serviceInjector,
+              this,
+              manager.services,
+              true,
+              manager.voidService
+            ).then(() => {
+              if (typeof this.onCreate === 'function') {
+                this.onCreate();
+              }
+            });
           });
         }
       }
@@ -41,10 +49,23 @@ export function composer(config?: ComposerConfig) {
 export class Composer {
   private root = document.body;
   private components: ComponentWrapper[] = [];
+  public readonly voidService = new Service();
 
   constructor(
     private config: ComposerConfig = {}
   ) {
+    this.initServices();
+
+    if (config.initUpdate !== false) {
+      this.update();
+    }
+  }
+
+  get services() {
+    return this.config.services || [];
+  }
+
+  private async initServices() {
     const services = this.config.services;
 
     if (services) {
@@ -55,7 +76,13 @@ export class Composer {
       }
 
       for (let i = 0, len = services.length; i < len; i++) {
-        injectInstances(serviceInjector, services[i], this.config.services)
+        await injectInstances(
+          serviceInjector,
+          services[i],
+          this.config.services,
+          true,
+          this.voidService
+        );
       }
 
       for (let i = 0, len = services.length; i < len; i++) {
@@ -66,20 +93,18 @@ export class Composer {
         services[i].init();
       }
     }
-
-    if (config.initUpdate !== false) {
-      this.update();
-    }
-  }
-
-  get services() {
-    return this.config.services;
   }
 
   private async inject(wrapper: ComponentWrapper) {
     await Promise.all([
       injectInstances(composerInjector, wrapper.component, [this]),
-      injectInstances(serviceInjector, wrapper.component, this.config.services),
+      injectInstances(
+        serviceInjector,
+        wrapper.component,
+        this.config.services,
+        false,
+        this.voidService
+      ),
       inject(queryInjector, wrapper.component, async (name, config, target) => {
         let result = wrapper.element.querySelector(config.selector);
 
