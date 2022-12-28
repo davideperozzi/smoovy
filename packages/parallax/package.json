@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/parallax",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Parallax effects library",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
@@ -24,8 +24,8 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/listener": "^1.0.0",
-    "@smoovy/observer": "^1.0.0",
-    "@smoovy/utils": "^1.0.0"
+    "@smoovy/listener": "^1.0.1",
+    "@smoovy/observer": "^1.0.1",
+    "@smoovy/utils": "^1.0.1"
   }
 }

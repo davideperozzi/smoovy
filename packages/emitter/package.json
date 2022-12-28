@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/emitter",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simple event emitter",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
@@ -24,7 +24,7 @@
   "author": "Davide Perozzi",
   "license": "MIT",
   "dependencies": {
-    "@smoovy/listener": "^1.0.0"
+    "@smoovy/listener": "^1.0.1"
   },
   "devDependencies": {
     "@vitest/coverage-c8": "^0.25.3",

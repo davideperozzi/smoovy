@@ -1,5 +1,13 @@
 # @smoovy/tween
 
+## 1.0.1
+
+### Patch Changes
+
+- general: updated readme | composer: added injectable utils
+- Updated dependencies
+  - @smoovy/ticker@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

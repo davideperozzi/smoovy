@@ -1,5 +1,13 @@
 # @smoovy/emitter
 
+## 1.0.2
+
+### Patch Changes
+
+- general: updated readme | composer: added injectable utils
+- Updated dependencies
+  - @smoovy/listener@1.0.1
+
 ## 1.0.1
 
 ### Patch Changes

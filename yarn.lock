@@ -728,21 +728,21 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smoovy/composer@workspace:packages/composer"
   dependencies:
-    "@smoovy/listener": ^1.0.0
+    "@smoovy/listener": ^1.0.1
   languageName: unknown
   linkType: soft
 
-"@smoovy/emitter@^1.0.0, @smoovy/emitter@workspace:packages/emitter":
+"@smoovy/emitter@^1.0.2, @smoovy/emitter@workspace:packages/emitter":
   version: 0.0.0-use.local
   resolution: "@smoovy/emitter@workspace:packages/emitter"
   dependencies:
-    "@smoovy/listener": ^1.0.0
+    "@smoovy/listener": ^1.0.1
     "@vitest/coverage-c8": ^0.25.3
     vitest: ^0.25.3
   languageName: unknown
   linkType: soft
 
-"@smoovy/listener@^1.0.0, @smoovy/listener@workspace:packages/listener":
+"@smoovy/listener@^1.0.1, @smoovy/listener@workspace:packages/listener":
   version: 0.0.0-use.local
   resolution: "@smoovy/listener@workspace:packages/listener"
   dependencies:
@@ -750,12 +750,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smoovy/observer@^1.0.0, @smoovy/observer@workspace:packages/observer":
+"@smoovy/observer@^1.0.1, @smoovy/observer@workspace:packages/observer":
   version: 0.0.0-use.local
   resolution: "@smoovy/observer@workspace:packages/observer"
   dependencies:
-    "@smoovy/emitter": ^1.0.0
-    "@smoovy/listener": ^1.0.0
+    "@smoovy/emitter": ^1.0.2
+    "@smoovy/listener": ^1.0.1
     vitest: ^0.25.3
   languageName: unknown
   linkType: soft
@@ -764,9 +764,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smoovy/parallax@workspace:packages/parallax"
   dependencies:
-    "@smoovy/listener": ^1.0.0
-    "@smoovy/observer": ^1.0.0
-    "@smoovy/utils": ^1.0.0
+    "@smoovy/listener": ^1.0.1
+    "@smoovy/observer": ^1.0.1
+    "@smoovy/utils": ^1.0.1
   languageName: unknown
   linkType: soft
 
@@ -774,10 +774,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smoovy/router@workspace:packages/router"
   dependencies:
-    "@smoovy/emitter": ^1.0.0
-    "@smoovy/listener": ^1.0.0
-    "@smoovy/tween": ^1.0.0
-    "@smoovy/utils": ^1.0.0
+    "@smoovy/emitter": ^1.0.2
+    "@smoovy/listener": ^1.0.1
+    "@smoovy/tween": ^1.0.1
+    "@smoovy/utils": ^1.0.1
     vitest: ^0.25.3
   languageName: unknown
   linkType: soft
@@ -786,17 +786,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smoovy/scroller@workspace:packages/scroller"
   dependencies:
-    "@smoovy/emitter": ^1.0.0
-    "@smoovy/listener": ^1.0.0
-    "@smoovy/observer": ^1.0.0
-    "@smoovy/ticker": ^1.0.0
-    "@smoovy/utils": ^1.0.0
+    "@smoovy/emitter": ^1.0.2
+    "@smoovy/listener": ^1.0.1
+    "@smoovy/observer": ^1.0.1
+    "@smoovy/ticker": ^1.0.1
+    "@smoovy/utils": ^1.0.1
     "@types/dat.gui": ^0.7.7
     dat.gui: ^0.7.9
   languageName: unknown
   linkType: soft
 
-"@smoovy/ticker@^1.0.0, @smoovy/ticker@workspace:packages/ticker":
+"@smoovy/ticker@^1.0.1, @smoovy/ticker@workspace:packages/ticker":
   version: 0.0.0-use.local
   resolution: "@smoovy/ticker@workspace:packages/ticker"
   dependencies:
@@ -804,16 +804,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smoovy/tween@^1.0.0, @smoovy/tween@workspace:packages/tween":
+"@smoovy/tween@^1.0.1, @smoovy/tween@workspace:packages/tween":
   version: 0.0.0-use.local
   resolution: "@smoovy/tween@workspace:packages/tween"
   dependencies:
-    "@smoovy/ticker": ^1.0.0
+    "@smoovy/ticker": ^1.0.1
     vitest: ^0.25.3
   languageName: unknown
   linkType: soft
 
-"@smoovy/utils@^1.0.0, @smoovy/utils@workspace:packages/utils":
+"@smoovy/utils@^1.0.1, @smoovy/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@smoovy/utils@workspace:packages/utils"
   dependencies:
@@ -825,11 +825,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smoovy/webgl@workspace:packages/webgl"
   dependencies:
-    "@smoovy/emitter": ^1.0.0
-    "@smoovy/listener": ^1.0.0
-    "@smoovy/observer": ^1.0.0
-    "@smoovy/ticker": ^1.0.0
-    "@smoovy/utils": ^1.0.0
+    "@smoovy/emitter": ^1.0.2
+    "@smoovy/listener": ^1.0.1
+    "@smoovy/observer": ^1.0.1
+    "@smoovy/ticker": ^1.0.1
+    "@smoovy/utils": ^1.0.1
   languageName: unknown
   linkType: soft
 

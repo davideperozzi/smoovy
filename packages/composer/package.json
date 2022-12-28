@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/composer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Component Manager, Service Manager all in one",
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",
@@ -25,7 +25,7 @@
     "dependency injection"
   ],
   "dependencies": {
-    "@smoovy/listener": "^1.0.0"
+    "@smoovy/listener": "^1.0.1"
   },
   "author": "Davide Perozzi",
   "license": "MIT"
