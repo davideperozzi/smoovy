@@ -22,18 +22,24 @@ export function composer(config?: ComposerConfig) {
         constructor() {
           super();
 
-          injectInstances(composerInjector, this, [manager]).then(() => {
+          Promise.all([
+            injectInstances(composerInjector, this, [manager]),
+            ...manager.services.map(service => injectInstances(
+              composerInjector,
+              service,
+              [manager]
+            )),
             injectInstances(
               serviceInjector,
               this,
               manager.services,
               true,
               manager.voidService
-            ).then(() => {
-              if (typeof this.onCreate === 'function') {
-                this.onCreate();
-              }
-            });
+            )
+          ]).then(() => {
+            if (typeof this.onCreate === 'function') {
+              this.onCreate();
+            }
           });
         }
       }

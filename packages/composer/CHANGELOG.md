@@ -1,5 +1,11 @@
 # @smoovy/composer
 
+## 1.0.4
+
+### Patch Changes
+
+- composer: made composer injectable into services
+
 ## 1.0.3
 
 ### Patch Changes

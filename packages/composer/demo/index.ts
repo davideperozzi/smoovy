@@ -16,7 +16,11 @@ export class TestService2 extends Service<any, TestService> {
   get name() { return 'test2'; }
   get child() { return TestService2; }
 
+  @composer()
+  private composer!: Composer;
+
   async init() {
+    console.log('compos->', this.composer);
     this.resolve('test-service2');
   }
 }

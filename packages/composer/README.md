@@ -116,7 +116,11 @@ is basically a `Promise` with extra functionality.
 import { Service } from '@smoovy/composer';
 
 class TestService extends Service<any, TestService> {
-  protected get child() {
+  get name() {
+    return 'test';
+  }
+
+  get child() {
     return TestService;
   }
 

@@ -14,7 +14,7 @@ export function defineInjectors(id: symbol, data?: any) {
   };
 }
 
-export async function inject<T>(
+export async function inject(
   id: symbol,
   target: any,
   parse: (name: string, config: any, target: any) => Promise<any>
