@@ -1,5 +1,11 @@
 # @smoovy/composer
 
+## 1.0.5
+
+### Patch Changes
+
+- composer: fixed config parsing bug
+
 ## 1.0.4
 
 ### Patch Changes

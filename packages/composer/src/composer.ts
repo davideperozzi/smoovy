@@ -12,6 +12,16 @@ export interface ComposerConfig {
 }
 
 const composerInjector = Symbol(undefined);
+const parseJson = (text = '{}') => {
+  let result: any = {};
+
+  try {
+    result = JSON.parse(text);
+  } catch(err) {}
+
+  return result;
+};
+
 
 export function composer(config?: ComposerConfig) {
   return (target: any, propertyKey?: string) => {
@@ -173,27 +183,30 @@ export class Composer {
       const keyCam = name.replace(/-./g, x=>x[1].toUpperCase());
       const keyDat = keyCam.charAt(0).toUpperCase() + keyCam.slice(1);
       const dataValue = wrapper.element.dataset[`${dataset}${keyDat}`];
-      const dataObj = dataStr ? JSON.parse(dataStr || '{}') : {};
+      const dataObj = dataStr ? parseJson(dataStr) : {};
       const parser = config.type || String;
-      const plainVal = dataValue || dataObj[name] || target[name];
-      let value = parser(plainVal);
+      const plainVal = dataValue || dataObj[name];
 
-      if (
-        parser === Boolean &&
-        (
-          plainVal === '0' ||
-          plainVal === 'no' ||
-          plainVal === 'false'
-        )
-      ) {
-        value = false;
+      if (plainVal !== undefined) {
+        let value = parser(plainVal);
+
+        if (
+          parser === Boolean &&
+          (
+            plainVal === '0' ||
+            plainVal === 'no' ||
+            plainVal === 'false'
+          )
+        ) {
+          value = false;
+        }
+
+        if (typeof config.parse === 'function') {
+          value = config.parse(value);
+        }
+
+        target[name] = value;
       }
-
-      if (typeof config.parse === 'function') {
-        value = config.parse(value);
-      }
-
-      target[name] = value;
     }
   }
 

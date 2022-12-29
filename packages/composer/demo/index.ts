@@ -20,7 +20,7 @@ export class TestService2 extends Service<any, TestService> {
   private composer!: Composer;
 
   async init() {
-    console.log('compos->', this.composer);
+    // console.log('compos->', this.composer);
     this.resolve('test-service2');
   }
 }
@@ -32,11 +32,14 @@ export class SampleService extends Service<string, SampleService> {
   @service(TestService2)
   private testService2!: TestService2;
 
+  @composer()
+  private composer!: Composer;
+
   get name() { return 'sample'; }
   get child() { return SampleService; }
 
   async init() {
-    // console.log(this.testService2);
+    // console.log(this.composer, this.testService2, this.testService);
     this.resolve(await this.testService);
   }
 }
@@ -52,6 +55,9 @@ class SampleComponent {
   @config('message')
   private message = 'Default message';
 
+  @config('test', { type: Number, parse: value => ({ value }) })
+  private test = { value: 1 };
+
   @query('#imuniq')
   private uniq!: HTMLElement;
 
@@ -63,9 +69,10 @@ class SampleComponent {
   ) {}
 
   onCreate() {
-    console.log(this.sample, this.composer);
+    // console.log(this.sample, this.composer);
     console.log('message:', this.message);
-    console.log(this.uniq, this.selectMe);
+    console.log('test:', this.test);
+    // console.log(this.uniq, this.selectMe);
   }
 }
 
@@ -87,7 +94,7 @@ class App {
   private testService2!: TestService2;
 
   async onCreate() {
-    console.log('->', await this.testService2);
+    // console.log('->', await this.testService2);
   }
 }
 
