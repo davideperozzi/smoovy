@@ -1,5 +1,11 @@
 # @smoovy/composer
 
+## 1.0.8
+
+### Patch Changes
+
+- observer: removed default debounce
+
 ## 1.0.7
 
 ### Patch Changes

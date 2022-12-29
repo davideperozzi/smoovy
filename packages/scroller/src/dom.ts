@@ -7,7 +7,7 @@ export interface ScrollerDomElement {
 }
 
 export interface ScrollerDomConfig {
-  observer?: ObservableConfig | false;
+  observer?: Omit<ObservableConfig<HTMLElement>, 'target'> | false;
   element: HTMLElement | ScrollerDomElement;
 }
 

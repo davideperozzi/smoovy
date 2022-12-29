@@ -1,5 +1,13 @@
 # @smoovy/scroller
 
+## 1.0.2
+
+### Patch Changes
+
+- observer: removed default debounce
+- Updated dependencies
+  - @smoovy/observer@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes

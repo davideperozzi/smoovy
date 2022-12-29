@@ -1,5 +1,11 @@
 # @smoovy/observer
 
+## 1.0.2
+
+### Patch Changes
+
+- observer: removed default debounce
+
 ## 1.0.1
 
 ### Patch Changes

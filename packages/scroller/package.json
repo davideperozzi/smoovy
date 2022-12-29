@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "smooth scrolling for the world",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
@@ -26,7 +26,7 @@
   "dependencies": {
     "@smoovy/emitter": "^1.0.2",
     "@smoovy/listener": "^1.0.1",
-    "@smoovy/observer": "^1.0.1",
+    "@smoovy/observer": "^1.0.2",
     "@smoovy/ticker": "^1.0.1",
     "@smoovy/utils": "^1.0.1"
   },

@@ -83,7 +83,6 @@ class SampleComponent {
   }
 
   onListen() {
-    console.log('activated:', this.sampleService.activated);
   }
 }
 

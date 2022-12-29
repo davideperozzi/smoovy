@@ -61,7 +61,7 @@ export interface ObservableConfig<
    * So if the delta value is below this threshold the resize event will
    * be discarded and therefore the observable will not be updated.
    *
-   * Default = 16.6
+   * Default = 0
    */
   resizeDebounce?: number;
 }
@@ -127,7 +127,7 @@ export class Observable<
   }
 
   get resizeDebounce() {
-    return this.config.resizeDebounce || 16.6;
+    return this.config.resizeDebounce || 0;
   }
 
   get resizeDetection() {

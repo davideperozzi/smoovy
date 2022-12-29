@@ -750,7 +750,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smoovy/observer@^1.0.1, @smoovy/observer@workspace:packages/observer":
+"@smoovy/observer@^1.0.1, @smoovy/observer@^1.0.2, @smoovy/observer@workspace:packages/observer":
   version: 0.0.0-use.local
   resolution: "@smoovy/observer@workspace:packages/observer"
   dependencies:
@@ -788,7 +788,7 @@ __metadata:
   dependencies:
     "@smoovy/emitter": ^1.0.2
     "@smoovy/listener": ^1.0.1
-    "@smoovy/observer": ^1.0.1
+    "@smoovy/observer": ^1.0.2
     "@smoovy/ticker": ^1.0.1
     "@smoovy/utils": ^1.0.1
     "@types/dat.gui": ^0.7.7
