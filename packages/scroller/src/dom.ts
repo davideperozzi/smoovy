@@ -7,7 +7,9 @@ export interface ScrollerDomElement {
 }
 
 export interface ScrollerDomConfig {
-  observer?: Omit<ObservableConfig<HTMLElement>, 'target'> | false;
+  observer?: Omit<
+    ObservableConfig<HTMLElement>, 'target' | 'autoAttach'
+  > | false;
   element: HTMLElement | ScrollerDomElement;
 }
 
@@ -26,7 +28,8 @@ export class ScrollerDom extends EventEmitter {
     super();
 
     const observableConfig: Omit<ObservableConfig<HTMLElement>, 'target'> = {
-      ...(config.observer || { resizeDetection : false }),
+      resizeDetection: true,
+      ...config.observer,
       autoAttach: false
     };
 
@@ -46,8 +49,8 @@ export class ScrollerDom extends EventEmitter {
     );
 
     if (config.observer !== false) {
-      this.wrapper.onChange(() => this.emit(ScrollerDomEvent.RECALC));
-      this.container.onChange(() => this.emit(ScrollerDomEvent.RECALC));
+      this.wrapper.onDimChange(() => this.emit(ScrollerDomEvent.RECALC));
+      this.container.onDimChange(() => this.emit(ScrollerDomEvent.RECALC));
     }
 
     if (this.dynamic) {

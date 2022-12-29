@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 1.0.3
+
+### Patch Changes
+
+- scroller: updated dom resize detection
+
 ## 1.0.2
 
 ### Patch Changes
