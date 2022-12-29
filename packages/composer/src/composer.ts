@@ -168,45 +168,51 @@ export class Composer {
     config: any,
     target: any
   ) {
-    if (name === config.key) {
-      const clazz = wrapper.ctor as any;
-      const dataset = clazz[componentConfigKey].dataset;
+    const clazz = wrapper.ctor as any;
+    const dataset = clazz[componentConfigKey].dataset;
 
-      if ( ! dataset) {
-        throw new Error(
-          `${clazz.name} has no dataset attr defined. ` +
-          `Define it via "dataset" in the component config`
-        );
+    if ( ! dataset) {
+      throw new Error(
+        `${clazz.name} has no dataset attr defined. ` +
+        `Define it via "dataset" in the component config`
+      );
+    }
+
+    const dataStr = wrapper.element.dataset[dataset];
+    const keyCam = config.key.replace(/-./g, (x: string) => x[1].toUpperCase());
+    const keyDat = keyCam.charAt(0).toUpperCase() + keyCam.slice(1);
+    const dataValue = wrapper.element.dataset[`${dataset}${keyDat}`];
+    const dataObj = dataStr ? parseJson(dataStr) : {};
+    const parser = config.type || String;
+    const plainVal = dataValue === undefined ? dataObj[config.key] : dataValue;
+
+    if (plainVal !== undefined) {
+      let value = parser(plainVal);
+
+      if (
+        parser === Boolean &&
+        typeof plainVal === 'string' &&
+        plainVal.trim() === ''
+      ) {
+        value = true;
       }
 
-      const dataStr = wrapper.element.dataset[dataset];
-      const keyCam = name.replace(/-./g, x=>x[1].toUpperCase());
-      const keyDat = keyCam.charAt(0).toUpperCase() + keyCam.slice(1);
-      const dataValue = wrapper.element.dataset[`${dataset}${keyDat}`];
-      const dataObj = dataStr ? parseJson(dataStr) : {};
-      const parser = config.type || String;
-      const plainVal = dataValue || dataObj[name];
-
-      if (plainVal !== undefined) {
-        let value = parser(plainVal);
-
-        if (
-          parser === Boolean &&
-          (
-            plainVal === '0' ||
-            plainVal === 'no' ||
-            plainVal === 'false'
-          )
-        ) {
-          value = false;
-        }
-
-        if (typeof config.parse === 'function') {
-          value = config.parse(value);
-        }
-
-        target[name] = value;
+      if (
+        parser === Boolean &&
+        (
+          plainVal === '0' ||
+          plainVal === 'no' ||
+          plainVal === 'false'
+        )
+      ) {
+        value = false;
       }
+
+      if (typeof config.parse === 'function') {
+        value = config.parse(value);
+      }
+
+      target[name] = value;
     }
   }
 

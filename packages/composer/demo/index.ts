@@ -58,6 +58,9 @@ class SampleComponent {
   @config('test', { type: Number, parse: value => ({ value }) })
   private test = { value: 1 };
 
+  @config('is-active', { type: Boolean })
+  private active = false;
+
   @query('#imuniq')
   private uniq!: HTMLElement;
 
@@ -71,6 +74,7 @@ class SampleComponent {
   onCreate() {
     // console.log(this.sample, this.composer);
     console.log('message:', this.message);
+    console.log('active:', this.active);
     console.log('test:', this.test);
     // console.log(this.uniq, this.selectMe);
   }

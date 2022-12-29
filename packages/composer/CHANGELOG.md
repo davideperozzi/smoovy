@@ -1,5 +1,11 @@
 # @smoovy/composer
 
+## 1.0.6
+
+### Patch Changes
+
+- composer: added better boolean config parsing
+
 ## 1.0.5
 
 ### Patch Changes
