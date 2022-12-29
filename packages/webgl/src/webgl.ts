@@ -48,6 +48,9 @@ export class WebGL {
   private unlistenResize?: Unlisten;
   private paused = false;
   private lastTime = 0;
+  private startTime = 0;
+  private pauseTime = 0;
+  private pauseStart = 0;
 
   public constructor(
     protected config: WebGLConfig = {}
@@ -77,11 +80,16 @@ export class WebGL {
 
     this.viewport.on(ViewportEvent.RESIZE, () => this.recalc());
     this.viewport.attach();
+
+    this.startTime = Ticker.now();
+
     this.ticker.add((delta, time) => {
+      const relTime = time - this.pauseTime - this.startTime;
+
       if ( ! this.paused) {
-        this.render(time);
+        this.render(relTime);
       } else {
-        this.lastTime = time;
+        this.lastTime = relTime;
       }
     });
   }
@@ -151,6 +159,13 @@ export class WebGL {
 
   public pause(paused = true) {
     this.paused = paused;
+
+    if (paused) {
+      this.pauseStart = Ticker.now();
+    } else if (this.pauseStart > 0) {
+      this.pauseTime += Ticker.now() - this.pauseStart;
+      this.pauseStart = 0;
+    }
   }
 
   public add(...meshes: GLMesh[]) {
