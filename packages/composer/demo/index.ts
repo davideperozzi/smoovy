@@ -49,6 +49,9 @@ class SampleComponent {
   @service(SampleService, true)
   protected sample!: string;
 
+  @service(SampleService)
+  protected sampleService!: SampleService;
+
   @composer()
   protected composer!: Composer;
 
@@ -77,6 +80,10 @@ class SampleComponent {
     console.log('active:', this.active);
     console.log('test:', this.test);
     // console.log(this.uniq, this.selectMe);
+  }
+
+  onListen() {
+    console.log('activated:', this.sampleService.activated);
   }
 }
 

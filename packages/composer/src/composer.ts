@@ -92,6 +92,10 @@ export class Composer {
       }
 
       for (let i = 0, len = services.length; i < len; i++) {
+        services[i].activate();
+      }
+
+      for (let i = 0, len = services.length; i < len; i++) {
         await injectInstances(
           serviceInjector,
           services[i],
@@ -99,10 +103,6 @@ export class Composer {
           true,
           this.voidService
         );
-      }
-
-      for (let i = 0, len = services.length; i < len; i++) {
-        services[i].activate();
       }
 
       for (let i = 0, len = services.length; i < len; i++) {

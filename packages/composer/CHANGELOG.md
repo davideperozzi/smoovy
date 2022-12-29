@@ -1,5 +1,11 @@
 # @smoovy/composer
 
+## 1.0.7
+
+### Patch Changes
+
+- composer: fixed service activation sync issue
+
 ## 1.0.6
 
 ### Patch Changes
