@@ -47,13 +47,13 @@ export enum WebGLEvent {
 }
 
 export class WebGL extends EventEmitter {
+  public ticking = true;
   protected meshes: GLMesh[] = [];
   protected viewport: Viewport;
   protected observable: Observable<Window>;
   protected ticker: Ticker;
   private unlistenResize?: Unlisten;
   private paused = false;
-  private lastTime = 0;
   private startTime = 0;
   private pauseTime = 0;
   private pauseStart = 0;
@@ -91,7 +91,11 @@ export class WebGL extends EventEmitter {
 
     this.startTime = Ticker.now();
 
-    this.ticker.add((delta, time) => this.render(time));
+    this.ticker.add((delta, time) => {
+      if (this.ticking) {
+        this.render(time);
+      }
+    });
   }
 
   destroy() {
@@ -194,8 +198,6 @@ export class WebGL extends EventEmitter {
     const time = now - this.pauseTime - this.startTime;
 
     if (this.paused) {
-      this.lastTime = time;
-
       return;
     }
 
@@ -213,8 +215,6 @@ export class WebGL extends EventEmitter {
 
       this.emit(WebGLEvent.AFTER_RENDER, time);
     }
-
-    this.lastTime = time;
   }
 
   private createMesh<T, C>(Clazz: any, config: C, cb?: (mesh: T) => void): T {

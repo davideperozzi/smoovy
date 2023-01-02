@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.0.6
+
+### Patch Changes
+
+- webgl: added ticking flag for render bypass
+
 ## 1.0.5
 
 ### Patch Changes
