@@ -1,3 +1,4 @@
+import { EventEmitter } from '@smoovy/emitter';
 import { Unlisten } from '@smoovy/listener';
 import { Observable, observe } from '@smoovy/observer';
 import { Ticker } from '@smoovy/ticker';
@@ -40,7 +41,12 @@ export interface WebGLConfig extends Partial<ViewportConfig> {
   fullscreen?: boolean;
 }
 
-export class WebGL {
+export enum WebGLEvents {
+  BEFORE_RENDER = 'beforerender',
+  AFTER_RENDER = 'afterrender'
+}
+
+export class WebGL extends EventEmitter {
   protected meshes: GLMesh[] = [];
   protected viewport: Viewport;
   protected observable: Observable<Window>;
@@ -52,9 +58,11 @@ export class WebGL {
   private pauseTime = 0;
   private pauseStart = 0;
 
-  public constructor(
+  constructor(
     protected config: WebGLConfig = {}
   ) {
+    super();
+
     this.ticker = config.ticker || new Ticker();
     this.viewport = new Viewport(this.initCanvas(config.canvas), config);
     this.observable = observe(window);
@@ -64,7 +72,7 @@ export class WebGL {
     }
   }
 
-  public create() {
+  create() {
     if (this.config.fullscreen !== false) {
       const style = this.viewport.element.style;
 
@@ -94,7 +102,7 @@ export class WebGL {
     });
   }
 
-  public destroy() {
+  destroy() {
     if (this.unlistenResize) {
       this.unlistenResize();
       delete this.unlistenResize;
@@ -119,45 +127,45 @@ export class WebGL {
     return newCanvas;
   }
 
-  public get vp() {
+  get vp() {
     return this.viewport;
   }
 
-  public get gl() {
+  get gl() {
     return this.viewport.gl;
   }
 
-  public setSize(width: number, height: number) {
+  setSize(width: number, height: number) {
     this.viewport.setSize(width, height);
   }
 
-  public clipSpaceX(x: number) {
+  clipSpaceX(x: number) {
     return this.viewport.getClipSpaceX(x);
   }
 
-  public clipSpaceY(y: number) {
+  clipSpaceY(y: number) {
     return this.viewport.getClipSpaceY(y);
   }
 
-  public clipSpaceW(width: number) {
+  clipSpaceW(width: number) {
     return this.viewport.getClipSpaceWidth(width);
   }
 
-  public clipSpaceH(height: number) {
+  clipSpaceH(height: number) {
     return this.viewport.getClipSpaceHeight(height);
   }
 
-  public scrollTo(pos: Partial<Coordinate>) {
+  scrollTo(pos: Partial<Coordinate>) {
     this.viewport.scrollTo(pos);
   }
 
-  public recalc() {
+  recalc() {
     for (let i = 0, len = this.meshes.length; i < len; i++) {
       this.meshes[i].recalc();
     }
   }
 
-  public pause(paused = true) {
+  pause(paused = true) {
     this.paused = paused;
 
     if (paused) {
@@ -168,13 +176,13 @@ export class WebGL {
     }
   }
 
-  public add(...meshes: GLMesh[]) {
+  add(...meshes: GLMesh[]) {
     meshes.forEach(mesh => this.meshes.push(mesh.create()));
 
     return this;
   }
 
-  public remove(mesh: GLMesh) {
+  remove(mesh: GLMesh) {
     const index = this.meshes.indexOf(mesh);
 
     if (index > -1) {
@@ -184,10 +192,12 @@ export class WebGL {
     return this;
   }
 
-  public render(time?: number) {
+  render(time?: number) {
     this.meshes = this.meshes.sort((a, b) => b.model[14] - a.model[14]);
 
     const enabledMeshes = this.meshes.filter(mesh => !mesh.disabled);
+
+    this.emit(WebGLEvents.BEFORE_RENDER, time);
 
     if (enabledMeshes.length > 0) {
       this.viewport.render();
@@ -197,7 +207,10 @@ export class WebGL {
       }
     }
 
+    this.emit(WebGLEvents.AFTER_RENDER, time);
+
     this.lastTime = time ?? this.lastTime;
+
   }
 
   private createMesh<T, C>(Clazz: any, config: C, cb?: (mesh: T) => void): T {
@@ -212,15 +225,15 @@ export class WebGL {
     return mesh;
   }
 
-  public plane(config: GLPlaneConfig, cb?: (plane: GLPlane) => void) {
+  plane(config: GLPlaneConfig, cb?: (plane: GLPlane) => void) {
     return this.createMesh(GLPlane, config, cb);
   }
 
-  public video(config: GLVideoConfig, cb?: (video: GLVideo) => void) {
+  video(config: GLVideoConfig, cb?: (video: GLVideo) => void) {
     return this.createMesh(GLVideo, config, cb);
   }
 
-  public image(config: GLImageConfig, cb?: (image: GLImage) => void) {
+  image(config: GLImageConfig, cb?: (image: GLImage) => void) {
     return this.createMesh(GLImage, config, cb);
   }
 }
