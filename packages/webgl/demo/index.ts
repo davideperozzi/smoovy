@@ -9,10 +9,25 @@ function updateScroll() {
 window.addEventListener('scroll', updateScroll);
 setTimeout(() => updateScroll());
 
-setTimeout(() => webgl.pause(), 500);
-setTimeout(() => webgl.pause(false), 1000);
-setTimeout(() => webgl.pause(), 1500);
-setTimeout(() => webgl.pause(false), 2000);
+const pauseCheck = () => {
+  setTimeout(() => {
+    for (let i = 0; i < 500; i++) {
+      requestAnimationFrame(() => webgl.pause(true));
+      // webgl.render();
+    }
+  }, 500);
+  setTimeout(() => {
+    for (let i = 0; i < 500; i++) {
+      requestAnimationFrame(() => webgl.pause(false));
+      // webgl.render();
+    }
+  }, 1000);
+  // setTimeout(() => webgl.pause(true), 1500);
+  // setTimeout(() => webgl.pause(false), 2000);
+}
+
+pauseCheck();
+setInterval(pauseCheck, 2000);
 
 webgl.plane({
   element: document.querySelector('#box') as HTMLElement,

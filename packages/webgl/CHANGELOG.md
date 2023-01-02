@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.0.5
+
+### Patch Changes
+
+- webgl: fixed rendering time issue
+
 ## 1.0.4
 
 ### Patch Changes

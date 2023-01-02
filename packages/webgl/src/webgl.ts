@@ -41,7 +41,7 @@ export interface WebGLConfig extends Partial<ViewportConfig> {
   fullscreen?: boolean;
 }
 
-export enum WebGLEvents {
+export enum WebGLEvent {
   BEFORE_RENDER = 'beforerender',
   AFTER_RENDER = 'afterrender'
 }
@@ -91,15 +91,7 @@ export class WebGL extends EventEmitter {
 
     this.startTime = Ticker.now();
 
-    this.ticker.add((delta, time) => {
-      const relTime = time - this.pauseTime - this.startTime;
-
-      if ( ! this.paused) {
-        this.render(relTime);
-      } else {
-        this.lastTime = relTime;
-      }
-    });
+    this.ticker.add((delta, time) => this.render(time));
   }
 
   destroy() {
@@ -165,14 +157,20 @@ export class WebGL extends EventEmitter {
     }
   }
 
-  pause(paused = true) {
+  pause(paused = true, track = true) {
+    if (paused === this.paused) {
+      return;
+    }
+
     this.paused = paused;
 
-    if (paused) {
-      this.pauseStart = Ticker.now();
-    } else if (this.pauseStart > 0) {
-      this.pauseTime += Ticker.now() - this.pauseStart;
-      this.pauseStart = 0;
+    if (track) {
+      if (paused) {
+        this.pauseStart = Ticker.now();
+      } else if (this.pauseStart > 0) {
+        this.pauseTime += Ticker.now() - this.pauseStart;
+        this.pauseStart = 0;
+      }
     }
   }
 
@@ -192,25 +190,31 @@ export class WebGL extends EventEmitter {
     return this;
   }
 
-  render(time?: number) {
+  render(now = Ticker.now()) {
+    const time = now - this.pauseTime - this.startTime;
+
+    if (this.paused) {
+      this.lastTime = time;
+
+      return;
+    }
+
     this.meshes = this.meshes.sort((a, b) => b.model[14] - a.model[14]);
 
     const enabledMeshes = this.meshes.filter(mesh => !mesh.disabled);
 
-    this.emit(WebGLEvents.BEFORE_RENDER, time);
-
     if (enabledMeshes.length > 0) {
+      this.emit(WebGLEvent.BEFORE_RENDER, time);
       this.viewport.render();
 
       for (let i = 0, len = enabledMeshes.length; i < len; i++) {
-        enabledMeshes[i].render(time ?? this.lastTime);
+        enabledMeshes[i].render(time);
       }
+
+      this.emit(WebGLEvent.AFTER_RENDER, time);
     }
 
-    this.emit(WebGLEvents.AFTER_RENDER, time);
-
-    this.lastTime = time ?? this.lastTime;
-
+    this.lastTime = time;
   }
 
   private createMesh<T, C>(Clazz: any, config: C, cb?: (mesh: T) => void): T {
