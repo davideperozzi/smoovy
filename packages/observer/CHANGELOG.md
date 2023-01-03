@@ -1,5 +1,11 @@
 # @smoovy/observer
 
+## 1.0.3
+
+### Patch Changes
+
+- observer: added update periods
+
 ## 1.0.2
 
 ### Patch Changes

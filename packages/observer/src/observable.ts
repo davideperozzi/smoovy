@@ -64,6 +64,26 @@ export interface ObservableConfig<
    * Default = 0
    */
   resizeDebounce?: number;
+
+  /**
+   * The initial update periods are executed on creation. This ensures that
+   * after that element has been rendered minor chnages to the layout
+   * and position of the obserable will be taken into account. This is only
+   * being used if `autoAttach` is `true`
+   *
+   * Default = [50, 250, 500, 1000]
+   */
+  initUpdatePeriods?: number[];
+
+  /**
+   * Update periods after the window triggered a resize. Since sometimes
+   * the size of a observable depends on each other, this ensures that
+   * the size is forced to a stable state in conjuction to all observables
+   * updating on resize.
+   *
+   * Default = [250, 500];
+   */
+  resizePeriods?: number[];
 }
 
 export enum ObservableEventType {
@@ -122,7 +142,12 @@ export class Observable<
     super();
 
     if (config.autoAttach !== false) {
+      const periods = config.initUpdatePeriods !== undefined
+        ? config.initUpdatePeriods
+        : [50, 250, 500, 1000];
+
       this.attach();
+      periods.forEach(ms => setTimeout(() => this.update(), ms));
     }
   }
 
@@ -262,7 +287,17 @@ export class Observable<
                 const observable = observables[i];
 
                 if (observable?.resizeDetection) {
-                  requestAnimationFrame(() => observable.update());
+                  const periods = typeof this.config.resizePeriods !== undefined
+                    ? [250, 500]
+                    : this.config.resizePeriods;
+
+                  if (Array.isArray(periods)) {
+                    periods.forEach(ms => {
+                      setTimeout(() => observable.update(), ms);
+                    });
+                  } else {
+                    requestAnimationFrame(() => observable.update());
+                  }
                 }
               }
             })
