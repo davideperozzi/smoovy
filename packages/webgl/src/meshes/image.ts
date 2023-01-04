@@ -3,7 +3,7 @@ import { Resolver } from '@smoovy/utils';
 
 import { TextureAttrBuffer } from '../buffers';
 import { Program } from '../program';
-import { segmentateSquare, SegmentMode } from '../utils/raster';
+import { triangulate } from '../utils/raster';
 import { Viewport } from '../viewport';
 import { GLPlane, GLPlaneConfig } from './plane';
 
@@ -21,6 +21,8 @@ export interface GLImageConfig extends GLPlaneConfig {
 export enum GLImageEvent {
   LOADEND = 'loadend'
 }
+
+const uvSize = { width: 1, height: 1 };
 
 export class GLImage extends GLPlane {
   private texture!: WebGLTexture | null;
@@ -88,6 +90,7 @@ export class GLImage extends GLPlane {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
       gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -141,14 +144,7 @@ export class GLImage extends GLPlane {
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
-      this.buffers.texCoord.update(
-        segmentateSquare(
-          this.segments,
-          { width: 1, height: 1 },
-          { x: 0, y: 0 },
-          SegmentMode.TEXTURE
-        )
-      );
+      this.buffers.texCoord.update(triangulate(this.segments, uvSize));
     }
   }
 

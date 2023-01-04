@@ -1,40 +1,33 @@
 import { Coordinate, Size } from '@smoovy/utils';
 
-export enum SegmentMode {
-  VERTEX = 1,
-  TEXTURE = 2
-}
-
-export function segmentateSquare(
+export function triangulate(
   amount: Coordinate,
   size: Size,
-  pos: Coordinate = { x: 0, y: 0 },
-  mode: SegmentMode = SegmentMode.VERTEX
+  posX = 0,
+  posY = 0
 ) {
-  const sW = amount.x;
-  const sH = amount.y;
-  const tW = size.width / sW;
-  const tH = size.height / sH;
-  const nH = mode === SegmentMode.TEXTURE ? tH : -tH;
-  const points: number[] = [];
+  const sX = size.width / amount.x;
+  const sY = size.height / amount.y;
+  const vertices: number[] = [];
 
-  for (let iY = 0; iY < sH; iY++) {
-    const nY = pos.y + (mode === SegmentMode.TEXTURE ? (iY * tH) : (-iY * tH));
+  for (let iY = 0; iY < amount.y; iY++) {
+    const y = posY + sY * iY;
 
-    for (let iX = 0; iX < sW; iX++) {
-      const nX = pos.x + iX * tW;
+    for (let iX = 0; iX < amount.x; iX++) {
+      const x = posX + sX * iX;
 
-      points.push(...[
-        nX,      nY + nH,
-        nX,      nY,
-        nX + tW, nY + nH,
-
-        nX + tW, nY + nH,
-        nX,      nY,
-        nX + tW, nY
-      ]);
+      vertices.push(
+        // top-left triangle
+        x,       y + sY, // top-left corner     = 0, 1
+        x,       y,      // bottom-left corner  = 0, 0
+        x + sX,  y + sY, // top-right corner    = 1, 1
+        // bottom-right triangle
+        x + sX,  y,      // bottom-right corner = 1, 0
+        x + sX,  y + sY, // top-right corner    = 1, 1
+        x,       y,      // bottom-left corner  = 0, 0
+      );
     }
   }
 
-  return points;
+  return vertices;
 }

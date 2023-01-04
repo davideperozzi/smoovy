@@ -1,9 +1,9 @@
 import { EventEmitter } from '@smoovy/emitter';
 
+import { Buffer } from './buffers';
 import { Program, Uniform, UniformType } from './program';
 import { mat4 } from './utils/math';
 import { Viewport } from './viewport';
-import { Buffer } from './buffers';
 
 export enum GLMeshDrawMode {
   POINTS = 0,

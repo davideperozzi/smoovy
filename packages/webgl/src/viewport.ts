@@ -129,12 +129,9 @@ export class Viewport extends EventEmitter {
     const color = this.config.color || [0, 0, 0];
     const alpha = this.config.alpha;
 
-    this.gl.enable(this.gl.CULL_FACE);
-    this.gl.cullFace(this.gl.FRONT);
-
     this.gl.enable(this.gl.BLEND);
+    this.gl.enable(this.gl.CULL_FACE);
     this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-
     this.gl.clearColor(color[0], color[1], color[2], alpha ? 0 : 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
   }

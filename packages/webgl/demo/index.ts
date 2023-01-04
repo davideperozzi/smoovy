@@ -1,4 +1,5 @@
 import { WebGL } from '../src';
+import { mat4tv } from '../src/utils/math';
 
 const webgl = new WebGL();
 
@@ -26,13 +27,12 @@ const pauseCheck = () => {
   // setTimeout(() => webgl.pause(false), 2000);
 }
 
-pauseCheck();
-setInterval(pauseCheck, 2000);
+// pauseCheck();
+// setInterval(pauseCheck, 2000);
 
 webgl.plane({
   element: document.querySelector('#box') as HTMLElement,
-  segments: 50,
-  vertex: `
+  vertex: /* glsl */`
     precision mediump float;
 
     attribute vec4 vertCoord;
@@ -47,13 +47,13 @@ webgl.plane({
     void main() {
       vCoord = vertCoord;
 
-      vCoord.z = sin(vertCoord.x + vertCoord.y + time);
+      // vCoord.z = sin(vertCoord.x + vertCoord.y + time) * .5;
 
       gl_Position = projectionMatrix * modelViewMatrix * vCoord;
     }
 
   `,
-  fragment: `
+  fragment: /* glsl */`
     precision mediump float;
 
     varying vec4 vCoord;
@@ -67,7 +67,7 @@ webgl.plane({
       vec4 coords = vCoord;
       vec4 color = vec4(5.0 / 255.0, 28.0 / 255.0, 44.0 / 255.0, 1.0);
 
-      color.a = vCoord.z;
+      // color.a = vCoord.z;
 
       gl_FragColor = color;
     }
@@ -79,4 +79,26 @@ webgl.plane({
 const image = webgl.image({
   source: 'https://i.imgur.com/fHyEMsl.jpg',
   element: document.querySelector('#test-attach') as HTMLElement,
+  fragment: /* glsl */`
+    precision mediump float;
+
+    uniform sampler2D image;
+    uniform float time;
+
+    varying vec2 vTexCoord;
+
+    void main() {
+      vec4 color = texture2D(image, vTexCoord);
+      color.a = 0.3;
+      gl_FragColor = color;
+    }
+  `
 });
+
+
+const background = webgl.plane({
+  element: document.body
+}, (plane) => {
+  plane.uniform('color', [133, 13, 30]);
+});
+mat4tv(background.model, { z: 0.01 });

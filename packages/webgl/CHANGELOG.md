@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.0.7
+
+### Patch Changes
+
+- webgl: improved triangulation
+
 ## 1.0.6
 
 ### Patch Changes

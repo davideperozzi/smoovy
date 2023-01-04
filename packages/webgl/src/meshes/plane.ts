@@ -6,7 +6,7 @@ import { VertexAttrBuffer } from '../buffers';
 import { GLMesh, GLMeshConfig } from '../mesh';
 import { Program } from '../program';
 import { mat4gs, mat4s, mat4ta } from '../utils/math';
-import { segmentateSquare } from '../utils/raster';
+import { triangulate } from '../utils/raster';
 import { Viewport } from '../viewport';
 
 export interface GLPlaneConfig extends GLMeshConfig {
@@ -177,6 +177,13 @@ export class GLPlane extends GLMesh {
     return this.config.height || 0;
   }
 
+  public get clipSize() {
+    return this.viewport.getClipsSpaceSize(
+      this.config.width || 0,
+      this.config.height || 0
+    );
+  }
+
   public get scaling() {
     const [ x, y ] = mat4gs(this.model);
 
@@ -225,7 +232,7 @@ export class GLPlane extends GLMesh {
       return this.config.segments;
     }
 
-    return { x: 5, y: 5 };
+    return { x: 2, y: 2 };
   }
 
   public recalc() {
@@ -235,20 +242,14 @@ export class GLPlane extends GLMesh {
       this.setSize(this.observable.size);
       this.translate(this.observable.coord);
     } else {
-      this.translate({
-        x: this.config.x || 0,
-        y: this.config.y || 0
-      });
+      this.translate({ x: this.config.x || 0, y: this.config.y || 0 });
     }
 
-    this.buffers.vertCoord.update(
-      segmentateSquare(
-        this.segments,
-        this.viewport.getClipsSpaceSize(
-          this.config.width || 0,
-          this.config.height || 0
-        )
-      )
+    const size = this.clipSize;
+    const buffer = this.buffers.vertCoord;
+
+    buffer.update(
+      triangulate(this.segments, size, 0, -size.height)
     );
   }
 }
