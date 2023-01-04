@@ -142,12 +142,7 @@ export class Observable<
     super();
 
     if (config.autoAttach !== false) {
-      const periods = config.initUpdatePeriods !== undefined
-        ? config.initUpdatePeriods
-        : [50, 250, 500, 1000];
-
       this.attach();
-      periods.forEach(ms => setTimeout(() => this.update(), ms));
     }
   }
 
@@ -291,12 +286,12 @@ export class Observable<
                     ? [250, 500]
                     : this.config.resizePeriods;
 
+                  requestAnimationFrame(() => observable.update());
+
                   if (Array.isArray(periods)) {
                     periods.forEach(ms => {
                       setTimeout(() => observable.update(), ms);
                     });
-                  } else {
-                    requestAnimationFrame(() => observable.update());
                   }
                 }
               }
@@ -315,7 +310,12 @@ export class Observable<
       }
     }
 
+    const periods = config.initUpdatePeriods !== undefined
+        ? config.initUpdatePeriods
+        : [50, 250, 500, 1000];
+
     requestAnimationFrame(() => this.update());
+    periods.forEach(ms => setTimeout(() => this.update(), ms));
   }
 
   onDimChange(listener: ObservableChangeListener) {
