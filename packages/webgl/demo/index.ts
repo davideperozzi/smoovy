@@ -1,4 +1,4 @@
-import { WebGL } from '../src';
+import { GLImage, WebGL } from '../src';
 import { mat4tv } from '../src/utils/math';
 
 const webgl = new WebGL();
@@ -75,6 +75,8 @@ webgl.plane({
 }, (plane) => {
   plane.uniform('color', [ 133, 7, 0 ]);
 });
+
+GLImage.preload(webgl.gl, 'https://i.imgur.com/fHyEMsl.jpg');
 
 const image = webgl.image({
   source: 'https://i.imgur.com/fHyEMsl.jpg',

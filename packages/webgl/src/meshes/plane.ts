@@ -114,9 +114,16 @@ export class GLPlane extends GLMesh {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected visibilityChanged(visible: boolean) {}
+
   private checkVisibility() {
-    if (this.observable && this.config.elementCulling !== false) {
-      this.disabled = !this.observable.visible;
+    if (this.observable) {
+      if (this.config.elementCulling !== false) {
+        this.disabled = !this.observable.visible;
+      }
+
+      this.visibilityChanged(this.observable.visible);
     }
   }
 
@@ -133,7 +140,7 @@ export class GLPlane extends GLMesh {
     }
   }
 
-  public element(element: HTMLElement) {
+  public setElement(element: HTMLElement) {
     this.config.element = element;
   }
 
@@ -195,6 +202,10 @@ export class GLPlane extends GLMesh {
       x: this.config.x,
       y: this.config.y
     };
+  }
+
+  public get element() {
+    return this.config.element;
   }
 
   public scale(x: number, y: number) {

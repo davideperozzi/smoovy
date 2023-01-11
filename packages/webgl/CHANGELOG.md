@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.0
+
+### Minor Changes
+
+- webgl: addd image preload functionality
+
 ## 1.0.7
 
 ### Patch Changes
