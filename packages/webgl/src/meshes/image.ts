@@ -121,7 +121,6 @@ export class GLImage extends GLPlane {
     image: HTMLImageElement,
     tex?: WebGLTexture
   ) {
-    console.log('create', image.src);
     const texture = tex || gl.createTexture();
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -149,7 +148,6 @@ export class GLImage extends GLPlane {
       }
     });
 
-    console.log('remove', removes);
     removes.forEach(src => GLImage.cache.delete(src));
   }
 
@@ -184,7 +182,9 @@ export class GLImage extends GLPlane {
     this.setSize(this.imageSize);
   }
 
-  public load() {
+  public async load() {
+    await this.created.promise;
+
     if (GLImage.cache.has(this.config.source)) {
       const cache = GLImage.cache.get(this.config.source);
 

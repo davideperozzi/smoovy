@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.2
+
+### Patch Changes
+
+- webgl: image waits for creation before loading
+
 ## 1.1.1
 
 ### Patch Changes

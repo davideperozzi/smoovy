@@ -1,4 +1,5 @@
 import { EventEmitter } from '@smoovy/emitter';
+import { Resolver } from '@smoovy/utils';
 
 import { Buffer } from './buffers';
 import { Program, Uniform, UniformType } from './program';
@@ -27,6 +28,7 @@ export interface GLMeshConfig {
 export class GLMesh extends EventEmitter {
   private animating = false;
   public disabled = false;
+  protected created = new Resolver();
   protected program!: Program;
   protected _buffers: { [name: string]: Buffer } = {};
   protected _uniforms: { [name: string]: Uniform } = {};
@@ -127,6 +129,7 @@ export class GLMesh extends EventEmitter {
 
     this.recalc();
     this.onCreate();
+    this.created.resolve();
 
     this.animating = true;
 
