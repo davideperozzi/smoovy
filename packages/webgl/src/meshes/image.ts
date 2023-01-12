@@ -8,6 +8,9 @@ import { Viewport } from '../viewport';
 import { GLPlane, GLPlaneConfig } from './plane';
 
 export interface GLImageConfig extends GLPlaneConfig {
+  /**
+   * The source to the image as a string. This can be an external url as well
+   */
   source: string;
 
   /**
@@ -24,6 +27,14 @@ export interface GLImageConfig extends GLPlaneConfig {
    * Default = true
    */
   visibleLoad?: boolean;
+
+  /**
+   * Whether to unload the texture and remove it from the cache when the image
+   * has been destroyed.
+   *
+   * Default = false
+   */
+  unloadTexture?: boolean;
 }
 
 export enum GLImageEvent {
@@ -110,6 +121,7 @@ export class GLImage extends GLPlane {
     image: HTMLImageElement,
     tex?: WebGLTexture
   ) {
+    console.log('create', image.src);
     const texture = tex || gl.createTexture();
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -121,6 +133,24 @@ export class GLImage extends GLPlane {
     gl.bindTexture(gl.TEXTURE_2D, null);
 
     return texture;
+  }
+
+  private static unloadTexture(
+    gl: WebGLRenderingContext,
+    tex: WebGLTexture
+  ) {
+    const removes: string[] = [];
+
+    gl.deleteTexture(tex);
+
+    GLImage.cache.forEach(({ texture  }, src) => {
+      if (texture === tex) {
+        removes.push(src);
+      }
+    });
+
+    console.log('remove', removes);
+    removes.forEach(src => GLImage.cache.delete(src));
   }
 
   protected visibilityChanged(visible: boolean) {
@@ -148,6 +178,12 @@ export class GLImage extends GLPlane {
     return this.loadResolver.completed;
   }
 
+  private loadEnd() {
+    this.emit(GLImageEvent.LOADEND);
+    this.loadResolver.resolve();
+    this.setSize(this.imageSize);
+  }
+
   public load() {
     if (GLImage.cache.has(this.config.source)) {
       const cache = GLImage.cache.get(this.config.source);
@@ -156,8 +192,8 @@ export class GLImage extends GLPlane {
         this.texture = cache.texture;
         this.image = cache.image;
 
-        this.emit(GLImageEvent.LOADEND);
-        this.loadResolver.resolve();
+        this.loadEnd();
+        this.recalc();
       }
     } else {
       if ( ! this.imageLoading && ! this.loadResolver.completed) {
@@ -165,9 +201,7 @@ export class GLImage extends GLPlane {
         this.image.crossOrigin = 'anonymous';
 
         listen(this.image, 'load', () => {
-          this.emit(GLImageEvent.LOADEND);
-          this.loadResolver.resolve();
-          this.setSize(this.imageSize);
+          this.loadEnd();
 
           if (this.texture) {
             GLImage.loadTexture(this.viewport.gl, this.image, this.texture);
@@ -175,6 +209,7 @@ export class GLImage extends GLPlane {
               image: this.image,
               texture: this.texture
             });
+
             this.recalc();
           }
         });
@@ -186,24 +221,24 @@ export class GLImage extends GLPlane {
     return this.loadResolver.promise;
   }
 
-  protected beforeDraw() {
-    if (this.texture) {
-      const gl = this.viewport.gl;
+  protected bindTexture() {
+    const gl = this.viewport.gl;
 
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    }
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+  }
+
+  protected beforeDraw() {
+    super.beforeDraw();
+
+    this.bindTexture();
   }
 
   public recalc() {
     super.recalc();
 
     if (this.texture) {
-      const gl = this.viewport.gl;
-
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.texture);
-
+      this.bindTexture();
       this.buffers.texCoord.update(triangulate(this.segments, uvSize));
     }
   }
@@ -215,10 +250,10 @@ export class GLImage extends GLPlane {
   }
 
   public onDestroy() {
-    super.onCreate();
+    super.onDestroy();
 
-    if (this.texture) {
-      this.viewport.gl.deleteTexture(this.texture);
+    if (this.texture && this.config.unloadTexture === true) {
+      GLImage.unloadTexture(this.viewport.gl, this.texture);
     }
   }
 }

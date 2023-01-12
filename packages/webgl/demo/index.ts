@@ -76,27 +76,21 @@ webgl.plane({
   plane.uniform('color', [ 133, 7, 0 ]);
 });
 
-GLImage.preload(webgl.gl, 'https://i.imgur.com/fHyEMsl.jpg');
+// GLImage.preload(webgl.gl, 'https://i.imgur.com/fHyEMsl.jpg');
 
-const image = webgl.image({
+const createImage = () => webgl.image({
   source: 'https://i.imgur.com/fHyEMsl.jpg',
-  element: document.querySelector('#test-attach') as HTMLElement,
-  fragment: /* glsl */`
-    precision mediump float;
+  element: document.querySelector('#test-attach') as HTMLElement
+})
 
-    uniform sampler2D image;
-    uniform float time;
+const image = createImage();
 
-    varying vec2 vTexCoord;
+setTimeout(() => webgl.remove(image), 1000);
+setTimeout(() => {
+  const image = createImage();
 
-    void main() {
-      vec4 color = texture2D(image, vTexCoord);
-      color.a = 0.3;
-      gl_FragColor = color;
-    }
-  `
-});
-
+  setTimeout(() => webgl.remove(image), 1000);
+}, 2000);
 
 const background = webgl.plane({
   element: document.body

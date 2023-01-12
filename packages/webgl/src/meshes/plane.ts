@@ -10,13 +10,30 @@ import { triangulate } from '../utils/raster';
 import { Viewport } from '../viewport';
 
 export interface GLPlaneConfig extends GLMeshConfig {
+  /**
+   * The x position in pixels not in clip space points
+   */
   x?: number;
+
+  /**
+   * The y position in pixels not in clip space points
+   */
   y?: number;
+
+  /**
+   * The width in pixels not in clip space size
+   */
   width?: number;
+
+  /**
+   * The height in pixels not in clip space size
+   */
   height?: number;
 
   /**
    * The number of segments to use for rasterization of the mesh
+   *
+   * Default = { x: 5, y: 5 }
    */
   segments?: Coordinate | number;
 
@@ -111,6 +128,7 @@ export class GLPlane extends GLMesh {
       );
 
       setTimeout(() => this.checkVisibility());
+      setTimeout(() => this.checkVisibility(), 100);
     }
   }
 

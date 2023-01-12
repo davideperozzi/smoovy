@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.1
+
+### Patch Changes
+
+- webgl: added image unloadTexture option
+
 ## 1.1.0
 
 ### Minor Changes
