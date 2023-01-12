@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.3
+
+### Patch Changes
+
+- webgl: added texture cache persistence option
+
 ## 1.1.2
 
 ### Patch Changes

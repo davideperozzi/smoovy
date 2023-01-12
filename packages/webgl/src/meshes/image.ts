@@ -43,8 +43,14 @@ export enum GLImageEvent {
 
 const uvSize = { width: 1, height: 1 };
 
+export interface GLImageCacheItem {
+  texture: WebGLTexture;
+  image: HTMLImageElement;
+  keep?: boolean;
+}
+
 export class GLImage extends GLPlane {
-  private static cache = new Map<string, { texture: WebGLTexture, image: HTMLImageElement }>();
+  private static cache = new Map<string, GLImageCacheItem>();
   private texture!: WebGLTexture | null;
   private image: HTMLImageElement;
   private loadResolver = new Resolver();
@@ -96,7 +102,11 @@ export class GLImage extends GLPlane {
     }
   }
 
-  public static async preload(gl: WebGLRenderingContext, src: string) {
+  public static async preload(
+    gl: WebGLRenderingContext,
+    src: string,
+    keep = false
+  ) {
     const image = new Image();
 
     image.crossOrigin = 'anonymous';
@@ -108,7 +118,7 @@ export class GLImage extends GLPlane {
         const texture = GLImage.loadTexture(gl, image);
 
         if (texture) {
-          this.cache.set(src, { texture, image });
+          this.cache.set(src, { texture, image, keep });
         }
 
         resolve(image);
@@ -140,15 +150,20 @@ export class GLImage extends GLPlane {
   ) {
     const removes: string[] = [];
 
-    gl.deleteTexture(tex);
-
-    GLImage.cache.forEach(({ texture  }, src) => {
-      if (texture === tex) {
+    GLImage.cache.forEach(({ texture, keep }, src) => {
+      if (texture === tex && ! keep) {
         removes.push(src);
       }
     });
 
     removes.forEach(src => GLImage.cache.delete(src));
+
+    const items = Array.from(GLImage.cache.values());
+    const remaining = items.filter(({ texture }) => tex === texture);
+
+    if (remaining.length === 0) {
+      gl.deleteTexture(tex);
+    }
   }
 
   protected visibilityChanged(visible: boolean) {
@@ -184,6 +199,10 @@ export class GLImage extends GLPlane {
 
   public async load() {
     await this.created.promise;
+
+    if (this.loadResolver.completed) {
+      return this.loadResolver.promise;
+    }
 
     if (GLImage.cache.has(this.config.source)) {
       const cache = GLImage.cache.get(this.config.source);

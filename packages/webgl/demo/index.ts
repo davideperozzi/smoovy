@@ -76,12 +76,13 @@ webgl.plane({
   plane.uniform('color', [ 133, 7, 0 ]);
 });
 
-// GLImage.preload(webgl.gl, 'https://i.imgur.com/fHyEMsl.jpg');
+GLImage.preload(webgl.gl, 'https://i.imgur.com/fHyEMsl.jpg', true);
 
 const createImage = () => webgl.image({
+  unloadTexture: true,
   source: 'https://i.imgur.com/fHyEMsl.jpg',
   element: document.querySelector('#test-attach') as HTMLElement
-})
+});
 
 const image = createImage();
 
