@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.4
+
+### Patch Changes
+
+- webgl: fixed viewport resize detection
+
 ## 1.1.3
 
 ### Patch Changes

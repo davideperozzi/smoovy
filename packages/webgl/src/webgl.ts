@@ -65,7 +65,7 @@ export class WebGL extends EventEmitter {
 
     this.ticker = config.ticker || new Ticker();
     this.viewport = new Viewport(this.initCanvas(config.canvas), config);
-    this.observable = observe(window);
+    this.observable = observe(window, { resizeDetection: true });
 
     if (config.autoCreate !== false) {
       this.create();
