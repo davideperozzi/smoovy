@@ -86,15 +86,17 @@ export class Parallax {
   protected target?: Observable<HTMLElement>;
   protected parent?: Observable<HTMLElement>;
   protected state = createState();
-  protected resolvers: Coordinate<ParallaxResolver> = {
-    x: new ParallaxResolver(this.config),
-    y: new ParallaxResolver(this.config)
-  };
+  protected resolvers: Coordinate<ParallaxResolver>;
 
   constructor(
     protected config: ParallaxConfig
   ) {
     const entries = Parallax.registry.get(this.context);
+
+    this.resolvers = {
+      x: new ParallaxResolver(config),
+      y: new ParallaxResolver(config)
+    };
 
     if (entries) {
       entries.push(this);
@@ -208,11 +210,9 @@ export class Parallax {
     const maskingTarget = this.parent || this.target;
     const elementConfig = this.config.element as ParallaxElementConfig;
     const visible = config.masking ? maskingTarget.visible : (
-      between(state.shiftY, state.startY, state.endY) ||
-      between(state.shiftX, state.startX, state.endX)
+      between(state.shiftY, state.startY, state.endY, true) ||
+      between(state.shiftX, state.startX, state.endX, true)
     );
-
-    // console.log(state.shiftY, state.startY, state.endY);
 
     if ((config.culling !== false && visible) || config.culling === false) {
       let transform = '';

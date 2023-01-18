@@ -1,5 +1,11 @@
 # @smoovy/parallax
 
+## 1.0.3
+
+### Patch Changes
+
+- parallax: optimized shift start and end calculation
+
 ## 1.0.2
 
 ### Patch Changes

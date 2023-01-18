@@ -2,7 +2,7 @@ import { queryEl } from '@smoovy/utils';
 import { Parallax, parallax } from '../src';
 
 parallax({
-  speed: { y: 0.3 },
+  speed: { y: .2 },
   element: {
     target: queryEl('.box0'),
   },

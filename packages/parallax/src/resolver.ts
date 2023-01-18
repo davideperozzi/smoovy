@@ -59,7 +59,9 @@ export class ParallaxResolver {
     } else if (this.isEntry()) {
       return this.midView - this.mid - this.state.pos;
     } else if (this.isOutro()) {
-      return -this.midView + this.mid;
+      const bottom = this.state.pos + this.state.size - this.state.maxSize;
+
+      return -this.midView + this.mid - bottom;
     }
 
     return 0;
@@ -74,22 +76,16 @@ export class ParallaxResolver {
   update(newState: Partial<ParallaxResolverState>) {
     const state = this.state = { ...this.state, ...newState };
 
-    if (this.checksum !== this.lastChecksum) {
-      this.lastChecksum = this.checksum;
+    state.shiftStart = this.shiftStart();
+    state.shiftEnd = this.shiftEnd();
 
-      const maxShift = Math.abs(this.maxShift());
+    if (this.config.normalize !== false) {
+      if (this.isEntry()) {
+        state.shiftStart = 0;
+      }
 
-      state.shiftStart = state.speed < 0 ? maxShift : -maxShift;
-      state.shiftEnd = state.speed < 0 ? -maxShift : maxShift;
-
-      if (this.config.normalize !== false) {
-        if (this.isEntry()) {
-          state.shiftStart = 0;
-        }
-
-        if (this.isOutro()) {
-          state.shiftEnd = 0;
-        }
+      if (this.isOutro()) {
+        state.shiftEnd = 0;
       }
     }
   }
@@ -106,24 +102,32 @@ export class ParallaxResolver {
     );
   }
 
-  maxShift() {
-    const state = this.state;
-    const outro = this.isOutro();
-    const buffer = 1;
+  shiftStart() {
+    const { pos, speed, viewSize } = this.state;
+    const middle = this.midView - this.mid;
+    const start = pos - viewSize - speed * (pos + this.norm - middle);
 
-    if (state.viewSize === 0 || state.speed === 1) {
-      return 0;
+    if (speed === 1) {
+      return this.shift(false, 0);
     }
 
-    return this.interpolate(
-      (shift) => state.pos + shift,
-      (scroll, pos) =>
-        state.speed > 1
-          ? scroll - pos - state.size > buffer
-          : outro
-              ? scroll - pos + state.viewSize < buffer
-              : scroll - pos - state.size < buffer
+    return this.shift(false, start / (1 - speed));
+  }
+
+  shiftEnd() {
+    const { pos, size, speed, viewSize, maxSize } = this.state;
+    const middle = this.midView - this.mid;
+    const end = clamp(
+      (pos + size - speed * (pos + this.norm - middle)) / (1 - speed),
+      0,
+      maxSize - viewSize
     );
+
+    if (speed === 1) {
+      return this.shift(false, maxSize - viewSize);
+    }
+
+    return this.shift(false, end);
   }
 
   private isEntry() {
@@ -136,32 +140,5 @@ export class ParallaxResolver {
     const state = this.state;
 
     return state.pos + state.size > state.maxSize - state.viewSize;
-  }
-
-  private get checksum() {
-    const state = this.state;
-
-    return state.pos + state.maxSize + state.size + state.viewSize;
-  }
-
-  private interpolate(
-    position: (shift: number) => number,
-    condition: (scroll: number, pos: number) => boolean,
-    stepSize = 1
-  ) {
-    let pos = 0;
-    let scroll = 0;
-    let shift = 0;
-
-    do {
-      shift = this.shift(false, scroll);
-      pos = position(shift);
-      scroll += stepSize;
-    } while (
-      condition(scroll, pos) &&
-      scroll + this.state.viewSize < this.state.maxSize
-    );
-
-    return shift;
   }
 }
