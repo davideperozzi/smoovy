@@ -194,7 +194,10 @@ export class GLImage extends GLPlane {
   private loadEnd() {
     this.emit(GLImageEvent.LOADEND);
     this.loadResolver.resolve();
-    this.setSize(this.imageSize);
+
+    if (this.config.width === undefined && this.config.height === undefined) {
+      this.setSize(this.imageSize);
+    }
   }
 
   public async load() {
@@ -254,12 +257,12 @@ export class GLImage extends GLPlane {
   }
 
   public recalc() {
-    super.recalc();
-
     if (this.texture) {
       this.bindTexture();
       this.buffers.texCoord.update(triangulate(this.segments, uvSize));
     }
+
+    super.recalc();
   }
 
   public onCreate() {

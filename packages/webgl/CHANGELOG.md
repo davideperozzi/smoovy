@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.5
+
+### Patch Changes
+
+- webgl: fix image initial size
+
 ## 1.1.4
 
 ### Patch Changes
