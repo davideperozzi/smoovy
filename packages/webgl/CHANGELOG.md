@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.6
+
+### Patch Changes
+
+- webgl: added `setSource` to image primitive
+
 ## 1.1.5
 
 ### Patch Changes

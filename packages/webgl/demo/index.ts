@@ -76,22 +76,33 @@ webgl.plane({
   plane.uniform('color', [ 133, 7, 0 ]);
 });
 
-GLImage.preload(webgl.gl, 'https://i.imgur.com/fHyEMsl.jpg', true);
+// GLImage.preload(webgl.gl, 'https://i.imgur.com/fHyEMsl.jpg', true);
 
 const createImage = () => webgl.image({
-  unloadTexture: true,
   source: 'https://i.imgur.com/fHyEMsl.jpg',
   element: document.querySelector('#test-attach') as HTMLElement
 });
 
 const image = createImage();
 
-setTimeout(() => webgl.remove(image), 1000);
 setTimeout(() => {
-  const image = createImage();
+  image.setSource('https://images.unsplash.com/photo-1674753987419-750e44ba94e2?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=600&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTY3NTk1ODU1MQ&ixlib=rb-4.0.3&q=80&w=800');
+}, 1000);
 
-  setTimeout(() => webgl.remove(image), 1000);
-}, 2000);
+setTimeout(() =>  {
+  webgl.remove(image);
+
+  setTimeout(() => {
+    const image = createImage();
+
+    setTimeout(() => {
+      image.setSource('https://images.unsplash.com/photo-1674753987419-750e44ba94e2?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=600&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTY3NTk1ODU1MQ&ixlib=rb-4.0.3&q=80&w=800');
+    }, 1000);
+
+
+    setTimeout(() => webgl.remove(image), 1000);
+  }, 2000);
+}, 3000);
 
 const background = webgl.plane({
   element: document.body

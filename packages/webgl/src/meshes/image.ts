@@ -1,4 +1,4 @@
-import { listen } from '@smoovy/listener';
+import { listen, listenCompose } from '@smoovy/listener';
 import { Resolver } from '@smoovy/utils';
 
 import { TextureAttrBuffer } from '../buffers';
@@ -34,7 +34,7 @@ export interface GLImageConfig extends GLPlaneConfig {
    *
    * Default = false
    */
-  unloadTexture?: boolean;
+  noCache?: boolean;
 }
 
 export enum GLImageEvent {
@@ -113,16 +113,24 @@ export class GLImage extends GLPlane {
     image.src = src;
 
     return new Promise<HTMLImageElement>((resolve, reject) => {
-      listen(image, 'error', (err) => reject(err));
-      listen(image, 'load', () => {
-        const texture = GLImage.loadTexture(gl, image);
+      const unlisten = listenCompose(
+        listen(image, 'error', (err) => {
+          unlisten();
 
-        if (texture) {
-          this.cache.set(src, { texture, image, keep });
-        }
+          reject(err);
+        }),
+        listen(image, 'load', () => {
+          unlisten();
 
-        resolve(image);
-      });
+          const texture = GLImage.loadTexture(gl, image);
+
+          if (texture) {
+            this.cache.set(src, { texture, image, keep });
+          }
+
+          resolve(image);
+        })
+      );
     });
   }
 
@@ -195,49 +203,62 @@ export class GLImage extends GLPlane {
     this.emit(GLImageEvent.LOADEND);
     this.loadResolver.resolve();
 
+    this.imageLoading = false;
+
     if (this.config.width === undefined && this.config.height === undefined) {
       this.setSize(this.imageSize);
     }
   }
 
+  public setSource(source: string) {
+    this.config.source = source;
+    this.imageLoading = false;
+    this.loadResolver = new Resolver();
+
+    return this.load();
+  }
+
   public async load() {
     await this.created.promise;
 
-    if (this.loadResolver.completed) {
+    if (this.loadResolver.completed || this.imageLoading) {
       return this.loadResolver.promise;
     }
+
 
     if (GLImage.cache.has(this.config.source)) {
       const cache = GLImage.cache.get(this.config.source);
 
       if (cache && cache.texture && cache.image) {
+        this.imageLoading = true;
         this.texture = cache.texture;
         this.image = cache.image;
 
         this.loadEnd();
-        this.recalc();
       }
     } else {
-      if ( ! this.imageLoading && ! this.loadResolver.completed) {
-        this.imageLoading = true;
-        this.image.crossOrigin = 'anonymous';
+      this.imageLoading = true;
+      this.image.crossOrigin = 'anonymous';
 
-        listen(this.image, 'load', () => {
-          this.loadEnd();
+      const unlisten = listen(this.image, 'load', () => {
+        unlisten();
 
-          if (this.texture) {
-            GLImage.loadTexture(this.viewport.gl, this.image, this.texture);
-            GLImage.cache.set(this.config.source, {
-              image: this.image,
-              texture: this.texture
-            });
+        const prevTexture = this.texture;
+        this.texture = this.viewport.gl.createTexture();
 
-            this.recalc();
-          }
-        });
+        if (this.texture) {
+          GLImage.loadTexture(this.viewport.gl, this.image, this.texture);
+          GLImage.cache.set(this.config.source, {
+            image: this.image,
+            texture: this.texture
+          });
+        }
 
-        this.image.src = this.config.source;
-      }
+        this.loadEnd();
+        this.unloadTexture(prevTexture);
+      });
+
+      this.image.src = this.config.source;
     }
 
     return this.loadResolver.promise;
@@ -246,8 +267,10 @@ export class GLImage extends GLPlane {
   protected bindTexture() {
     const gl = this.viewport.gl;
 
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    if (this.texture) {
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    }
   }
 
   protected beforeDraw() {
@@ -257,25 +280,22 @@ export class GLImage extends GLPlane {
   }
 
   public recalc() {
-    if (this.texture) {
-      this.bindTexture();
-      this.buffers.texCoord.update(triangulate(this.segments, uvSize));
-    }
+    this.bindTexture();
+    this.buffers.texCoord.update(triangulate(this.segments, uvSize));
 
     super.recalc();
   }
 
-  public onCreate() {
-    super.onCreate();
-
-    this.texture = this.viewport.gl.createTexture();
+  public unloadTexture(texture: WebGLTexture | null) {
+    if (texture && this.config.noCache === true) {
+      GLImage.unloadTexture(this.viewport.gl, texture);
+    }
   }
 
   public onDestroy() {
     super.onDestroy();
+    this.unloadTexture(this.texture);
 
-    if (this.texture && this.config.unloadTexture === true) {
-      GLImage.unloadTexture(this.viewport.gl, this.texture);
-    }
+    this.texture = null;
   }
 }
