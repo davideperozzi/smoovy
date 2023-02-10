@@ -830,6 +830,8 @@ __metadata:
     "@smoovy/observer": ^1.0.2
     "@smoovy/ticker": ^1.0.1
     "@smoovy/utils": ^1.0.1
+    "@tweakpane/core": ^1.1.4
+    tweakpane: ^3.1.4
   languageName: unknown
   linkType: soft
 
@@ -874,6 +876,13 @@ __metadata:
   version: 1.0.3
   resolution: "@tsconfig/node16@npm:1.0.3"
   checksum: 3a8b657dd047495b7ad23437d6afd20297ce90380ff0bdee93fc7d39a900dbd8d9e26e53ff6b465e7967ce2adf0b218782590ce9013285121e6a5928fbd6819f
+  languageName: node
+  linkType: hard
+
+"@tweakpane/core@npm:^1.1.4":
+  version: 1.1.4
+  resolution: "@tweakpane/core@npm:1.1.4"
+  checksum: 29909faca5ea8dd575fbb52a77008e469fc189bc24345ad1d6e7ae20d579bd2c85e40ed06ada67e97f80d37e18bf05db9b6c40cc219e5e29d4b8de013313bfbd
   languageName: node
   linkType: hard
 
@@ -6104,6 +6113,13 @@ __metadata:
   bin:
     turbo: bin/turbo
   checksum: 35195f4b7623014c25ba152c11a8cb23e51cbd75dc9266d0656692665f85b28faf3496dea8cecacf52795a917410668124186ffbdcf276325ccc3e11df9e9623
+  languageName: node
+  linkType: hard
+
+"tweakpane@npm:^3.1.4":
+  version: 3.1.4
+  resolution: "tweakpane@npm:3.1.4"
+  checksum: 671178572e4095dede0c23d1660cfd12bfd84846dba79ef8a6f7755bb5cc5c82e0c15891f8bdaffbc7803e3c6f64b9c8cdc34e35ebd1e8883b9aff68b4ddece9
   languageName: node
   linkType: hard
 

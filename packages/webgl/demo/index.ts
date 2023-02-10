@@ -1,7 +1,9 @@
 import { GLImage, WebGL } from '../src';
+import { Pane } from 'tweakpane';
 import { mat4tv } from '../src/utils/math';
 
 const webgl = new WebGL();
+const pane = new Pane();
 
 function updateScroll() {
   webgl.scrollTo({ x: window.scrollX, y: window.scrollY });
@@ -30,51 +32,77 @@ const pauseCheck = () => {
 // pauseCheck();
 // setInterval(pauseCheck, 2000);
 
-webgl.plane({
+const plane = webgl.plane({
   element: document.querySelector('#box') as HTMLElement,
   vertex: /* glsl */`
     precision mediump float;
-
+//
     attribute vec4 vertCoord;
     attribute vec2 texCoord;
-
+//
     uniform mat4 modelViewMatrix;
     uniform mat4 projectionMatrix;
     uniform float time;
-
+//
     varying vec4 vCoord;
-
+//
     void main() {
       vCoord = vertCoord;
-
+//
       // vCoord.z = sin(vertCoord.x + vertCoord.y + time) * .5;
-
+//
       gl_Position = projectionMatrix * modelViewMatrix * vCoord;
     }
-
+//
   `,
   fragment: /* glsl */`
     precision mediump float;
-
+//
     varying vec4 vCoord;
     uniform float time;
-
+//
     float mapRange(float value, float inStart, float inEnd, float outMin, float outMax) {
       return outMin + (outMax - outMin) / (inEnd - inStart) * (value - inStart);
     }
-
+//
     void main() {
       vec4 coords = vCoord;
       vec4 color = vec4(5.0 / 255.0, 28.0 / 255.0, 44.0 / 255.0, 1.0);
-
+//
       // color.a = vCoord.z;
-
+//
       gl_FragColor = color;
     }
   `,
 }, (plane) => {
   plane.uniform('color', [ 133, 7, 0 ]);
 });
+
+const scale = { value: 0, scaleOrigin: 0, translateOrigin: 0, translate: { x: 200, y: 200 } };
+
+pane.addInput(scale, 'value', { min: 1, max: 2 }).on('change', (ev) => {
+  plane.scale(scale.value);
+});
+
+pane.addInput(scale, 'scaleOrigin', { min: 0, max: 1 }).on('change', (ev) => {
+  plane.setScaleOrigin(scale.scaleOrigin);
+});
+
+pane.addInput(scale, 'translateOrigin', { min: 0, max: 1 }).on('change', (ev) => {
+  plane.setTranslateOrigin(scale.translateOrigin);
+});
+
+pane.addInput(scale, 'translate', {
+  picker: 'inline',
+  expanded: true,
+}).on('change', (ev) => {
+  plane.translate({ x: scale.translate.x, y: scale.translate.y });
+});
+
+pane.controller_.view.element.style.zIndex = '1000';
+pane.controller_.view.element.style.position = 'fixed';
+
+// plane.scale(1, 1);
 
 // GLImage.preload(webgl.gl, 'https://i.imgur.com/fHyEMsl.jpg', true);
 
@@ -84,6 +112,15 @@ const createImage = () => webgl.image({
 });
 
 const image = createImage();
+
+image.setScaleOrigin(0.5);
+
+setTimeout(() => {
+  image.scale(1.5);
+}, 1000);
+
+// generate a random image url
+const randomImage = () => `https://picsum.photos/seed/${Math.random()}/200/200`;
 
 setTimeout(() => {
   image.setSource('https://images.unsplash.com/photo-1674753987419-750e44ba94e2?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=600&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTY3NTk1ODU1MQ&ixlib=rb-4.0.3&q=80&w=800');
@@ -98,7 +135,6 @@ setTimeout(() =>  {
     setTimeout(() => {
       image.setSource('https://images.unsplash.com/photo-1674753987419-750e44ba94e2?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=600&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTY3NTk1ODU1MQ&ixlib=rb-4.0.3&q=80&w=800');
     }, 1000);
-
 
     setTimeout(() => webgl.remove(image), 1000);
   }, 2000);

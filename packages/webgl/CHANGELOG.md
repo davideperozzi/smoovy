@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.7
+
+### Patch Changes
+
+- webgl: added scale and transition origin to plane
+
 ## 1.1.6
 
 ### Patch Changes

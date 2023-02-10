@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/webgl",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "Easier WebGL animations for websites",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",
@@ -32,5 +32,9 @@
     "@smoovy/observer": "^1.0.2",
     "@smoovy/ticker": "^1.0.1",
     "@smoovy/utils": "^1.0.1"
+  },
+  "devDependencies": {
+    "@tweakpane/core": "^1.1.4",
+    "tweakpane": "^3.1.4"
   }
 }

@@ -1,6 +1,6 @@
 import { listenCompose, Unlisten } from '@smoovy/listener';
 import { Observable, observe, unobserve } from '@smoovy/observer';
-import { Coordinate, Size } from '@smoovy/utils';
+import { Coordinate, isNum, Size } from '@smoovy/utils';
 
 import { VertexAttrBuffer } from '../buffers';
 import { GLMesh, GLMeshConfig } from '../mesh';
@@ -29,6 +29,20 @@ export interface GLPlaneConfig extends GLMeshConfig {
    * The height in pixels not in clip space size
    */
   height?: number;
+
+  /**
+   * The origin of all scale operations
+   *
+   * Default = { x: 0, y: 0 }
+   */
+  scaleOrigin?: Coordinate;
+
+  /**
+   * The origin of all translate operations
+   *
+   * Default = { x: 0, y: 0 }
+   */
+  translateOrigin?: Coordinate;
 
   /**
    * The number of segments to use for rasterization of the mesh
@@ -202,6 +216,14 @@ export class GLPlane extends GLMesh {
     return this.config.height || 0;
   }
 
+  public get scaleOrigin() {
+    return this.config.scaleOrigin || { x: 0, y: 0 };
+  }
+
+  public get translateOrigin() {
+    return this.config.translateOrigin || { x: 0, y: 0 };
+  }
+
   public get clipSize() {
     return this.viewport.getClipsSpaceSize(
       this.config.width || 0,
@@ -226,27 +248,96 @@ export class GLPlane extends GLMesh {
     return this.config.element;
   }
 
-  public scale(x: number, y: number) {
-    const scaling = mat4gs(this.model);
-    const scaleX = x / scaling[0];
-    const scaleY = y / scaling[1];
+  public setScaleOrigin(origin: Partial<Coordinate> | number) {
+    if ( ! this.config.scaleOrigin) {
+      this.config.scaleOrigin = { x: 0, y: 0 };
+    }
+
+    if (isNum(origin)) {
+      this.config.scaleOrigin.x = this.config.scaleOrigin.y = origin;
+    } else if (origin) {
+      if (isNum(origin.x)) {
+        this.scaleOrigin.x = origin.x;
+      }
+
+      if (isNum(origin.y)) {
+        this.scaleOrigin.y = origin.y;
+      }
+    }
+
+    this.scale(this.scaling);
+  }
+
+  public setTranslateOrigin(origin: Partial<Coordinate> | number) {
+    if ( ! this.config.translateOrigin) {
+      this.config.translateOrigin = { x: 0, y: 0 };
+    }
+
+    if (isNum(origin)) {
+      this.config.translateOrigin.x = this.config.translateOrigin.y = origin;
+    } else if (origin) {
+      if (isNum(origin.x)) {
+        this.translateOrigin.x = origin.x;
+      }
+
+      if (isNum(origin.y)) {
+        this.translateOrigin.y = origin.y;
+      }
+    }
+
+    this.translate(this.translation);
+  }
+
+  public setOrigin(origin: Partial<Coordinate> | number) {
+    this.setTranslateOrigin(origin);
+    this.setScaleOrigin(origin);
+  }
+
+  public scale(scale: Partial<Coordinate> | number) {
+    const scaling = this.scaling;
+    let scaleX = 1;
+    let scaleY = 1;
+
+    if (isNum(scale)) {
+      scaleX = scale / scaling.x;
+      scaleY = scale / scaling.y;
+    } else {
+      if (isNum(scale.x)) {
+        scaleX = scale.x / scaling.x;
+      }
+
+      if (isNum(scale.y)) {
+        scaleY = scale.y / scaling.y;
+      }
+    }
 
     mat4s(this.model, [ scaleX, scaleY, 1 ]);
+    this.translate(this.translation);
   }
 
   public translate(pos: Partial<Coordinate>) {
-    if (typeof pos.x === 'number') {
-      mat4ta(this.model, [
-        this.viewport.getClipSpaceX(this.config.x = pos.x)
-      ]);
+    const vp = this.viewport;
+    const sc = this.scaling;
+    let x = 0;
+    let y = 0;
+
+    if (isNum(pos.x)) {
+      x = this.config.x = pos.x;
     }
 
-    if (typeof pos.y === 'number') {
-      mat4ta(this.model, [
-        undefined,
-        this.viewport.getClipSpaceY(this.config.y = pos.y)
-      ]);
+    if (isNum(pos.y)) {
+      y = this.config.y = pos.y;
     }
+
+    const toX = this.translateOrigin.x * this.width;
+    const toY = this.translateOrigin.y * this.height;
+    const soX = (this.width - (this.width * sc.x)) * -this.scaleOrigin.x;
+    const soY = (this.height - (this.height * sc.y)) * -this.scaleOrigin.y;
+
+    mat4ta(this.model, [
+      vp.getClipSpaceX(x - toX - soX),
+      vp.getClipSpaceY(y - toY - soY)
+    ]);
   }
 
   public get segments(): Coordinate {

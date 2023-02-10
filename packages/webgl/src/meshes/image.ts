@@ -200,6 +200,11 @@ export class GLImage extends GLPlane {
   }
 
   private loadEnd() {
+    if (this.loadResolver.completed) {
+      console.warn('image loadend already called');
+      return
+    }
+
     this.emit(GLImageEvent.LOADEND);
     this.loadResolver.resolve();
 
@@ -224,7 +229,6 @@ export class GLImage extends GLPlane {
     if (this.loadResolver.completed || this.imageLoading) {
       return this.loadResolver.promise;
     }
-
 
     if (GLImage.cache.has(this.config.source)) {
       const cache = GLImage.cache.get(this.config.source);
