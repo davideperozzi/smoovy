@@ -1,5 +1,11 @@
 # @smoovy/composer
 
+## 1.0.9
+
+### Patch Changes
+
+- composer: exposed injectService and injectComponent
+
 ## 1.0.8
 
 ### Patch Changes

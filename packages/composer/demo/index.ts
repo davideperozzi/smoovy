@@ -39,8 +39,12 @@ export class SampleService extends Service<string, SampleService> {
   get child() { return SampleService; }
 
   async init() {
-    // console.log(this.composer, this.testService2, this.testService);
-    this.resolve(await this.testService);
+    if (this.testService.activated) {
+      // console.log(this.composer, this.testService2, this.testService);
+      this.resolve(await this.testService);
+    } else {
+      this.resolve('Error: Test Service not activated!')
+    }
   }
 }
 
@@ -74,11 +78,18 @@ class SampleComponent {
     private element: HTMLElement
   ) {}
 
-  onCreate() {
+  async onCreate() {
     // console.log(this.sample, this.composer);
     console.log('message:', this.message);
     console.log('active:', this.active);
     console.log('test:', this.test);
+
+    const childService = this.sampleService.addChild('test-child');
+
+    await this.composer.injectService(childService);
+    await childService.init();
+
+    console.log('child says -> ', await childService);
     // console.log(this.uniq, this.selectMe);
   }
 

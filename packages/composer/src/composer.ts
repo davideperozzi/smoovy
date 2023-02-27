@@ -96,13 +96,7 @@ export class Composer {
       }
 
       for (let i = 0, len = services.length; i < len; i++) {
-        await injectInstances(
-          serviceInjector,
-          services[i],
-          this.config.services,
-          true,
-          this.voidService
-        );
+        await this.injectService(services[i]);
       }
 
       for (let i = 0, len = services.length; i < len; i++) {
@@ -111,7 +105,17 @@ export class Composer {
     }
   }
 
-  private async inject(wrapper: ComponentWrapper) {
+  public async injectService(service: Service) {
+    await injectInstances(
+      serviceInjector,
+      service,
+      this.config.services,
+      true,
+      this.voidService
+    );
+  }
+
+  public async injectComponent(wrapper: ComponentWrapper) {
     await Promise.all([
       injectInstances(composerInjector, wrapper.component, [this]),
       injectInstances(
@@ -224,7 +228,7 @@ export class Composer {
     const results: ComponentWrapper[] = [];
 
     this.collect(scope, filter, (wrapper) => {
-      this.inject(wrapper).then(() => {
+      this.injectComponent(wrapper).then(() => {
         let created = Promise.resolve();
 
         if (typeof wrapper.component.onCreate === 'function') {
