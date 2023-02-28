@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 1.0.4
+
+### Patch Changes
+
+- scroller: added mouse events to touchInertia + mapPos to translate
+
 ## 1.0.3
 
 ### Patch Changes

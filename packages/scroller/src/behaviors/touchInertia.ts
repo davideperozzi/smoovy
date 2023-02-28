@@ -42,6 +42,14 @@ interface Config {
    * Default: 2
    */
   minimumThreshold?: number;
+
+  /**
+   * Whether to enable mouse events or not
+   * This transform mouse events to touch events
+   * and allows the user to drag the positions via mouse
+   * Default: false
+   */
+  enableMouseEvents?: boolean;
 }
 
 const defaultConfig = {
@@ -65,27 +73,33 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     let lastMove = 0;
     let down = false;
 
-    const getTouch = (event: TouchEvent) => {
+    const getPosition = (event: TouchEvent | MouseEvent) => {
+      if (event instanceof MouseEvent) {
+        return { pageX: event.pageX, pageY: event.pageY };
+      }
+
       return (event.targetTouches ? event.targetTouches[0] : event) as Touch;
     };
 
-    const handleTouchStart = (event: TouchEvent) => {
+    const handleStart = (event: TouchEvent | MouseEvent) => {
       ticker.kill();
 
-      const touch = getTouch(event);
+      const pos = getPosition(event);
 
-      startPos.x = touch.pageX;
-      startPos.y = touch.pageY;
+      startPos.x = pos.pageX;
+      startPos.y = pos.pageY;
 
       down = true;
     };
 
-    const handleTouchEnd = () => {
+    const handleEnd = () => {
       if (down) {
         if (velocity.x !== 0 || velocity.y !== 0) {
           ticker.add((_delta, _time, kill) => {
             velocity.x = lerp(velocity.x, 0, cfg.velocityDamping);
             velocity.y = lerp(velocity.y, 0, cfg.velocityDamping);
+            velocity.x = isFinite(velocity.x) ? velocity.x : 0;
+            velocity.y = isFinite(velocity.y) ? velocity.y : 0;
 
             scroller.emit(ScrollerEvent.DELTA, velocity);
 
@@ -105,25 +119,25 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       down = false;
     };
 
-    const handleTouchMove = (event: TouchEvent) => {
+    const handleMove = (event: TouchEvent | MouseEvent) => {
       if (down) {
         event.preventDefault();
 
         const delta = { x: 0, y: 0 };
-        const touch = getTouch(event);
+        const pos = getPosition(event);
 
-        delta.x = (touch.pageX - startPos.x) * cfg.deltaMultiplier;
-        delta.y = (touch.pageY - startPos.y) * cfg.deltaMultiplier;
+        delta.x = (pos.pageX - startPos.x) * cfg.deltaMultiplier;
+        delta.y = (pos.pageY - startPos.y) * cfg.deltaMultiplier;
 
         const deltaTime = Ticker.now() - lastMove;
 
-        velocity.x = (startPos.x - touch.pageX) / deltaTime;
-        velocity.y = (startPos.y - touch.pageY) / deltaTime;
+        velocity.x = (startPos.x - pos.pageX) / deltaTime;
+        velocity.y = (startPos.y - pos.pageY) / deltaTime;
         velocity.x *= -1 * cfg.velocityMultiplier;
         velocity.y *= -1 * cfg.velocityMultiplier;
 
-        startPos.x = touch.pageX;
-        startPos.y = touch.pageY;
+        startPos.x = pos.pageX;
+        startPos.y = pos.pageY;
         lastMove = Ticker.now();
 
         scroller.emit(ScrollerEvent.DELTA, delta);
@@ -131,14 +145,16 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     };
 
     return listenCompose(
-      listen(
-        target,
-        'touchstart',
-        handleTouchStart,
-        { passive: cfg.passive }
-      ),
-      listen(doc, 'touchend', handleTouchEnd, { passive: cfg.passive }),
-      listen(doc, 'touchmove', handleTouchMove, { passive: cfg.passive }),
+      listen(target, 'touchstart', handleStart, { passive: cfg.passive }),
+      listen(doc, 'touchmove', handleMove, { passive: cfg.passive }),
+      listen(doc, 'touchend', handleEnd, { passive: cfg.passive }),
+      cfg.enableMouseEvents ? listenCompose(
+        listen(target, 'mousedown', handleStart, { passive: cfg.passive }),
+        listen(doc, 'mousemove', handleMove, { passive: cfg.passive }),
+        listen(doc, ['mouseup', 'mousecancel'], handleEnd, {
+          passive: cfg.passive
+        }),
+      ) : undefined
     );
   };
 };

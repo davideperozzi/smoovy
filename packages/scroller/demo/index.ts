@@ -23,7 +23,11 @@ function createScroller(type: string) {
 
   switch (type) {
     case 'default':
-      scroller = smoothScroll(queryEl('main'));
+      scroller = smoothScroll(queryEl('main'), {
+        touch: {
+          enableMouseEvents: true
+        }
+      });
       break;
 
     case 'native':

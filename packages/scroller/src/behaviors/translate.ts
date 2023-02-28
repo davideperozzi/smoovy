@@ -24,21 +24,32 @@ interface Config {
    * Default: 2
    */
   precision?: number;
+
+  /**
+   * Maps the position to a new position
+   * Default: (pos) => pos
+   */
+  mapPos?: (pos: Coordinate) => Coordinate;
 }
 
 const defaultConfig = {
   firefoxFix: true,
   initialStyles: true,
-  precision: 2
+  precision: 2,
+  mapPos: (pos: Coordinate) => pos
 };
 
 const updateTransform = (
   element: HTMLElement,
-  posX = 0,
-  posY = 0,
-  rotate = false
+  pos: Coordinate,
+  rotate = false,
+  mapPos?: (pos: Coordinate) => Coordinate
 ) => {
-  let transform = `translate3d(${-posX}px, ${-posY}px, 0)`;
+  if (mapPos) {
+    pos = mapPos(pos);
+  }
+
+  let transform = `translate3d(${-pos.x}px, ${-pos.y}px, 0)`;
 
   if (rotate) {
     transform += ` rotate3d(0.01, 0.01, 0.01, 0.01deg)`;
@@ -61,7 +72,12 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
             const posX = parseFloat(pos.x.toFixed(cfg.precision));
             const posY = parseFloat(pos.y.toFixed(cfg.precision));
 
-            updateTransform(element, posX, posY, firefoxFix);
+            updateTransform(
+              element,
+              { x: posX, y: posY },
+              firefoxFix,
+              cfg.mapPos
+            );
           }
         }
       ),
@@ -69,13 +85,13 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
         const pos = scroller.position.virtual;
 
         if ( ! scroller.isLocked()) {
-          updateTransform(element, pos.x, pos.y, firefoxFix);
+          updateTransform(element, pos, firefoxFix, cfg.mapPos);
         }
       })
     );
 
     if (cfg.initialStyles) {
-      updateTransform(element, 0, 0, firefoxFix);
+      updateTransform(element, { x: 0, y: 0 }, firefoxFix, cfg.mapPos);
     }
 
     return () => {
