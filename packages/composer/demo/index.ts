@@ -68,6 +68,9 @@ class SampleComponent {
   @config('is-active', { type: Boolean })
   private active = false;
 
+  @config('array', { type: Array })
+  private testArray: string[] = [];
+
   @query('#imuniq')
   private uniq!: HTMLElement;
 
@@ -83,6 +86,7 @@ class SampleComponent {
     console.log('message:', this.message);
     console.log('active:', this.active);
     console.log('test:', this.test);
+    console.log('testArray:', this.testArray);
 
     const childService = this.sampleService.addChild('test-child');
 
@@ -115,7 +119,6 @@ class App {
   private testService2!: TestService2;
 
   async onCreate() {
-    // console.log('->', await this.testService2);
   }
 }
 

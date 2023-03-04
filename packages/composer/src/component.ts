@@ -20,7 +20,7 @@ export interface ComponentConfig {
 
 export interface ComponentWrapper<T = any> {
   component: T;
-  ctor: new () => T;
+  ctor: new (...args: any[]) => T;
   config: ComponentConfig;
   element: HTMLElement;
   unlisten?: Unlisten;
@@ -32,7 +32,7 @@ export function component(config: ComponentConfig | string) {
   return (target: any) => {
     config = typeof config === 'string' ? {
       selector: `[data-${config}]`,
-      dataset: config.replace(/-./g, x=>x[1].toUpperCase())
+      dataset: config.replace(/-./g, x => x[1].toUpperCase())
     } : config;
 
     target[componentConfigKey] = config;

@@ -12,12 +12,18 @@ export interface ComposerConfig {
 }
 
 const composerInjector = Symbol(undefined);
-const parseJson = (text = '{}') => {
-  let result: any = {};
+const parseJson = (text?: string, defaultValue = {}, warn = false) => {
+  let result: any = defaultValue;
 
-  try {
-    result = JSON.parse(text);
-  } catch(err) {}
+  if (text) {
+    try {
+      result = JSON.parse(text);
+    } catch(err) {
+      if (warn) {
+        console.warn(`could not parse json:`, err);
+      }
+    }
+  }
 
   return result;
 };
@@ -177,8 +183,8 @@ export class Composer {
 
     if ( ! dataset) {
       throw new Error(
-        `${clazz.name} has no dataset attr defined. ` +
-        `Define it via "dataset" in the component config`
+        `${clazz.name} component has no dataset attribute defined. ` +
+        `Define it with "dataset" in the component decorator.`
       );
     }
 
@@ -191,7 +197,15 @@ export class Composer {
     const plainVal = dataValue === undefined ? dataObj[config.key] : dataValue;
 
     if (plainVal !== undefined) {
-      let value = parser(plainVal);
+      let value: any;
+
+      if (parser === Array) {
+        value = [];
+      } else if (parser === Object) {
+        value = {};
+      } else {
+        value = parser(plainVal);
+      }
 
       if (
         parser === Boolean &&
@@ -210,6 +224,20 @@ export class Composer {
         )
       ) {
         value = false;
+      }
+
+      if (parser === Array) {
+        if (plainVal instanceof Array) {
+          value = plainVal;
+        } else if (typeof plainVal === 'string' && plainVal.startsWith('[')) {
+          value = parseJson(plainVal, [], true);
+        }
+      } else if (parser === Object) {
+        if (plainVal instanceof Object) {
+          value = plainVal;
+        } else if (typeof plainVal === 'string' && plainVal.startsWith('{')) {
+          value = parseJson(plainVal, {}, true);
+        }
       }
 
       if (typeof config.parse === 'function') {
@@ -335,7 +363,7 @@ export class Composer {
     }
   }
 
-  query<T>(ctor: T, scope?: HTMLElement) {
+  query<T>(ctor: new(...args: any[]) => T, scope?: HTMLElement) {
     const results: ComponentWrapper<T>[] = [];
 
     this.components.forEach(wrapper => {

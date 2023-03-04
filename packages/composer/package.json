@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/composer",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Component Manager, Service Manager all in one",
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",

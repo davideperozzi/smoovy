@@ -1,5 +1,11 @@
 # @smoovy/composer
 
+## 1.0.10
+
+### Patch Changes
+
+- composer: improved types + config injector
+
 ## 1.0.9
 
 ### Patch Changes
