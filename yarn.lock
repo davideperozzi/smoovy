@@ -742,6 +742,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@smoovy/grid@workspace:packages/grid":
+  version: 0.0.0-use.local
+  resolution: "@smoovy/grid@workspace:packages/grid"
+  dependencies:
+    "@smoovy/emitter": ^1.0.2
+    "@smoovy/listener": ^1.0.1
+    "@smoovy/observer": ^1.0.2
+    "@smoovy/ticker": ^1.0.1
+    "@smoovy/utils": ^1.0.1
+    "@types/dat.gui": ^0.7.7
+    dat.gui: ^0.7.9
+  languageName: unknown
+  linkType: soft
+
 "@smoovy/listener@^1.0.1, @smoovy/listener@workspace:packages/listener":
   version: 0.0.0-use.local
   resolution: "@smoovy/listener@workspace:packages/listener"

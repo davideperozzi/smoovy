@@ -1,0 +1,37 @@
+{
+  "name": "@smoovy/grid",
+  "version": "0.0.0",
+  "description": "scrollable infinite grid handler",
+  "main": "./src/index.ts",
+  "homepage": "https://github.com/davideperozzi/smoovy",
+  "repository": "https://github.com/davideperozzi/smoovy",
+  "publishConfig": {
+    "directory": "./dist",
+    "access": "public"
+  },
+  "scripts": {
+    "build": "yarn run -T ts-node --esm ../../scripts/build.ts",
+    "lint": "eslint ./src",
+    "dev": "vite --config ./vite.demo.ts"
+  },
+  "keywords": [
+    "smoovy",
+    "grid",
+    "infinite",
+    "scrollable",
+    "typecript"
+  ],
+  "dependencies": {
+    "@smoovy/emitter": "^1.0.2",
+    "@smoovy/listener": "^1.0.1",
+    "@smoovy/observer": "^1.0.2",
+    "@smoovy/ticker": "^1.0.1",
+    "@smoovy/utils": "^1.0.1"
+  },
+  "author": "Davide Perozzi",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/dat.gui": "^0.7.7",
+    "dat.gui": "^0.7.9"
+  }
+}

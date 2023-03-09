@@ -41,3 +41,7 @@ export function cutDec(value: number, precision: number) {
 
   return parseFloat(str.substring(0, str.indexOf('.') + 1 + precision));
 }
+
+export function mod(x: number, n: number) {
+  return (x % n + n) % n;
+}
