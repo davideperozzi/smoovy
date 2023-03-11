@@ -38,7 +38,7 @@ export class GridMesh {
   }
 
   get pad() {
-    return this.config.pad || 4;
+    return this.config.pad || 2;
   }
 
   get padSizeX() {

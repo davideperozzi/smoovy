@@ -18,20 +18,28 @@ const grid = imageGrid({
   size: 6,
   root,
   data,
-  onExpand: (item, image) => {
-    const scale = `${0.3  + Math.random() * 0.7}`;
+  item: {
+    map: (props) => {
+      props.y = props.x + props.y;
 
-    image.style.position = 'absolute';
-    image.style.top = '50%';
-    image.style.left = '50%';
-    image.style.transform = `translate3d(-50%, -50%, 0) scale(${scale})`;
-
-    return true;
+      return props;
+    },
+    // collapse: () => false
   },
-  map: (item) => {
-    item.y = item.x + item.y;
+  image: {
+    // onLoad: () => {
 
-    return item;
+    // },
+    onExpand: (item, image) => {
+      const scale = `${0.3 + Math.random() * 0.7}`;
+
+      image.style.position = 'absolute';
+      image.style.top = '50%';
+      image.style.left = '50%';
+      image.style.transform = `translate3d(-50%, -50%, 0) scale(${scale})`;
+
+      return true;
+    }
   }
 });
 

@@ -3,12 +3,7 @@ export const isFunc = (val: any): val is CallableFunction => typeof val === 'fun
 export const isNum = (val: any): val is number => typeof val === 'number';
 export const isStr = (val: any): val is string => typeof val === 'string';
 export const isArray = (val: any): val is Array<any> => Array.isArray(val);
+export const isElement = (val: any): val is Element => val instanceof Element;
 export const isObj = (val: any): val is Record<any, any> => {
-  const type = typeof val;
-
-  return !isArray(val) && (
-    type === 'object' &&
-    val != null ||
-    type === 'function'
-  );
+  return val && typeof val === 'object' && !isArray(val) && !isElement(val);
 }

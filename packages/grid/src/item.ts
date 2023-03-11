@@ -8,11 +8,13 @@ export interface GridItemConfig<T extends GridData> {
   data: T[];
   grid: Coordinate & Size;
   pad: Coordinate;
+  items: GridItem<T>[];
   create?: (item: GridItem<T>, element: HTMLElement) => HTMLElement;
   expand?: (item: GridItem<T>, data: GridItemConfig<T>['data'][0]) => boolean;
+  collapse?: (item: GridItem<T>) => boolean;
   find?: (
     item: GridItem<T>,
-    data: GridItemConfig<T>['data']
+    data: GridItemConfig<T>['data'],
   ) => GridItemConfig<T>['data'][0];
   resize?: (item: GridItem<T>) => void;
   translate?: (item: GridItem<T>) => void;
@@ -57,6 +59,10 @@ export class GridItem<T extends GridData> {
     return this.config.grid;
   }
 
+  get siblings(): GridItem<T>[] {
+    return this.config.items.filter(item => item !== this);
+  }
+
   isExpanded() {
     return this.expanded;
   }
@@ -78,7 +84,7 @@ export class GridItem<T extends GridData> {
   }
 
   find() {
-    if (this.config.find) {
+    if (isFunc(this.config.find)) {
       return this.config.find(this, this.config.data);
     }
 
@@ -89,7 +95,7 @@ export class GridItem<T extends GridData> {
     this.expanded = true;
     this.available = true;
 
-    if (this.config.expand) {
+    if (isFunc(this.config.expand)) {
       this.available = this.config.expand(this, this.find());
     }
 
@@ -100,8 +106,23 @@ export class GridItem<T extends GridData> {
     }
   }
 
+  collapse() {
+    this.expanded = false;
+    this.available = false;
+
+    let remove = true;
+
+    if (isFunc(this.config.collapse)) {
+      remove = this.config.collapse(this);
+    }
+
+    if (remove) {
+      this.config.root.removeChild(this.element);
+    }
+  }
+
   translate() {
-    if (this.config.translate) {
+    if (isFunc(this.config.translate)) {
       this.config.translate(this);
     } else {
       this.element.style.transform = `translate3d(
@@ -134,6 +155,10 @@ export class GridItem<T extends GridData> {
 
     if (visible && ! expanded) {
       this.expand();
+    }
+
+    if ( ! visible && expanded) {
+      this.collapse();
     }
 
     if (visible && this.reset) {

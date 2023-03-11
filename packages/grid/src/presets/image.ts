@@ -1,4 +1,4 @@
-import { isFunc } from '@smoovy/utils';
+import { isFunc, objectDeepMerge } from '@smoovy/utils';
 
 import { GridConfig } from '../config';
 import { GridData } from '../data';
@@ -9,45 +9,105 @@ export interface ImageGridData extends GridData {
   image: string;
 }
 
-export interface ImageGridConfig<T extends ImageGridData> extends GridConfig<T> {
-  onCreate?: (item: GridItem<T>, image: HTMLElement) => void;
-  onExpand?: (item: GridItem<T>, image: HTMLElement, data: T) => boolean;
+export interface ImageGridConfig<
+  T extends ImageGridData
+> extends GridConfig<T> {
+  image?: Partial<{
+    onCreate?: (item: GridItem<T>, image: HTMLElement) => void;
+    onExpand?: (item: GridItem<T>, image: HTMLElement, data: T) => boolean;
+    onLoad?: (item: GridItem<T>, image: HTMLElement, data: T) => boolean;
+    noStyles?: boolean;
+    autoLoad?: boolean;
+    classes?: Partial<{
+      cell: string;
+      image: string;
+      loading: string;
+      loaded: string;
+    }>;
+  }>
 }
 
 export function imageGrid<T extends ImageGridData>(config: ImageGridConfig<T>) {
-  return new Grid({
-    create: (item, element) => {
-      const image = document.createElement('div');
+  const imageCache = new Map<string, true>();
+  const handleLoad = (
+    item: GridItem<T>,
+    image: HTMLElement,
+    data: T
+  ) => {
+    const classes = config.image?.classes;
 
-      image.style.width = `100%`;
-      image.style.position = 'absolute';
-      image.style.backgroundSize = 'cover';
-      image.style.backgroundRepeat = 'no-repeat';
+    imageCache.set(data.image, true);
+    item.element.classList.add(classes?.loaded || 'is-loaded');
+    item.element.classList.remove(classes?.loading || 'is-loading');
 
-      if (isFunc(config.onCreate)) {
-        config.onCreate(item, image);
-      }
+    image.style.backgroundImage = `url(${data.image})`;
 
-      item.element.appendChild(image);
+    if (isFunc(config.image?.onLoad)) {
+      config.image?.onLoad(item, image, data);
+    }
+  };
 
-      return element;
-    },
-    expand: (item, data) => {
-      const image = item.element.firstElementChild as HTMLElement;
+  return new Grid<T>(objectDeepMerge({
+    ...config,
+    item: {
 
-      if (image) {
-        image.style.aspectRatio = `${data.width}/${data.height}`;
-        image.style.backgroundImage = `url(${data.image})`;
+      create: (item, element) => {
+        const image = document.createElement('div');
 
-        if (isFunc(config.onExpand)) {
-          return config.onExpand(item, image, data);
+        if (config.image?.noStyles !== true) {
+          image.style.width = `100%`;
+          image.style.position = 'absolute';
+          image.style.backgroundSize = 'cover';
+          image.style.backgroundRepeat = 'no-repeat';
         }
 
-        return true;
-      }
+        if (config.image?.classes && config.image?.classes.cell) {
+          element.classList.add(config.image?.classes.cell);
+        }
 
-      return false;
-    },
-    ...config
-  });
+        if (isFunc(config.image?.onCreate)) {
+          config.image?.onCreate(item, image);
+        }
+
+        item.element.appendChild(image);
+
+        return element;
+      },
+      expand: (item, data) => {
+        const image = item.element.firstElementChild as HTMLElement;
+
+        if (image) {
+          if (config.image?.classes?.image) {
+            image.classList.add(config.image.classes.image);
+          }
+
+          if (config.image?.noStyles !== true) {
+            image.style.aspectRatio = `${data.width}/${data.height}`;
+          }
+
+          if (config.image?.autoLoad !== false) {
+            if ( ! imageCache.has(data.image)) {
+              const element = new Image();
+              const classes = config.image?.classes;
+
+              image.classList.add(classes?.loading || 'is-loading');
+
+              element.onload = () => handleLoad(item, image, data);
+              element.src = data.image;
+            } else {
+              handleLoad(item, image, data);
+            }
+          }
+
+          if (config.image && isFunc(config.image?.onExpand)) {
+            return config.image.onExpand(item, image, data);
+          }
+
+          return true;
+        }
+
+        return false;
+      }
+    }
+  }, config));
 }
