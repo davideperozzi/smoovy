@@ -116,7 +116,7 @@ export class GridItem<T extends GridData> {
       remove = this.config.collapse(this);
     }
 
-    if (remove) {
+    if (remove && this.config.root.contains(this.element)) {
       this.config.root.removeChild(this.element);
     }
   }
@@ -168,5 +168,9 @@ export class GridItem<T extends GridData> {
     if ( ! outerBounds && this.expanded) {
       this.translate();
     }
+  }
+
+  destroy() {
+    this.collapse();
   }
 }

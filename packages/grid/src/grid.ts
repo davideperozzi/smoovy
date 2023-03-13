@@ -97,5 +97,8 @@ export class Grid<T extends GridData> {
     if (this.ticker) {
       this.ticker.kill();
     }
+
+    this.items.forEach(item => item.destroy());
+    this.items.length = 0;
   }
 }

@@ -1,5 +1,11 @@
 # @smoovy/utils
 
+## 1.0.2
+
+### Patch Changes
+
+- grid: added infinite grid
+
 ## 1.0.1
 
 ### Patch Changes

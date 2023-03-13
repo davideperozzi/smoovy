@@ -23,8 +23,7 @@ const grid = imageGrid({
       props.y = props.x + props.y;
 
       return props;
-    },
-    // collapse: () => false
+    }
   },
   image: {
     // onLoad: () => {
