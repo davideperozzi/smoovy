@@ -1,10 +1,10 @@
-import { Coordinate, isNum } from '@smoovy/utils';
+import { Coordinate, isNum, mapRange } from '@smoovy/utils';
 import { Ticker, TickerThread } from '@smoovy/ticker';
 
 import { GridConfig } from './config';
 import { GridData } from './data';
 import { GridItem } from './item';
-import { GridMesh } from './mesh';
+import { GridCell, GridMesh } from './mesh';
 
 export class Grid<T extends GridData> {
   private mesh: GridMesh;
@@ -29,14 +29,63 @@ export class Grid<T extends GridData> {
   }
 
   render() {
+    const colSize = this.mesh.getColSize();
+    const rowSize = this.mesh.getRowSize();
+
     for (let i = 0, len = this.items.length; i < len; i++) {
       const item = this.items[i];
+      let pos = { x: item.cell.x * colSize, y: item.cell.y * rowSize };
 
-      item.x = this.mesh.x(item.grid.x, this.translation.x);
-      item.y = this.mesh.y(item.grid.y, this.translation.y);
+      if (this.config.item?.map) {
+        pos = this.config.item.map(pos);
+      }
+
+      item.x = this.mesh.x(pos.x, this.translation.x);
+      item.y = this.mesh.y(pos.y, this.translation.y);
 
       item.render();
     }
+  }
+
+  recalc() {
+    const oldItems = this.items.slice();
+    const newItems: GridItem<T>[] = [];
+
+    this.items.length = 0;
+
+    this.mesh.recalc();
+    this.mesh.fill((cell) => {
+      if (this.config.item?.filter && ! this.config.item.filter(cell)) {
+        return;
+      }
+
+      const item = oldItems.find(item => (
+        item.cell.x === cell.x && item.cell.y === cell.y
+      ));
+
+      if (item) {
+        cell.index = item.cell.index;
+
+        item.update(cell);
+        newItems.push(item);
+      } else {
+        newItems.push(this.createItem(cell));
+      }
+    });
+
+    oldItems.forEach(item => {
+      if ( ! newItems.includes(item)) {
+        item.destroy();
+      }
+    });
+
+    this.items.push(...newItems);
+
+    for (let i = 0, len = this.items.length; i < len; i++) {
+      this.items[i].recalc();
+    }
+
+    this.render();
   }
 
   translate(pos: Partial<Coordinate>) {
@@ -50,28 +99,27 @@ export class Grid<T extends GridData> {
   }
 
   fill() {
-    this.mesh.fill((x, y, width, height, index) => {
-      const grid = { x, y, width, height };
-
-      if (this.config.item?.filter && ! this.config.item.filter(grid)) {
+    this.mesh.fill((cell) => {
+      if (this.config.item?.filter && ! this.config.item.filter(cell)) {
         return;
       }
 
-      const item = new GridItem({
-        index,
-        items: this.items,
-        root: this.config.root,
-        data: this.config.data,
-        grid: this.config.item?.map ? this.config.item.map(grid) : grid,
-        pad: { x: this.mesh.padSizeX, y: this.mesh.padSizeY },
-        expand: this.config.item?.expand,
-        find: this.config.item?.find,
-        create: this.config.item?.create,
-        translate: this.config.item?.translate,
-        collapse: this.config.item?.collapse
-      });
+      this.items.push(this.createItem(cell));
+    });
+  }
 
-      this.items.push(item);
+  createItem(cell: GridCell) {
+    return new GridItem({
+      cell,
+      items: this.items,
+      pad: this.mesh.padding,
+      root: this.config.root,
+      data: this.config.data,
+      expand: this.config.item?.expand,
+      find: this.config.item?.find,
+      create: this.config.item?.create,
+      translate: this.config.item?.translate,
+      collapse: this.config.item?.collapse
     });
   }
 

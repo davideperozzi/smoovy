@@ -2,7 +2,7 @@ import { Coordinate, Size } from '@smoovy/utils';
 
 import { GridData } from './data';
 import { GridItem, GridItemConfig } from './item';
-import { GridMeshFit } from './mesh';
+import { GridCell, GridMeshFit } from './mesh';
 
 export interface GridConfig<T extends GridData> {
   /**
@@ -15,7 +15,7 @@ export interface GridConfig<T extends GridData> {
    * If you want to have 4 columns and  4 rows you need to set the fit method to
    * `none`.
    */
-  size: number;
+  size: number | { [size: number]: number };
 
   /**
    * The size of the viewport. Most of the time you want this to be the size
@@ -88,14 +88,14 @@ export interface GridConfig<T extends GridData> {
      * want to change the position of the items a bit or go crazy with different
      * repeating patterns.
     */
-    map?: (grid: Coordinate & Size) => Coordinate & Size;
+    map?: (pos: Coordinate) => Coordinate;
 
     /**
      * Filter out items from the grid. This is useful if you want to render
      * only a subset of the items. This happens "on fill", so items you discard
      * will stay aways from the dom.
      */
-    filter?: (grid: Coordinate & Size) => boolean;
+    filter?: (cell: GridCell) => boolean;
 
     /**
      * This will be called when the item is created. Here you can define how

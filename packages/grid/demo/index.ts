@@ -12,23 +12,26 @@ const data = [
   { width: 1920, height: 1080, image: `https://source.unsplash.com/random/${1920}x${1080}` }
 ];
 
-// let first = false;
+const view = { width: 0, height: 0 };
 const grid = imageGrid({
-  view: { width: window.innerWidth, height: window.innerHeight },
-  size: 6,
+  // view: { width: window.innerWidth, height: window.innerHeight },
+  view,
+  size: {
+    0: 2,
+    420: 3,
+    768: 4,
+    1024: 6
+  },
   root,
   data,
   item: {
-    map: (props) => {
-      props.y = props.x + props.y;
+    map: (pos) => {
+      pos.y = pos.x + pos.y;
 
-      return props;
+      return pos;
     }
   },
   image: {
-    // onLoad: () => {
-
-    // },
     onExpand: (item, image) => {
       const scale = `${0.3 + Math.random() * 0.7}`;
 
@@ -41,6 +44,22 @@ const grid = imageGrid({
     }
   }
 });
+
+setTimeout(() => {
+  view.width = window.innerWidth;
+  view.height = window.innerHeight;
+
+  grid.recalc();
+}, 500);
+
+window.onresize = () => {
+  setTimeout(() => {
+    view.width = window.outerWidth;
+    view.height = window.outerHeight;
+
+    grid.recalc();
+  });
+};
 
 /** Controls */
 const element = { container: document.documentElement, wrapper: root };

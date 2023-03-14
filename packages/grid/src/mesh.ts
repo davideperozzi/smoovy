@@ -1,4 +1,4 @@
-import { mod, Size } from '@smoovy/utils';
+import { Coordinate, isDef, isNum, mod, Size } from '@smoovy/utils';
 
 export enum GridMeshFit {
   WIDTH = 'w',
@@ -7,16 +7,21 @@ export enum GridMeshFit {
 }
 
 export interface GridMeshConfig {
+  size: number | { [size: number]: number };
   fit?: GridMeshFit;
   view?: Size;
   data?: Size[];
   pad?: number;
-  size: number;
+}
+
+export interface GridCell extends Size, Coordinate {
+  index: number;
 }
 
 export class GridMesh {
   private rowSize?: number;
   private colSize?: number;
+  public padding: Coordinate = { x: 0, y: 0 };
 
   constructor(
     private config: GridMeshConfig,
@@ -27,7 +32,25 @@ export class GridMesh {
   }
 
   get size() {
-    return this.config.size;
+    if (isNum(this.config.size)) {
+      return this.config.size;
+    }
+
+    const keys = Object.keys(this.config.size).map(k => parseInt(k));
+    const sizes = keys.sort((a, b) => a - b);
+    const screen = this.fit === GridMeshFit.WIDTH
+      ? this.view.width
+      : this.view.height;
+
+    for (let i = 0, len = sizes.length; i < len; i++) {
+      if (screen < sizes[i]) {
+        const prevSize = sizes[i - 1];
+
+        return this.config.size[isDef(prevSize) ? prevSize : sizes[0]];
+      }
+    }
+
+    return this.config.size[Math.max(...keys)];
   }
 
   get view() {
@@ -61,9 +84,11 @@ export class GridMesh {
     return this.view.height / this.view.width;
   }
 
-  update() {
+  recalc() {
     this.rowSize = undefined;
     this.colSize = undefined;
+    this.padding.x = this.padSizeX;
+    this.padding.y = this.padSizeY;
   }
 
   repeat(pos: number, translate = 0, padding = 0, size = 0) {
@@ -162,13 +187,7 @@ export class GridMesh {
     return this.rowSize;
   }
 
-  fill(cb: (
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    i: number
-  ) => void) {
+  fill(cb: (cell: GridCell) => void) {
     const colSize = this.getColSize();
     const colCount = this.getColCount();
     const rowSize = this.getRowSize();
@@ -177,7 +196,13 @@ export class GridMesh {
 
     for (let y = -this.pad; y < rowCount + this.pad; y++) {
       for (let x = -this.pad; x < colCount + this.pad; x++) {
-        cb(x * colSize, y * rowSize, colSize, rowSize, index++);
+        cb({
+          x,
+          y,
+          width: colSize,
+          height: rowSize,
+          index: index++
+        });
       }
     }
   }

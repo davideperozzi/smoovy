@@ -1,13 +1,13 @@
-import { Coordinate, isFunc, Size } from '@smoovy/utils';
+import { Coordinate, isFunc } from '@smoovy/utils';
 
 import { GridData } from './data';
+import { GridCell } from './mesh';
 
 export interface GridItemConfig<T extends GridData> {
-  index: number;
   root: HTMLElement;
   data: T[];
-  grid: Coordinate & Size;
   pad: Coordinate;
+  cell: GridCell;
   items: GridItem<T>[];
   create?: (item: GridItem<T>, element: HTMLElement) => HTMLElement;
   expand?: (item: GridItem<T>, data: GridItemConfig<T>['data'][0]) => boolean;
@@ -26,20 +26,16 @@ export class GridItem<T extends GridData> {
   private available = false;
   x = 0;
   y = 0;
-  padX = 0;
-  padY = 0;
-  width = 0;
-  height = 0;
   element: HTMLElement;
   data?: T;
 
   constructor(
     private readonly config: GridItemConfig<T>
   ) {
-    this.x = config.grid.x;
-    this.y = config.grid.y;
-    this.width = config.grid.width;
-    this.height = config.grid.height;
+    // this.x = config.cell.x;
+    // this.y = config.cell.y;
+    // this.width = config.cell.width;
+    // this.height = config.cell.height;
     this.element = document.createElement('div');
 
     this.element.style.position = 'absolute';
@@ -51,16 +47,20 @@ export class GridItem<T extends GridData> {
     }
   }
 
-  get index() {
-    return this.config.index;
-  }
-
-  get grid() {
-    return this.config.grid;
+  get cell() {
+    return this.config.cell;
   }
 
   get siblings(): GridItem<T>[] {
     return this.config.items.filter(item => item !== this);
+  }
+
+  get width() {
+    return this.cell.width;
+  }
+
+  get height() {
+    return this.cell.height;
   }
 
   isExpanded() {
@@ -83,12 +83,20 @@ export class GridItem<T extends GridData> {
     );
   }
 
+  update(cell: GridCell) {
+    this.config.cell = cell;
+  }
+
+  recalc() {
+    this.resize();
+  }
+
   find() {
     if (isFunc(this.config.find)) {
       return this.config.find(this, this.config.data);
     }
 
-    return this.config.data[this.index % this.config.data.length];
+    return this.config.data[this.cell.index % this.config.data.length];
   }
 
   expand() {
