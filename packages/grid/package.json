@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/grid",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "scrollable infinite grid handler",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
