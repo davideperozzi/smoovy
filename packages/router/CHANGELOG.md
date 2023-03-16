@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.0.2
+
+### Patch Changes
+
+- router: added hash navigation functionality
+
 ## 1.0.1
 
 ### Patch Changes

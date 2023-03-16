@@ -11,8 +11,8 @@ const router = new Router(
 );
 
 router.on(RouterEvent.NAVIGATION_END, () => {
-  console.log('ENDEDEDED');
-  console.log(router.state.current!.url);
+  // console.log('ENDEDEDED');
+  console.log(router.url, router.hash);
 });
 
 document.querySelectorAll('a').forEach(link => {
@@ -20,7 +20,7 @@ document.querySelectorAll('a').forEach(link => {
     event.preventDefault();
 
     const target = event.currentTarget as HTMLAnchorElement;
-    console.log(target.href);
+    // console.log(target.href);
 
     router.navigate(target.href);
   });

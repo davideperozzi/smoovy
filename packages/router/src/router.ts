@@ -10,10 +10,11 @@ import { RouterTransition } from './transition';
 export interface Route {
   url: string;
   load: string;
+  hash?: string;
 }
 
 export interface RouterState {
-  current?: Route;
+  current: Route;
 }
 
 export interface RouteChangeEvent {
@@ -49,7 +50,7 @@ export interface RouterConfig {
 export class Router extends EventEmitter {
   public outlet?: RouterOutlet;
   private baseUrl: BrowserUrl;
-  private _state: RouterState = {};
+  private _state: RouterState = { current: { url: '', load: '' } };
   private fetch?: GoFetch;
   private pendingEvent?: RouteChangeEvent;
   private unlistenPopstate?: Unlisten;
@@ -91,7 +92,8 @@ export class Router extends EventEmitter {
 
   private init() {
     const route = {
-      url: `${this.baseUrl.pathname}${this.baseUrl.search}${this.baseUrl.hash}`,
+      url: `${this.baseUrl.pathname}${this.baseUrl.search}`,
+      hash: this.baseUrl.hash,
       load: serializeUrl(this.baseUrl)
     };
 
@@ -151,6 +153,14 @@ export class Router extends EventEmitter {
     emptyConstraints.forEach(constr => this.transitions.delete(constr));
   }
 
+  public get url() {
+    return this.state.current.url;
+  }
+
+  public get hash() {
+    return this.state.current.hash;
+  }
+
   public replace(route: Route | string, history = false) {
     if (typeof route === 'string') {
       route = this.routeFromUrl(route);
@@ -159,7 +169,7 @@ export class Router extends EventEmitter {
     this._state.current = route;
 
     if (history) {
-      window.history.replaceState(route, '', route.url);
+      window.history.replaceState(route, '', route.url + (route.hash || ''));
     }
   }
 
@@ -171,7 +181,7 @@ export class Router extends EventEmitter {
     this._state.current = route;
 
     if (history) {
-      window.history.pushState(route, '', route.url);
+      window.history.pushState(route, '', route.url + (route.hash || ''));
     }
   }
 
@@ -265,8 +275,9 @@ export class Router extends EventEmitter {
     const url = parseUrl(loadUrl);
 
     return {
-      url: `${url.pathname}${url.search}${url.hash}`,
-      load: loadUrl,
+      url: `${url.pathname}${url.search}`,
+      hash: url.hash,
+      load: loadUrl
     } as Route;
   }
 
@@ -307,7 +318,10 @@ export class Router extends EventEmitter {
       throw new Error('No initial route found!');
     }
 
-    if (this._state.current && this._state.current.url === toRoute.url) {
+    const urlChanged = this._state.current.url !== toRoute.url;
+    const hashChanged = this._state.current.hash !== toRoute.hash;
+
+    if ( ! urlChanged && ! hashChanged) {
       return;
     }
 
@@ -330,7 +344,11 @@ export class Router extends EventEmitter {
     );
 
     this.push(toRoute, useHistory);
-    await this.loadContent(this.pendingEvent);
+
+    if (urlChanged) {
+      await this.loadContent(this.pendingEvent);
+    }
+
     this.emit<RouteChangeEvent>(RouterEvent.NAVIGATION_END, this.pendingEvent);
     delete this.pendingEvent;
   }

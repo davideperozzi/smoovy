@@ -134,7 +134,7 @@ router.addTransition(new SampleTransition());
 ```
 or register them inside the config
 ```js
-new Router(window.location.href), {
+new Router(window.location.href, {
   transitions: [
     new SampleTranistion()
   ]
