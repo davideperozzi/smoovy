@@ -61,7 +61,7 @@ const defaultConfig = {
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
-  const cfg = Object.assign(defaultConfig, config);
+  const cfg = Object.assign({ ...defaultConfig }, config);
 
   return (scroller) => {
     const doc = document.documentElement;

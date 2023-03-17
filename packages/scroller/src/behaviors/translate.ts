@@ -59,7 +59,7 @@ const updateTransform = (
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
-  const cfg = Object.assign(defaultConfig, config);
+  const cfg = Object.assign({ ...defaultConfig }, config);
   const firefoxFix = cfg.firefoxFix && Browser.firefox;
 
   return (scroller) => {

@@ -23,7 +23,7 @@ const defaultConfig = {
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
-  const cfg = Object.assign(defaultConfig, config);
+  const cfg = Object.assign({ ...defaultConfig }, config);
   const self: ReturnType<ScrollBehavior> = (scroller) => {
     const target = cfg.target || window;
     const detachedBehaviors: string[] = [];

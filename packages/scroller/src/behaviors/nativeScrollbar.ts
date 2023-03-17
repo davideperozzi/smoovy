@@ -45,7 +45,7 @@ const defaultConfig: Config = {
 };
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
-  const cfg = Object.assign(defaultConfig, config);
+  const cfg = Object.assign({ ...defaultConfig }, config);
 
   return (scroller) => {
     let locked = false;
