@@ -30,6 +30,7 @@ export const hybridSmoothScroll = (
     ...config.native
   }),
   clampContent: clampContent({
+    useScrollSize: true,
     container: Browser.client ? window : undefined,
     ...(config.clamp || {})
   }),

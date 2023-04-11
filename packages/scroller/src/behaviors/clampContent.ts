@@ -7,15 +7,26 @@ import { ScrollBehavior, ScrollerEvent } from '../core';
 interface Config {
   /**
    * The wrapper to use for clamp calculations
+   *
    * Default: scroller.dom.container
    */
   container?: HTMLElement | Window;
 
   /**
    * The wrapper to use for clamp calculations
+   *
    * Default: scroller.dom.wrapper
    */
   wrapper?: HTMLElement | Window;
+
+  /**
+   * This will use `scrollWidth` and `scrollHeight` on the wrapper to determine
+   * the max scroll values. This can be useful if you're using a hybrid native
+   * scrolling technique
+   *
+   * Default: false
+   */
+  useScrollSize?: boolean;
 }
 
 const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
@@ -26,6 +37,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
   const container = config.container
     ? observe(config.container, { resizeDetection: true })
     : dom.container;
+  const native = config.useScrollSize && ! (wrapper.ref instanceof Window);
 
   if (config.container) {
     container.update();
@@ -39,8 +51,9 @@ const behavior: ScrollBehavior<Config> = (config = {}) => (scroller) => {
     scroller.on<Coordinate>(
       ScrollerEvent.TRANSFORM_VIRTUAL,
       (virtual) => {
-        const maxScrollX = Math.max(wrapper.width - container.width, 0);
-        const maxScrollY = Math.max(wrapper.height - container.height, 0);
+        const size = native ? wrapper.scrollSize : wrapper.size;
+        const maxScrollX = Math.max(size.width - container.width, 0);
+        const maxScrollY = Math.max(size.height - container.height, 0);
 
         return {
           x: clamp(virtual.x, 0, maxScrollX),

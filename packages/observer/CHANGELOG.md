@@ -1,5 +1,11 @@
 # @smoovy/observer
 
+## 1.0.5
+
+### Patch Changes
+
+- observer: added scrollSize
+
 ## 1.0.4
 
 ### Patch Changes

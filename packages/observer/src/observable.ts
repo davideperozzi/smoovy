@@ -119,6 +119,8 @@ export class Observable<
   private _top = 0;
   private _width = 0;
   private _height = 0;
+  private _scrollWidth = 0;
+  private _scrollHeight = 0;
   private _visible = false;
 
   private static handleEntries<E extends { target: Element }>(
@@ -209,6 +211,18 @@ export class Observable<
 
   get height() {
     return this._height;
+  }
+
+  get scrollWidth() {
+    return this._scrollWidth;
+  }
+
+  get scrollHeight() {
+    return this._scrollHeight;
+  }
+
+  get scrollSize() {
+    return { width: this.scrollWidth, height: this.scrollHeight };
   }
 
   get size() {
@@ -366,6 +380,11 @@ export class Observable<
       this._top = rect.top;
       this._width = rect.width;
       this._height = rect.height;
+
+      if (this.ref instanceof Element) {
+        this._scrollHeight = this.ref.scrollHeight;
+        this._scrollWidth = this.ref.scrollWidth;
+      }
 
       this.emit(ObservableEventType.DIMENSIONS_CHANGE, this);
     }
