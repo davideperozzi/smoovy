@@ -31,7 +31,6 @@ export const hybridSmoothScroll = (
   }),
   clampContent: clampContent({
     container: Browser.client ? window : undefined,
-    wrapper: Browser.client ? document.body : undefined,
     ...(config.clamp || {})
   }),
   ...(config.behaviors || {})

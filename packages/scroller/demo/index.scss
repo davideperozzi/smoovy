@@ -26,6 +26,15 @@ html:not(.scroller-hybrid) {
   }
 }
 
+body::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: black;
+}
+
 section {
   width: 100%;
   display: block;
@@ -44,8 +53,32 @@ section {
   }
 
   @each $name, $size in $sizes {
-    &.#{$name} {
+    html:not(.scrolldir-horizontal) &.#{$name} {
       height: $size;
+    }
+
+    html.scrolldir-horizontal &.#{$name} {
+      width: $size;
+      height: 100%;
+    }
+  }
+}
+
+html.scrolldir-horizontal {
+  height: 100%;
+
+  body,
+  main,
+  .smoovy-wrapper {
+    height: 100%;
+  }
+
+  .smoovy-wrapper,
+  main {
+    display: inline-flex;
+
+    section {
+      flex-shrink: 0;
     }
   }
 }

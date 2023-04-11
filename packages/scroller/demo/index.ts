@@ -3,7 +3,7 @@ import * as dat from 'dat.gui';
 import { queryEl } from '@smoovy/utils';
 
 import {
-  hybridSmoothScroll, nativeSmoothScroll, Scroller, smoothScroll,
+  hybridSmoothScroll, nativeSmoothScroll, Scroller, ScrollerEvent, smoothScroll,
 } from '../src';
 
 function createScroller(type: string) {
@@ -38,25 +38,52 @@ function createScroller(type: string) {
       scroller = hybridSmoothScroll({
         element: {
           container: document.documentElement,
-          wrapper: document.body
+          wrapper: document.querySelector('main')!
+        }
+      }, {
+        behaviors: {
+          remap: (scroller) => {
+            return scroller.on(ScrollerEvent.TRANSFORM_DELTA, (delta: any) => {
+              delta.x += delta.y;
+
+              return delta;
+            });
+          }
         }
       });
       break;
   }
 }
 
+function updateDirection(dir: string) {
+  document.documentElement.classList.forEach(cls => {
+    if (cls.startsWith('scrolldir-')) {
+      document.documentElement.classList.remove(cls);
+    }
+  });
+
+  document.documentElement.classList.add(`scrolldir-${dir}`)
+}
+
 let scroller: Scroller | undefined;
 const gui = new dat.GUI();
 const config = {
   scroller: {
-    type: 'default'
-  }
+    dir: 'horizontal',
+    type: 'hybrid',
+  },
 };
 
 createScroller(config.scroller.type);
+updateDirection(config.scroller.dir);
 
 gui.add(config.scroller, 'type', {
   Default: 'default',
   Native: 'native',
   Hybrid: 'hybrid'
 }).onChange((type) => createScroller(type));
+
+gui.add(config.scroller, 'dir', {
+  Vertical: '',
+  Horizontal: 'horizontal'
+}).onChange((dir) => updateDirection(dir));

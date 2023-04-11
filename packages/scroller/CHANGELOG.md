@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 1.0.6
+
+### Patch Changes
+
+- fix: hybrid horizontal scrolling clamp
+
 ## 1.0.5
 
 ### Patch Changes
