@@ -1,5 +1,11 @@
 # @smoovy/listener
 
+## 1.0.2
+
+### Patch Changes
+
+- listener: added `listenOnce`
+
 ## 1.0.1
 
 ### Patch Changes
