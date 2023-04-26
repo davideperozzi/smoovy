@@ -44,7 +44,7 @@ This will throttle the update callback to **100ms**:
 ```js
 import { throttle } from '@smoovy/utils/throttle';
 
-const observable = observe(window).onChnage(
+const observable = observe(window).onChange(
   throttle(() => {}, 100)
 );
 ```
