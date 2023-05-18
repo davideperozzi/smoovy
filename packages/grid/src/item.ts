@@ -32,10 +32,6 @@ export class GridItem<T extends GridData> {
   constructor(
     private readonly config: GridItemConfig<T>
   ) {
-    // this.x = config.cell.x;
-    // this.y = config.cell.y;
-    // this.width = config.cell.width;
-    // this.height = config.cell.height;
     this.element = document.createElement('div');
 
     this.element.style.position = 'absolute';
@@ -65,6 +61,10 @@ export class GridItem<T extends GridData> {
 
   isExpanded() {
     return this.expanded;
+  }
+
+  isAvailable() {
+    return this.available;
   }
 
   isOuterBounds() {

@@ -1,5 +1,11 @@
 # @smoovy/grid
 
+## 0.0.4
+
+### Patch Changes
+
+- grid: added `isAvailable` to grid item
+
 ## 0.0.3
 
 ### Patch Changes
