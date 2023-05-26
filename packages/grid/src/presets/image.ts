@@ -13,9 +13,10 @@ export interface ImageGridConfig<
   T extends ImageGridData
 > extends GridConfig<T> {
   image?: Partial<{
-    onCreate?: (item: GridItem<T>, image: HTMLElement) => void;
+    onCreate?: (item: GridItem<T>, image: HTMLElement) => void | HTMLElement;
     onExpand?: (item: GridItem<T>, image: HTMLElement, data: T) => boolean;
     onLoad?: (item: GridItem<T>, image: HTMLElement, data: T) => boolean;
+    selector?: string;
     noStyles?: boolean;
     autoLoad?: boolean;
     classes?: Partial<{
@@ -66,7 +67,13 @@ export function imageGrid<T extends ImageGridData>(config: ImageGridConfig<T>) {
         }
 
         if (isFunc(config.image?.onCreate)) {
-          config.image?.onCreate(item, image);
+          const retElement = config.image?.onCreate(item, image);
+
+          if (retElement instanceof HTMLElement) {
+            item.element.appendChild(retElement);
+
+            return element;
+          }
         }
 
         item.element.appendChild(image);
@@ -74,7 +81,9 @@ export function imageGrid<T extends ImageGridData>(config: ImageGridConfig<T>) {
         return element;
       },
       expand: (item, data) => {
-        const image = item.element.firstElementChild as HTMLElement;
+        const image = config.image?.selector
+          ? item.element.querySelector<HTMLElement>(config.image.selector)
+          : item.element.firstElementChild as HTMLElement;
 
         if (image) {
           if (config.image?.classes?.image) {

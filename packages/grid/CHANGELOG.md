@@ -1,5 +1,11 @@
 # @smoovy/grid
 
+## 0.0.5
+
+### Patch Changes
+
+- feat(grid): improved image preset config
+
 ## 0.0.4
 
 ### Patch Changes
