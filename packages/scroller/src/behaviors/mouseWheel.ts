@@ -1,5 +1,5 @@
 import { listenCompose, listen } from '@smoovy/listener';
-import { Browser } from '@smoovy/utils';
+import { Browser, isFunc } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
 
@@ -20,20 +20,20 @@ interface Config {
    * The multiplier used on the delta value.
    * Default: 1
    */
-  multiplier?: number;
+  multiplier?: number | (() => number);
 
   /**
    * The multiplier used on the delta value for firefox browsers
    * Default: 25
    */
-  multiplierFirefox?: number;
+  multiplierFirefox?: number | (() => number);
 
   /**
    * Whether to enable platform multiplier. This detects which platform is
    * being used and adjusts the given multiplier
    * Default: true
    */
-  enablePlatformMultiplier?: boolean;
+  enablePlatformMultiplier?: boolean | (() => number);
 }
 
 const defaultConfig = {
@@ -45,6 +45,17 @@ const defaultConfig = {
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = Object.assign({ ...defaultConfig }, config);
+  const multiplier = {
+    delta: isFunc(cfg.multiplier)
+      ? cfg.multiplier
+      : () => cfg.multiplier,
+    firefox: isFunc(cfg.multiplierFirefox)
+      ? cfg.multiplierFirefox
+      : () => cfg.multiplierFirefox,
+    enablePlatform: isFunc(cfg.enablePlatformMultiplier)
+      ? cfg.enablePlatformMultiplier
+      : () => cfg.enablePlatformMultiplier
+  };
 
   return (scroller) => {
     const target = cfg.target || document.documentElement;
@@ -56,18 +67,18 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
         event.preventDefault();
       }
 
-      if (config.enablePlatformMultiplier && ! Browser.windows) {
+      if (multiplier.enablePlatform() && ! Browser.windows) {
         ratio = 0.4;
       }
 
       delta.x = event.deltaX * -1;
       delta.y = event.deltaY * -1;
-      delta.x *= cfg.multiplier * ratio;
-      delta.y *= cfg.multiplier * ratio;
+      delta.x *= multiplier.delta() * ratio;
+      delta.y *= multiplier.delta() * ratio;
 
       if (Browser.firefox && event.deltaMode === 1) {
-        delta.x *= cfg.multiplierFirefox;
-        delta.y *= cfg.multiplierFirefox;
+        delta.x *= multiplier.firefox();
+        delta.y *= multiplier.firefox();
       }
 
       scroller.emit(ScrollerEvent.DELTA, delta);

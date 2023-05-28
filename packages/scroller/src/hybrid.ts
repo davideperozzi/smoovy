@@ -3,7 +3,7 @@ import { Browser } from '@smoovy/utils';
 import bypassNative, { BypassNativeConfig } from './behaviors/bypassNative';
 import clampContent, { ClampContentConfig } from './behaviors/clampContent';
 import lerpContent, { LerpContentConfig } from './behaviors/lerpContent';
-import mouseWheel from './behaviors/mouseWheel';
+import mouseWheel, { MouseWheelConfig } from './behaviors/mouseWheel';
 import scrollContent from './behaviors/scrollContent';
 import scrollTo, { ScrollToConfig } from './behaviors/scrollTo';
 import { ScrollBehaviorItem, Scroller, ScrollerDomType } from './core';
@@ -14,12 +14,13 @@ export const hybridSmoothScroll = (
     lerp?: LerpContentConfig,
     scrollTo?: ScrollToConfig,
     native?: BypassNativeConfig,
+    mouse?: MouseWheelConfig,
     clamp?: ClampContentConfig,
     behaviors?: { [name: string]: ScrollBehaviorItem },
   } = {}
 ) => new Scroller(dom, {
   lerpContent: lerpContent(config.lerp),
-  mouseWheel: mouseWheel(),
+  mouseWheel: mouseWheel(config.mouse),
   scrollContent: scrollContent(),
   scrollTo: scrollTo({
     nativeTarget: Browser.client ? window : undefined,

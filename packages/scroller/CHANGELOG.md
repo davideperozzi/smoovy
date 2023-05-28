@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 1.0.8
+
+### Patch Changes
+
+- feat: added dynamic options to behaviors
+
 ## 1.0.7
 
 ### Patch Changes

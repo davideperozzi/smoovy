@@ -1,6 +1,6 @@
 import { listenCompose, listen } from '@smoovy/listener';
 import { Ticker } from '@smoovy/ticker';
-import { between, lerp } from '@smoovy/utils';
+import { between, isFunc, lerp } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
 
@@ -21,19 +21,19 @@ interface Config {
    * The multiplier used on the delta value
    * Default: 1
    */
-  deltaMultiplier?: number;
+  deltaMultiplier?: number | (() => number);
 
   /**
    * The multiplier used on the velocity values.
    * Default: 20
    */
-  velocityMultiplier?: number;
+  velocityMultiplier?: number | (() => number);
 
   /**
    * The inertia (damping) applied to the velocity
    * Default: 0.08
    */
-  velocityDamping?: number;
+  velocityDamping?: number | (() => number);
 
   /**
    * The minimum threshold range to enter before
@@ -41,7 +41,7 @@ interface Config {
    * the momentum animation
    * Default: 2
    */
-  minimumThreshold?: number;
+  minimumThreshold?: number | (() => number);
 
   /**
    * Whether to enable mouse events or not
@@ -62,6 +62,19 @@ const defaultConfig = {
 
 const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = Object.assign({ ...defaultConfig }, config);
+  const deltaMultiplier = isFunc(cfg.deltaMultiplier)
+    ? cfg.deltaMultiplier
+    : () => cfg.deltaMultiplier;
+  const velocityDamping = isFunc(cfg.velocityDamping)
+    ? cfg.velocityDamping
+    : () => cfg.velocityDamping;
+  const velocityMultiplier = isFunc(cfg.velocityMultiplier)
+    ? cfg.velocityMultiplier
+    : () => cfg.velocityMultiplier;
+  const minimumThreshold = isFunc(cfg.minimumThreshold)
+    ? cfg.minimumThreshold
+    : () => cfg.minimumThreshold;
+
 
   return (scroller) => {
     const doc = document.documentElement;
@@ -69,7 +82,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     const ticker = new Ticker();
     const startPos = { x: 0, y: 0 };
     const velocity = { x: 0, y: 0 };
-    const threshold = cfg.minimumThreshold;
+    const threshold = minimumThreshold();
     let lastMove = 0;
     let down = false;
 
@@ -96,8 +109,8 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
       if (down) {
         if (velocity.x !== 0 || velocity.y !== 0) {
           ticker.add((_delta, _time, kill) => {
-            velocity.x = lerp(velocity.x, 0, cfg.velocityDamping);
-            velocity.y = lerp(velocity.y, 0, cfg.velocityDamping);
+            velocity.x = lerp(velocity.x, 0, velocityDamping());
+            velocity.y = lerp(velocity.y, 0, velocityDamping());
             velocity.x = isFinite(velocity.x) ? velocity.x : 0;
             velocity.y = isFinite(velocity.y) ? velocity.y : 0;
 
@@ -126,15 +139,15 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
         const delta = { x: 0, y: 0 };
         const pos = getPosition(event);
 
-        delta.x = (pos.pageX - startPos.x) * cfg.deltaMultiplier;
-        delta.y = (pos.pageY - startPos.y) * cfg.deltaMultiplier;
+        delta.x = (pos.pageX - startPos.x) * deltaMultiplier();
+        delta.y = (pos.pageY - startPos.y) * deltaMultiplier();
 
         const deltaTime = Ticker.now() - lastMove;
 
         velocity.x = (startPos.x - pos.pageX) / deltaTime;
         velocity.y = (startPos.y - pos.pageY) / deltaTime;
-        velocity.x *= -1 * cfg.velocityMultiplier;
-        velocity.y *= -1 * cfg.velocityMultiplier;
+        velocity.x *= -1 * velocityMultiplier();
+        velocity.y *= -1 * velocityMultiplier();
 
         startPos.x = pos.pageX;
         startPos.y = pos.pageY;
