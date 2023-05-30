@@ -1,5 +1,5 @@
-import { Coordinate, isNum, mapRange } from '@smoovy/utils';
 import { Ticker, TickerThread } from '@smoovy/ticker';
+import { Coordinate, isNum } from '@smoovy/utils';
 
 import { GridConfig } from './config';
 import { GridData } from './data';
@@ -7,8 +7,8 @@ import { GridItem } from './item';
 import { GridCell, GridMesh } from './mesh';
 
 export class Grid<T extends GridData> {
-  private mesh: GridMesh;
-  private items: GridItem<T>[] = [];
+  readonly mesh: GridMesh;
+  private _items: GridItem<T>[] = [];
   private translation: Coordinate = { x: 0, y: 0 };
   private ticker?: Ticker;
   private thread?: TickerThread;
@@ -28,12 +28,16 @@ export class Grid<T extends GridData> {
     }
   }
 
+  get items() {
+    return this._items;
+  }
+
   render() {
     const colSize = this.mesh.getColSize();
     const rowSize = this.mesh.getRowSize();
 
-    for (let i = 0, len = this.items.length; i < len; i++) {
-      const item = this.items[i];
+    for (let i = 0, len = this._items.length; i < len; i++) {
+      const item = this._items[i];
       let pos = { x: item.cell.x * colSize, y: item.cell.y * rowSize };
 
       if (this.config.item?.map) {
@@ -48,7 +52,7 @@ export class Grid<T extends GridData> {
   }
 
   recalc() {
-    const oldItems = this.items.slice();
+    const oldItems = this._items.slice();
     const newItems: GridItem<T>[] = [];
 
     this.items.length = 0;
@@ -81,7 +85,7 @@ export class Grid<T extends GridData> {
 
     this.items.push(...newItems);
 
-    for (let i = 0, len = this.items.length; i < len; i++) {
+    for (let i = 0, len = this._items.length; i < len; i++) {
       this.items[i].recalc();
     }
 

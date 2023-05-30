@@ -1,5 +1,11 @@
 # @smoovy/grid
 
+## 0.0.6
+
+### Patch Changes
+
+- feat: added getters for mesh and items
+
 ## 0.0.5
 
 ### Patch Changes
