@@ -28,6 +28,7 @@ export class GridItem<T extends GridData> {
   y = 0;
   element: HTMLElement;
   data?: T;
+  dataIndex = -1;
 
   constructor(
     private readonly config: GridItemConfig<T>
@@ -102,9 +103,11 @@ export class GridItem<T extends GridData> {
   expand() {
     this.expanded = true;
     this.available = true;
+    this.data = this.find();
+    this.dataIndex = this.config.data.indexOf(this.data);
 
     if (isFunc(this.config.expand)) {
-      this.available = this.config.expand(this, this.find());
+      this.available = this.config.expand(this, this.data);
     }
 
     if (this.available) {
@@ -117,6 +120,8 @@ export class GridItem<T extends GridData> {
   collapse() {
     this.expanded = false;
     this.available = false;
+    this.data = undefined;
+    this.dataIndex = -1;
 
     let remove = true;
 

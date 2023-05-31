@@ -51,7 +51,6 @@ export function imageGrid<T extends ImageGridData>(config: ImageGridConfig<T>) {
   return new Grid<T>(objectDeepMerge({
     ...config,
     item: {
-
       create: (item, element) => {
         const image = document.createElement('div');
 

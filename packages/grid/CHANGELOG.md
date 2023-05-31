@@ -1,5 +1,11 @@
 # @smoovy/grid
 
+## 0.0.7
+
+### Patch Changes
+
+- feat: added data assignment to item
+
 ## 0.0.6
 
 ### Patch Changes
