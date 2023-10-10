@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.0.3
+
+### Patch Changes
+
+- feat(router): added navStart and navEnd to transition
+
 ## 1.0.2
 
 ### Patch Changes
