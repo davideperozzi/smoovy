@@ -22,6 +22,10 @@ export class FadeTransition extends RouterTransition {
     }
   }
 
+
+  public async navStart() {}
+  public async navEnd() {}
+
   public async afterEnter() {}
   public async beforeLeave() {}
 

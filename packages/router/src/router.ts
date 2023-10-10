@@ -5,24 +5,11 @@ import {
 } from '@smoovy/utils';
 
 import { RouterOutlet } from './outlet';
-import { RouterTransition } from './transition';
-
-export interface Route {
-  url: string;
-  load: string;
-  hash?: string;
-}
+import { Route, RouteChangeEvent } from './route';
+import { processTransitions, RouterTransition } from './transition';
 
 export interface RouterState {
   current: Route;
-}
-
-export interface RouteChangeEvent {
-  from: Route;
-  to: Route;
-  error?: any;
-  payload?: HTMLDivElement;
-  trigger: 'popstate' | 'user';
 }
 
 export interface NavigateConfig {
@@ -203,7 +190,10 @@ export class Router extends EventEmitter {
     };
   }
 
-  private async loadContent(event: RouteChangeEvent) {
+  private async loadContent(
+    event: RouteChangeEvent,
+    transitions?: RouterTransition[]
+  ) {
     if (this.fetch) {
       if  (this.fetch.controller) {
         this.fetch.controller.abort();
@@ -247,24 +237,32 @@ export class Router extends EventEmitter {
       );
 
       if (this.outlet) {
-        const transitions: RouterTransition[] = [];
-
-        this.transitions.forEach((trans, pattern) => {
-          const parts = pattern.split('=>');
-          const fromPattern = new RegExp(`^${parts[0].trim()}$`, 'gi');
-          const toPattern = new RegExp(`^${parts[1].trim()}$`, 'gi');
-
-          if (
-            fromPattern.test(event.from.url) &&
-            toPattern.test(event.to.url)
-          ) {
-            transitions.push(...trans);
-          }
-        });
-
-        await this.outlet.update(prepared.element, transitions, event.trigger);
+        await this.outlet.update(
+          prepared.element,
+          transitions,
+          event.trigger
+        );
       }
     }
+  }
+
+  private getTransitions(from: Route, to: Route) {
+    const transitions: RouterTransition[] = [];
+
+    this.transitions.forEach((trans, pattern) => {
+      const parts = pattern.split('=>');
+      const fromPattern = new RegExp(`^${parts[0].trim()}$`, 'gi');
+      const toPattern = new RegExp(`^${parts[1].trim()}$`, 'gi');
+
+      if (
+        fromPattern.test(from.url) &&
+        toPattern.test(to.url)
+      ) {
+        transitions.push(...trans);
+      }
+    });
+
+    return transitions;
   }
 
   public get state() {
@@ -332,24 +330,37 @@ export class Router extends EventEmitter {
       );
     }
 
-    this.pendingEvent = {
+    const pendingEvent: RouteChangeEvent = {
       from: fromRoute,
       to: toRoute,
       trigger: config.trigger || 'user'
     };
+
+    this.pendingEvent = pendingEvent;
 
     this.emit<RouteChangeEvent>(
       RouterEvent.NAVIGATION_START,
       this.pendingEvent
     );
 
+    const transitions = this.getTransitions(fromRoute, toRoute);
+
+    await processTransitions(transitions.slice(), (transition) => {
+      return transition.navStart(pendingEvent)
+    });
+
     this.push(toRoute, useHistory);
 
     if (urlChanged) {
-      await this.loadContent(this.pendingEvent);
+      await this.loadContent(this.pendingEvent, transitions);
     }
 
     this.emit<RouteChangeEvent>(RouterEvent.NAVIGATION_END, this.pendingEvent);
+
+    await processTransitions(transitions.slice(), (transition) => {
+      return transition.navEnd(pendingEvent)
+    });
+
     delete this.pendingEvent;
   }
 }

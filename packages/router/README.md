@@ -97,6 +97,12 @@ You can add page transitions to your router easily. To create a new page transit
 import { RouterTransition } from '../transition';
 
 class SampleTransition extends RouterTransition {
+  // triggered when a navigation has been registered
+  async navStart() {}
+
+  // triggered at the end of all other events and the navigation was successful
+  async navEnd() {}
+
   // Executed before the new node will enter
   async afterEnter() {}
 
