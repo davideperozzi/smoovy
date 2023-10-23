@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.8
+
+### Patch Changes
+
+- feat(webgl): improvied image handling
+
 ## 1.1.7
 
 ### Patch Changes

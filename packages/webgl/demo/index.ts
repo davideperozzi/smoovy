@@ -1,4 +1,4 @@
-import { GLImage, WebGL } from '../src';
+import { GLImage, GLImageEvent, WebGL } from '../src';
 import { Pane } from 'tweakpane';
 import { mat4tv } from '../src/utils/math';
 

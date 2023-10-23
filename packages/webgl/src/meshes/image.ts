@@ -38,7 +38,8 @@ export interface GLImageConfig extends GLPlaneConfig {
 }
 
 export enum GLImageEvent {
-  LOADEND = 'loadend'
+  LOADEND = 'loadend',
+  BIND_TEXTURE = 'bindtexture'
 }
 
 const uvSize = { width: 1, height: 1 };
@@ -112,11 +113,10 @@ export class GLImage extends GLPlane {
     image.crossOrigin = 'anonymous';
     image.src = src;
 
-    return new Promise<HTMLImageElement>((resolve, reject) => {
+    return new Promise<GLImageCacheItem>((resolve, reject) => {
       const unlisten = listenCompose(
         listen(image, 'error', (err) => {
           unlisten();
-
           reject(err);
         }),
         listen(image, 'load', () => {
@@ -125,10 +125,13 @@ export class GLImage extends GLPlane {
           const texture = GLImage.loadTexture(gl, image);
 
           if (texture) {
-            this.cache.set(src, { texture, image, keep });
-          }
+            const entry: GLImageCacheItem = { texture, image, keep };
 
-          resolve(image);
+            this.cache.set(src, entry);
+            resolve(entry);
+          } else {
+            reject(new Error('could not load texture: ' + src));
+          }
         })
       );
     });
@@ -274,6 +277,14 @@ export class GLImage extends GLPlane {
     if (this.texture) {
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    }
+
+    this.emit(GLImageEvent.BIND_TEXTURE);
+  }
+
+  public render() {
+    if (this.texture) {
+      super.render();
     }
   }
 
