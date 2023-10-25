@@ -65,7 +65,7 @@ export class Program {
     }
   }
 
-  private registerAttrib(name: string) {
+  public registerAttrib(name: string) {
     if ( ! this.program) {
       throw new Error('Program not initialized yet');
     }
@@ -92,7 +92,7 @@ export class Program {
     return buffer.count;
   }
 
-  private registerUniform(name: string) {
+  public registerUniform(name: string) {
     if ( ! this.program) {
       throw new Error('Program not initialized yet');
     }

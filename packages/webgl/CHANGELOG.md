@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.9
+
+### Patch Changes
+
+- feat(webgl): simplified image texture handling
+
 ## 1.1.8
 
 ### Patch Changes

@@ -106,8 +106,17 @@ pane.controller_.view.element.style.position = 'fixed';
 
 // GLImage.preload(webgl.gl, 'https://i.imgur.com/fHyEMsl.jpg', true);
 
+const dimage = webgl.image({
+  source: 'https://picsum.photos/800/600',
+  x: 500,
+  y: 500
+})
+
+dimage.loadTexture('image1', 'https://picsum.photos/536/354');
+
+
 const createImage = () => webgl.image({
-  source: 'https://i.imgur.com/fHyEMsl.jpg',
+  source: 'https://picsum.photos/536/354',
   element: document.querySelector('#test-attach') as HTMLElement
 });
 
@@ -119,10 +128,11 @@ setTimeout(() => {
   image.scale(1.5);
 }, 1000);
 
+
 // generate a random image url
 const randomImage = () => `https://picsum.photos/seed/${Math.random()}/200/200`;
 
-setTimeout(() => {
+setTimeout(async () => {
   image.setSource('https://images.unsplash.com/photo-1674753987419-750e44ba94e2?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=600&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTY3NTk1ODU1MQ&ixlib=rb-4.0.3&q=80&w=800');
 }, 1000);
 
@@ -134,9 +144,9 @@ setTimeout(() =>  {
 
     setTimeout(() => {
       image.setSource('https://images.unsplash.com/photo-1674753987419-750e44ba94e2?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=600&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTY3NTk1ODU1MQ&ixlib=rb-4.0.3&q=80&w=800');
-    }, 1000);
+    }, 3000);
 
-    setTimeout(() => webgl.remove(image), 1000);
+    setTimeout(() => webgl.remove(image), 4500);
   }, 2000);
 }, 3000);
 

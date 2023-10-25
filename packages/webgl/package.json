@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/webgl",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "Easier WebGL animations for websites",
   "main": "dist/bundles/index.js",
   "module": "dist/bundles/index.esm.js",

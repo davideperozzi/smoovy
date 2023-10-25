@@ -35,6 +35,14 @@ export interface GLImageConfig extends GLPlaneConfig {
    * Default = false
    */
   noCache?: boolean;
+
+  /**
+   * The name of the unfiform sampler inside the shader for the main
+   * image. Others texture can be added via `addTexture`.
+   *
+   * Default = image
+   */
+  mainSlot?: string;
 }
 
 export enum GLImageEvent {
@@ -44,16 +52,15 @@ export enum GLImageEvent {
 
 const uvSize = { width: 1, height: 1 };
 
-export interface GLImageCacheItem {
+export interface GlImageTexture {
   texture: WebGLTexture;
   image: HTMLImageElement;
   keep?: boolean;
 }
 
 export class GLImage extends GLPlane {
-  private static cache = new Map<string, GLImageCacheItem>();
-  private texture!: WebGLTexture | null;
-  private image: HTMLImageElement;
+  private static cache = new Map<string, GlImageTexture>();
+  private textures: Map<string, GlImageTexture> = new Map();
   private loadResolver = new Resolver();
   private imageLoading = false;
 
@@ -64,7 +71,6 @@ export class GLImage extends GLPlane {
     super(viewport, config);
 
     this.buffers.texCoord = new TextureAttrBuffer();
-    this.image = new Image();
     this.program = new Program(
       viewport.gl,
       config.vertex || `
@@ -113,7 +119,7 @@ export class GLImage extends GLPlane {
     image.crossOrigin = 'anonymous';
     image.src = src;
 
-    return new Promise<GLImageCacheItem>((resolve, reject) => {
+    return new Promise<GlImageTexture>((resolve, reject) => {
       const unlisten = listenCompose(
         listen(image, 'error', (err) => {
           unlisten();
@@ -125,7 +131,7 @@ export class GLImage extends GLPlane {
           const texture = GLImage.loadTexture(gl, image);
 
           if (texture) {
-            const entry: GLImageCacheItem = { texture, image, keep };
+            const entry: GlImageTexture = { texture, image, keep };
 
             this.cache.set(src, entry);
             resolve(entry);
@@ -184,9 +190,11 @@ export class GLImage extends GLPlane {
   }
 
   public get imageSize() {
+    const item = this.textures.get('image');
+
     return {
-      width: this.image.naturalWidth,
-      height: this.image.naturalHeight
+      width: item?.image ? item.image.naturalWidth : 0,
+      height: item?.image ? item.image.naturalHeight : 0
     };
   }
 
@@ -233,69 +241,97 @@ export class GLImage extends GLPlane {
       return this.loadResolver.promise;
     }
 
+    const mainSlot = this.config.mainSlot || 'image';
+
     if (GLImage.cache.has(this.config.source)) {
       const cache = GLImage.cache.get(this.config.source);
 
       if (cache && cache.texture && cache.image) {
         this.imageLoading = true;
-        this.texture = cache.texture;
-        this.image = cache.image;
 
+        this.textures.set(mainSlot, cache);
         this.loadEnd();
+      } else {
+        console.warn('image: cache is invalid for ' + this.config.source);
       }
     } else {
       this.imageLoading = true;
-      this.image.crossOrigin = 'anonymous';
 
-      const unlisten = listen(this.image, 'load', () => {
-        unlisten();
 
-        const prevTexture = this.texture;
-        this.texture = this.viewport.gl.createTexture();
+      const prevTexture = this.textures.get(mainSlot);
 
-        if (this.texture) {
-          GLImage.loadTexture(this.viewport.gl, this.image, this.texture);
-          GLImage.cache.set(this.config.source, {
-            image: this.image,
-            texture: this.texture
-          });
-        }
+      await this.loadTexture(mainSlot, this.config.source);
+      this.loadEnd();
 
-        this.loadEnd();
-        this.unloadTexture(prevTexture);
-      });
-
-      this.image.src = this.config.source;
+      if (prevTexture) {
+        this.unloadTexture(prevTexture.texture);
+      }
     }
 
     return this.loadResolver.promise;
   }
 
-  protected bindTexture() {
-    const gl = this.viewport.gl;
+  public async loadTexture(name: string, src: string, keep = false) {
+    return this.setTexture(
+      name,
+      await GLImage.preload(this.viewport.gl, src, keep)
+    );
+  }
 
-    if (this.texture) {
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    }
+  public setTexture(name: string, texture: GlImageTexture) {
+    this.textures.set(name, texture);
+
+    return texture;
+  }
+
+  protected bindTextures() {
+    const gl = this.viewport.gl;
+    let slot = 0;
+
+    this.textures.forEach(({ texture }, name) => {
+      const location = this.program.registerUniform(name);
+
+      slot++;
+
+      if (location) {
+        gl.activeTexture(gl.TEXTURE0 + slot);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.uniform1i(location, slot);
+      }
+    });
 
     this.emit(GLImageEvent.BIND_TEXTURE);
   }
 
-  public render() {
-    if (this.texture) {
-      super.render();
+  protected unbindTextures() {
+    const gl = this.viewport.gl;
+
+    for (let i = 0, len = this.textures.size + 1; i < len; i++) {
+      gl.activeTexture(gl.TEXTURE0 + i);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+  }
+
+  public render(time = 0) {
+    if (this.textures.size > 0) {
+      super.render(time);
     }
   }
 
   protected beforeDraw() {
     super.beforeDraw();
 
-    this.bindTexture();
+    this.bindTextures();
+  }
+
+  protected afterDraw() {
+    super.beforeDraw();
+
+    this.unbindTextures();
   }
 
   public recalc() {
-    this.bindTexture();
+    this.bindTextures();
     this.buffers.texCoord.update(triangulate(this.segments, uvSize));
 
     super.recalc();
@@ -309,8 +345,7 @@ export class GLImage extends GLPlane {
 
   public onDestroy() {
     super.onDestroy();
-    this.unloadTexture(this.texture);
 
-    this.texture = null;
+    this.textures.forEach(({ texture }) => this.unloadTexture(texture));
   }
 }
