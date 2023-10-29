@@ -1,5 +1,16 @@
 # @smoovy/router
 
+## 1.1.0
+
+### Minor Changes
+
+- feat(tween): added timelines, stagger and improved performance
+
+### Patch Changes
+
+- Updated dependencies
+  - @smoovy/tween@1.1.0
+
 ## 1.0.3
 
 ### Patch Changes

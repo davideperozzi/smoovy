@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.0
+
+### Minor Changes
+
+- feat(tween): added timelines, stagger and improved performance
+
 ## 1.0.1
 
 ### Patch Changes

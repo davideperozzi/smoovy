@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/tween",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "simple and easy-to-use tween lib",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
