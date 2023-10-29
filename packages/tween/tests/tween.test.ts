@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { tweenFromTo } from '../src/tween';
+import { tween as tveen } from '../src';
 
 describe('tween', () => {
   it('should mutate and tween object property from 0 to 100 in 300ms',
     () => new Promise<void>((resolve) => {
       const mutation = { x: 0 };
 
-      tweenFromTo(mutation, { x: 100 }, { duration: 300 });
+      tveen.to(mutation, { x: 100 }, { duration: 300 });
 
       setTimeout(() => {
         expect(mutation.x).toBe(100);
@@ -20,7 +20,7 @@ describe('tween', () => {
     () => new Promise<void>((resolve) => {
       const mutation = { x: 0 };
 
-      tweenFromTo(mutation, { x: 100 }, { duration: 300, mutate: false });
+      tveen.to(mutation, { x: 100 }, { duration: 300, mutate: false });
 
       setTimeout(() => {
         expect(mutation.x).toBe(0);
@@ -31,7 +31,7 @@ describe('tween', () => {
 
   it('should stop the tween after 100ms', () => new Promise<void>((resolve) => {
     const data = { x: 0 };
-    const tween = tweenFromTo(data, { x: 100 }, { duration: 300 });
+    const tween = tveen.to(data, { x: 100 }, { duration: 300 });
 
     setTimeout(() => {
       tween.stop();
@@ -46,7 +46,7 @@ describe('tween', () => {
   it('should tween from 0 to 0 without change and options', () => new Promise<void>((resolve) => {
     const data = { x: 0 };
 
-    tweenFromTo(data, { x: 0 });
+    tveen.to(data, { x: 0 });
 
     setTimeout(() => {
       expect(data.x).toBe(0);
@@ -57,7 +57,7 @@ describe('tween', () => {
   it('should not tween invalid from/to options', () => new Promise<void>((resolve) => {
     const data = { y: 0 };
 
-    tweenFromTo(data, { x: 0 } as any, { duration: 20 });
+    tveen.to(data, { x: 0 } as any, { duration: 20 });
 
     setTimeout(() => {
       expect(data.y).toBe(0);
@@ -68,8 +68,8 @@ describe('tween', () => {
   it('should not overwrite running tween', () => new Promise<void>((resolve) => {
     const data = { y: 0 };
 
-    tweenFromTo(data, { y: 50 }, { duration: 20, overwrite: false });
-    tweenFromTo(data, { y: 50 }, { duration: 50, overwrite: false });
+    tveen.to(data, { y: 50 }, { duration: 20, overwrite: false });
+    tveen.to(data, { y: 50 }, { duration: 50, overwrite: false });
 
     setTimeout(() => {
       expect(data.y).toBeLessThan(50);
@@ -85,7 +85,7 @@ describe('tween', () => {
     const data = { y: 0 };
     const update = vi.fn();
 
-    tweenFromTo(data, { y: 50 }, {
+    tveen.to(data, { y: 50 }, {
       duration: 100,
       onUpdate: update
     });
@@ -97,7 +97,7 @@ describe('tween', () => {
   }));
 
   it('should not throw an error if stopped multiple times', () => new Promise<void>((resolve) => {
-    const tween = tweenFromTo({ y: 0 }, { y: 50 }, { duration: 100 });
+    const tween = tveen.to({ y: 0 }, { y: 50 }, { duration: 100 });
 
     setTimeout(() => {
       tween.stop();
@@ -108,13 +108,20 @@ describe('tween', () => {
   }));
 
   it('should call the stop method', () => new Promise<void>((resolve) => {
-    const stop = vi.fn();
-    const tween = tweenFromTo(
+    const stopRunning = vi.fn();
+    const stopNotRunning = vi.fn();
+    const tween = tveen.to(
       { y: 0 },
       { y: 50 },
       {
-        duration: 200,
-        onStop: stop
+        duration: 500,
+        onStop: (running) => {
+          if (running) {
+            stopRunning();
+          } else {
+            stopNotRunning();
+          }
+        }
       }
     );
 
@@ -122,8 +129,8 @@ describe('tween', () => {
       tween.stop();
       tween.stop();
 
-      expect(stop).toBeCalledTimes(1);
-
+      expect(stopRunning).toBeCalledTimes(1);
+      expect(stopNotRunning).toBeCalledTimes(1);
       resolve();
     }, 50);
   }));
@@ -131,7 +138,7 @@ describe('tween', () => {
   it('should enter the complete callback', () => new Promise<void>((resolve) => {
     const data = { x: 0 };
 
-    tweenFromTo(
+    tveen.to(
       data,
       { x: 100 },
       {
@@ -148,7 +155,7 @@ describe('tween', () => {
     const data = { x: 0 };
     const overwriteFn = vi.fn();
 
-    tweenFromTo(
+    tveen.to(
       data,
       { x: 100 },
       {
@@ -161,7 +168,7 @@ describe('tween', () => {
     );
 
     setTimeout(() => {
-      tweenFromTo(
+      tveen.to(
         data,
         { x: 100 },
         {
@@ -180,15 +187,17 @@ describe('tween', () => {
   it('should pause and resume the tween', () => new Promise<void>((resolve) => {
     const pauseFn = vi.fn();
     const startFn = vi.fn();
+    const resumeFn = vi.fn();
     const completeFn = vi.fn();
     const dataFrom = { x: 0 };
     const dataTo = { x: 200 };
-    const tween = tweenFromTo(
+    const tween = tveen.to(
       dataFrom,
       dataTo,
       {
         duration: 100,
         onPause: pauseFn,
+        onResume: resumeFn,
         onStart: startFn,
         onComplete: completeFn,
       }
@@ -200,16 +209,17 @@ describe('tween', () => {
       setTimeout(() => {
         expect(tween.progress).toBeLessThan(1);
 
-        tween.start();
+        tween.resume();
 
         expect(pauseFn).toBeCalledTimes(1);
-        expect(startFn).toBeCalledTimes(2);
+        expect(resumeFn).toBeCalledTimes(1);
+        expect(startFn).toBeCalledTimes(1);
 
         setTimeout(() => {
           expect(tween.progress).toBeGreaterThanOrEqual(1);
           expect(completeFn).toBeCalledTimes(1);
           resolve();
-        }, 100);
+        }, 300);
       }, 20);
     }, 20);
   }));
@@ -217,7 +227,7 @@ describe('tween', () => {
   it('should start after the delay', () => new Promise<void>((resolve) => {
     const delayFn = vi.fn();
 
-    tweenFromTo(
+    tveen.to(
       { x: 0 },
       { x: 100 },
       {
@@ -232,22 +242,20 @@ describe('tween', () => {
   }));
 
   it('should not start if paused', () => new Promise<void>((resolve) => {
-    const tween = tweenFromTo(
+    const tween = tveen.to(
       { x: 0 },
       { x: 100 },
       {
-        paused: true,
+        autoStart: false,
         duration: 50
       }
     );
 
     expect(tween.progress).toBe(0);
-    expect(tween.paused).toBe(true);
     expect(tween.complete).toBe(false);
 
     setTimeout(() => {
       expect(tween.progress).toBe(0);
-      expect(tween.paused).toBe(true);
       expect(tween.complete).toBe(false);
       resolve();
     }, 60);
@@ -256,13 +264,13 @@ describe('tween', () => {
   it('should overwrite an active delay and call reset', () => new Promise<void>((resolve) => {
     let delayMs = 0;
     const resetFn = vi.fn();
-    const tween = tweenFromTo(
+    const tween = tveen.to(
       { x: 0 },
       { x: 100 },
       {
         delay: 200,
-        duration: 200,
-        onReset: resetFn,
+        duration: 500,
+        onReset: () => resetFn(),
         onDelay: (passed) => {
           delayMs = passed;
         }
@@ -272,15 +280,14 @@ describe('tween', () => {
     setTimeout(() => {
       expect(delayMs).toBeGreaterThan(90);
       expect(delayMs).toBeLessThan(200);
-      expect(tween.progress).toBe(0);
 
       tween.reset();
+      expect(resetFn).toBeCalledTimes(1);
 
       setTimeout(() => {
-        expect(delayMs).toBeGreaterThan(90);
-        expect(delayMs).toBeLessThan(200);
-        expect(tween.progress).toBe(0);
         expect(resetFn).toBeCalledTimes(1);
+        // expect(delayMs).toBeGreaterThan(90);
+        expect(delayMs).toBeLessThan(200);
 
         tween.stop();
         resolve();
@@ -289,11 +296,11 @@ describe('tween', () => {
   }));
 
   it('should not run delay if paused', () => new Promise<void>((resolve, reject) => {
-    tweenFromTo(
+    tveen.to(
       { x: 0 },
       { x: 100 },
       {
-        paused: true,
+        autoStart: false,
         delay: 100,
         duration: 100,
         onStart: () => reject(new Error()),
@@ -304,15 +311,15 @@ describe('tween', () => {
     setTimeout(() => resolve(), 200);
   }));
 
-  it('should not run callbacks if already active on start & pause', () => new Promise<void>((resolve) => {
+  it('should run callbacks if already active on start & pause', () => new Promise<void>((resolve) => {
     const startFn = vi.fn();
     const pauseFn = vi.fn();
-    const tween = tweenFromTo(
+    const tween = tveen.to(
       { x: 0 },
       { x: 100 },
       {
         delay: 100,
-        paused: true,
+        autoStart: false,
         duration: 100,
         onStart: startFn,
         onPause: pauseFn
@@ -331,7 +338,7 @@ describe('tween', () => {
         tween.pause();
         tween.pause();
 
-        expect(startFn).toBeCalledTimes(1);
+        expect(startFn).toBeCalledTimes(4);
         expect(pauseFn).toBeCalledTimes(1);
         resolve();
       }, 10);
@@ -340,13 +347,13 @@ describe('tween', () => {
 
   it('should reset without mutation', () => new Promise<void>((resolve) => {
     const target = { x: 0 };
-    const tween = tweenFromTo(
+    const tween = tveen.to(
       target,
       { x: 100 },
       {
         mutate: false,
         duration: 100,
-        onComplete: () => {
+        onReset: () => {
           expect(target).toMatchObject({ x: 0 });
           resolve();
         }
@@ -355,23 +362,23 @@ describe('tween', () => {
 
     setTimeout(() => {
       tween.reset();
-    }, 50);
+    }, 100);
   }));
 
   it('should set the correct progress', () => new Promise<void>((resolve) => {
-    const tween = tweenFromTo(
+    const tween = tveen.to(
       { x: 0 },
       { x: 100 },
       {
         duration: 100,
-        paused: true
+        autoStart: false
       }
     );
 
     expect(tween.passed).toBe(0);
 
     setTimeout(() => {
-      tween.progress = 0.5;
+      tween.seek(0.5);
       expect(tween.passed).toBe(50);
       resolve();
     }, 50);

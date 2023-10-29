@@ -1,4 +1,4 @@
 import * as easings from './easing';
 
-export * from './tween';
 export { easings };
+export { tween } from './helper';
