@@ -36,18 +36,31 @@ export class Timeline extends TweenController<TimelineConfig> {
     }
   }
 
-  add(controller: TweenController, config: TimelineItemConfig = {}) {
-    controller.override().pause();
+  add(
+    controllers: TweenController | TweenController[],
+    config: TimelineItemConfig = {}
+  ) {
+    controllers = Array.isArray(controllers) ? controllers : [controllers];
 
-    if (typeof config.offset !== 'undefined') {
-      config.offset = Math.min(Math.max(config.offset, -1), 1);
+    for (let i = 0, len = controllers.length; i < len; i++) {
+      const controller = controllers[i].override().pause().reset();
+      const itemConfig = { ...config };
+
+      if (this.timelineReversed && ! controller.reversed) {
+        controller.reverse();
+      }
+
+      if (i > 0) {
+        itemConfig.offset = -1;
+      }
+
+      if (typeof itemConfig.offset !== 'undefined') {
+        itemConfig.offset = Math.min(Math.max(itemConfig.offset, -1), 1);
+      }
+
+      this.items.push({ controller, config: itemConfig });
     }
 
-    if (this.timelineReversed && ! controller.reversed) {
-      controller.reverse();
-    }
-
-    this.items.push({ controller, config });
     this.updateDuration();
 
     return this;
@@ -65,26 +78,22 @@ export class Timeline extends TweenController<TimelineConfig> {
   }
 
   private updateDuration() {
-    let duration = 0;
+    let totalDuration = 0;
+    let prevDuration = 0;
 
-    for (let i = 0, len = this.items.length; i < len; i++) {
-      const prevItem = this.items[i - 1];
-      const { controller, config } = this.items[i];
-      let offset = 0;
+    for (const { controller, config } of this.items) {
+      const duration = controller.duration;
+      const offset = config.offset || 0;
 
-      if (prevItem && config.offset) {
-        offset = prevItem.controller.duration * config.offset;
-      }
-
-      duration += controller.duration + offset;
+      totalDuration += prevDuration * offset + duration;
+      prevDuration = duration;
     }
 
-    this._duration = duration;
+    this._duration = totalDuration;
   }
 
   protected process(eased: number) {
-    const maxDuration = this.duration - this.delay;
-    const totalTime = maxDuration * eased;
+    const totalTime = (this.duration - this.delay) * eased;
     const reversed = this.timelineReversed;
     const maxItems = this.items.length;
     let currentTime = 0;
@@ -103,7 +112,7 @@ export class Timeline extends TweenController<TimelineConfig> {
         offset = neighbour.controller.duration * config.offset;
       }
 
-      controller.seek((totalTime - (currentTime + offset)) / duration);
+      controller.seek(totalTime - (currentTime + offset));
 
       currentTime += duration + offset;
     }

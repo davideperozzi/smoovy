@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.1
+
+### Patch Changes
+
+- feat: improved tween performance
+
 ## 1.1.0
 
 ### Minor Changes

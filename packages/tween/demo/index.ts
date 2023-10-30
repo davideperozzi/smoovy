@@ -2,22 +2,21 @@ import { tween } from '../src';
 
 const targets = document.querySelectorAll<HTMLElement>('.anim');
 
+// let times = 0;
+// const tveen = tween.to(targets[0], { y: 200 }, {
+//   delay: 500,
+//   duration: 500,
+//   onStop: () => console.log('stopped'),
+//   onReset: () => ++times
+// });
 
-let times = 0;
-const tveen = tween.to(targets[0], { y: 200 }, {
-  delay: 500,
-  duration: 500,
-  onStop: () => console.log('stopped'),
-  onReset: () => ++times
-});
+// setTimeout(() => {
+//   tveen.reset();
 
-setTimeout(() => {
-  tveen.reset();
-
-  setTimeout(() => {
-    console.log('called times', times)
-  }, 300);
-}, 500);
+//   setTimeout(() => {
+//     console.log('called times', times)
+//   }, 300);
+// }, 500);
 
 // tween.staggerTo(
 //   targets, {
@@ -29,13 +28,63 @@ setTimeout(() => {
 //   }
 // );
 
-// const timeline = tween.timeline({
-//   // autoStart: false,
+
+// const tveen = tween.fromTo(targets[0], { y: 0 }, { y: 500 }, {
+//   duration: 100,
+//   delay: 500,
 //   onComplete: () => {
-//     timeline.reverse().start();
+//     tveen.reverse().start();
 //   }
 // });
 
+// interface Coordinate {
+//   x: number;
+//   y: number;
+// }
+
+// const stag = tween.staggerFromTo(targets, { rotate: 350 }, { rotate: 100 }, {
+//   duration: 500,
+//   stagger: { offset: 0.5 },
+// });
+
+// tween.fromTo(targets[0], { y: 50, opacity: 0 }, { y: 500 }, { delay: 1000, duration: 1000 });
+
+// tween.to(target, { x: 100 });
+// tween.fromTo(target, {  })
+// tween.fromTo(targets[0], { x: 0, y: 0 }, { x: 0, y: 100 });
+//
+
+const timeline = tween.timeline({
+  delay: 500
+});
+
+timeline.add(tween.fromTo(targets[0], { y: 0 }, { y: 500 }, { duration: 1000 }));
+timeline.add(tween.set(targets[0], { y: 0 }));
+timeline.add(tween.fromTo(targets[0], { y: 0 }, { y: 500 }, { duration: 1000 }));
+timeline.add(tween.set(targets[0], { y: 100 }));
+
+
+// timeline.add(
+//   tween.fromTo(targets[1], { y: 500 }, { y: 0 }, { duration: 1500 }),
+//   { offset: 0 }
+// );
+
+// timeline.add(
+//   tween.fromTo(targets[2], { y: 500 }, { y: 0 }, { duration: 1500 }),
+//   { offset: -.1 }
+// );
+
+// timeline.add([
+//   tween.fromTo(targets[3], { y: 500 }, { y: 0 }),
+//   tween.fromTo(targets[4], { y: 500 }, { y: 0 }, { delay: 500 }),
+//   tween.fromTo(targets[5], { y: 0 }, { y: 500 }, { duration: 1500 }),
+// ], { offset: 1.0 });
+
+
+// timeline.add(
+//   tween.fromTo(targets[3], { y: 500 }, { y: 0 }, { duration: 800 }),
+//   { offset: -1 }
+// );
 
 // async function test() {
 //   const tl = await tween.staggerTo(

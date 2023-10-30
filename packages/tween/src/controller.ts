@@ -38,14 +38,19 @@ export class TweenController<
   private _passed = 0;
   private _progress = 0;
   private _reversed = false;
+  private _started = false;
   protected _duration = 0;
   private thread?: TickerThread;
+  private lastProgress = 0;
+  private lastDelay = 0;
   private resolveFn?: () => void;
 
   constructor(
     protected config: T = {} as T
   ) {
-    this._duration = config.duration || 500;
+    this._duration = typeof config.duration !== 'undefined'
+      ? config.duration
+      : 500;
 
     if (config.reversed) {
       this.reverse();
@@ -98,9 +103,10 @@ export class TweenController<
 
   private resolve() {
     if (this.resolveFn && ! this._resolved) {
-      this._resolved = true;
       this.resolveFn();
     }
+
+    this._resolved = true;
   }
 
   override() {
@@ -109,7 +115,7 @@ export class TweenController<
     return this;
   }
 
-  start(startFrom = 0, silent = false) {
+  start(startFrom = 0) {
     if (this._overridden) {
       return this;
     }
@@ -119,13 +125,9 @@ export class TweenController<
 
     const start = Ticker.now();
 
-    if ( ! silent) {
-      this.callback(this.config.onStart);
-    }
-
     this.thread = this.ticker.add((_delta, time) => {
       if ( ! this._paused) {
-        this.seek((startFrom + time - start) / this.duration);
+        this.seek(startFrom + time - start);
       }
     });
 
@@ -152,7 +154,7 @@ export class TweenController<
       }
 
       if ( ! paused && ! this.thread) {
-        this.start(this._passed, true);
+        this.start(this._passed);
       }
     }
 
@@ -161,6 +163,8 @@ export class TweenController<
 
   stop(silent = false) {
     const running = this.thread && ! this.thread.dead;
+
+    this._started = false;
 
     if (running) {
       this.thread?.kill();
@@ -174,52 +178,75 @@ export class TweenController<
     return this;
   }
 
-  seek(progress: number, noDelay = false) {
+  seek(ms: number, noDelay = false) {
     if (this._resolved) {
       return this;
     }
 
-    this._progress = progress = Math.min(Math.max(progress, 0), 1);
+    if (this._reversed) {
+      ms = this.duration - ms;
+    }
+
+    if (
+      (! this._reversed && ms > 0 || this._reversed && ms < this.duration) &&
+      ! this._started
+    ) {
+      this._started = true;
+
+      this.callback(this.config.onStart);
+    }
+
+    const delay = noDelay ? 0 : this.delay;
+    const passed = Math.min(Math.max(ms, 0), this.duration);
+    this._progress = Math.min(Math.max(ms / this.duration, 0), 1);
 
     this.callback(this.config.onSeek, [this._progress]);
 
-    const delayThreshold = this.delay / this.duration;
-
-    if (progress <= delayThreshold && ! noDelay) {
-      let delayProgress = mapRange(progress, 0, delayThreshold, 0, 1);
-
-      delayProgress = Math.min(Math.max(delayProgress, 0), 1)
-
-      this.callback(this.config.onDelay, [
-        delayProgress * this.delay,
-        delayProgress
-      ]);
-
-      return this;
-    }
-
-    progress = mapRange(progress, delayThreshold, 1, 0, 1);
-    progress = Math.min(Math.max(progress, 0), 1);
-
-    if (this.reversed) {
-      progress = 1 - progress;
-    }
-
-    const eased = this.config.easing ? this.config.easing(progress) : progress;
-
-    this.process(eased, progress);
-
-    if ( ! this._reversed && progress >= 1 || this._reversed && progress <= 0) {
+    if (
+      ! this._reversed && passed >= this.duration ||
+      this._reversed && passed <= 0
+    ) {
+      this.process(this._reversed ? 0 : 1, this._reversed ? 0 : 1);
       this.stop();
       this.resolve();
       this.callback(this.config.onComplete);
+
+      return;
     }
+
+    if ( ! noDelay && ms <= delay) {
+      this.callback(this.config.onDelay, [ ms, ms / delay ]);
+      this.lastDelay = ms;
+
+      if (this.lastProgress !== 0) {
+        this.lastProgress = 0;
+
+        this.process(0, 0);
+      }
+
+      return;
+    } else if ( ! noDelay && ms >= delay && this.lastDelay !== delay) {
+      this.callback(this.config.onDelay, [ delay, 1 ]);
+
+      this.lastDelay = delay;
+    }
+
+    this.lastProgress = (passed - delay) / (this.duration - delay);
+
+    this.process(
+      this.config.easing
+        ? this.config.easing(this.lastProgress)
+        : this.lastProgress,
+      this.lastProgress
+    );
 
     return this;
   }
 
   reset(seek = 0, silent = false) {
     this._resolved = false;
+    this.lastProgress = 0;
+    this.lastDelay = 0;
 
     if ( ! silent) {
       this.callback(this.config.onReset);
@@ -229,15 +256,16 @@ export class TweenController<
       this.stop(silent);
     }
 
-    if (seek >= 0) {
-      this.seek(seek);
-    }
+    this.seek(seek);
 
     return this;
   }
 
   reverse() {
     this._reversed = !this._reversed;
+
+    this.stop(true);
+    this.seek(0);
 
     return this;
   }

@@ -2,19 +2,28 @@ import { TweenController, TweenControllerConfig } from './controller';
 import { getDomProps, mergeDomProps, setDomProps } from './dom';
 import { DOMTweenProps, TweenProps } from './props';
 
-export interface TweenConfig<V extends TweenProps> extends TweenControllerConfig {
+export interface TweenConfig<
+  V extends (TweenProps | object)
+> extends TweenControllerConfig {
   from: V | HTMLElement;
   to: Partial<V>;
   key?: any;
+  target?: V | HTMLElement;
   units?: Record<string, string>;
-  dom?: HTMLElement;
   mutate?: boolean;
   overwrite?: boolean;
-  onUpdate?: (values: V, linear: number, eased: number) => void;
   onOverwrite?: () => void;
+  onUpdate?: (
+    values: V,
+    state: {
+      target: Tween<V>,
+      linear: number,
+      eased: number
+    }
+  ) => void;
 }
 
-function getChanges<T extends TweenProps>(from: T, to: Partial<T>) {
+function getChanges<T extends (TweenProps | object)>(from: T, to: Partial<T>) {
   const changes = {} as typeof to;
 
   for (const key in from) {
@@ -22,7 +31,7 @@ function getChanges<T extends TweenProps>(from: T, to: Partial<T>) {
       Object.prototype.hasOwnProperty.call(from, key) &&
       Object.prototype.hasOwnProperty.call(to, key)
     ) {
-      const change = (to[key] as number) - from[key];
+      const change = (to[key] as number) - (from as any)[key];
 
       if (change !== 0) {
         changes[key] = change as any;
@@ -35,7 +44,7 @@ function getChanges<T extends TweenProps>(from: T, to: Partial<T>) {
 
 /** @todo improve typing (prevent any) */
 export class Tween<
-  T extends TweenProps = TweenProps
+  T extends (TweenProps | object) = TweenProps
 > extends TweenController<TweenConfig<T>> {
   private static registry = new WeakMap<any, Tween>();
   private registry = Tween.registry;
@@ -53,7 +62,7 @@ export class Tween<
   }
 
   public get key() {
-    return this.config.key || this.config.dom || this.config.from;
+    return this.config.key || this.config.target || this.config.from;
   }
 
   private overwrite(key: T) {
@@ -69,8 +78,8 @@ export class Tween<
   private updateChanges() {
     const config = this.config;
 
-    if (config.dom) {
-      this.domTarget = config.dom;
+    if (config.target && config.target instanceof HTMLElement) {
+      this.domTarget = config.target;
     } else if (config.from instanceof HTMLElement) {
       this.domTarget = config.from;
     }
@@ -95,10 +104,15 @@ export class Tween<
       const desiredState = config.to as any as Partial<T>;
 
       this.originState = { ...initialState };
-      this.resultState = config.mutate !== false
-        ? initialState
-        : { ...this.originState };
       this.changedState = getChanges<T>(this.originState as T, desiredState);
+
+      if (config.target && ! (config.target instanceof HTMLElement)) {
+        this.resultState = config.target;
+      } else {
+        this.resultState = config.mutate !== false
+          ? initialState
+          : { ...this.originState };
+      }
     }
   }
 
@@ -123,16 +137,16 @@ export class Tween<
         if (typeof origin !== undefined) {
           (this.resultState[prop] as any) = origin + change * eased;
         }
-
-        if (this.domTarget) {
-          setDomProps(this.domTarget, this.resultState, this.config.units);
-        }
-
-        this.callback(
-          this.config.onUpdate,
-          [ this.resultState, linear, eased, this.domTarget ]
-        );
       }
     }
+
+    if (this.domTarget) {
+      setDomProps(this.domTarget, this.resultState as any, this.config.units);
+    }
+
+    this.callback(
+      this.config.onUpdate,
+      [ this.resultState, { target: this, linear, eased } ]
+    );
   }
 }

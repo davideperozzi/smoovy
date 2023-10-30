@@ -213,11 +213,12 @@ describe('tween', () => {
 
         expect(pauseFn).toBeCalledTimes(1);
         expect(resumeFn).toBeCalledTimes(1);
-        expect(startFn).toBeCalledTimes(1);
+        expect(startFn).toBeCalledTimes(0);
 
         setTimeout(() => {
           expect(tween.progress).toBeGreaterThanOrEqual(1);
           expect(completeFn).toBeCalledTimes(1);
+          expect(startFn).toBeCalledTimes(1);
           resolve();
         }, 300);
       }, 20);
@@ -338,7 +339,7 @@ describe('tween', () => {
         tween.pause();
         tween.pause();
 
-        expect(startFn).toBeCalledTimes(4);
+        expect(startFn).toBeCalledTimes(1);
         expect(pauseFn).toBeCalledTimes(1);
         resolve();
       }, 10);
@@ -378,7 +379,7 @@ describe('tween', () => {
     expect(tween.passed).toBe(0);
 
     setTimeout(() => {
-      tween.seek(0.5);
+      tween.seek(50);
       expect(tween.passed).toBe(50);
       resolve();
     }, 50);
