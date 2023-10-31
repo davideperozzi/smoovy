@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.2
+
+### Patch Changes
+
+- fix(tween): invalid timeline duration
+
 ## 1.1.1
 
 ### Patch Changes

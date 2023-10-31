@@ -78,18 +78,30 @@ export class Timeline extends TweenController<TimelineConfig> {
   }
 
   private updateDuration() {
-    let totalDuration = 0;
-    let prevDuration = 0;
+    let highestEdge = 0;
 
-    for (const { controller, config } of this.items) {
+    for (let i = 0; i < this.items.length; i++) {
+      const controller = this.items[i].controller;
+      const config = this.items[i].config;
       const duration = controller.duration;
       const offset = config.offset || 0;
+      const prevItem = this.items[i-1];
 
-      totalDuration += prevDuration * offset + duration;
-      prevDuration = duration;
+      if ( ! prevItem) {
+        highestEdge = duration;
+        continue;
+      }
+
+      const prevDuration = prevItem.controller.duration;
+      const currentGap = prevDuration * offset;
+      const currentEdge = highestEdge + currentGap + duration;
+
+      if (currentEdge > highestEdge) {
+        highestEdge = currentEdge;
+      }
     }
 
-    this._duration = totalDuration;
+    this._duration = highestEdge;
   }
 
   protected process(eased: number) {

@@ -1,4 +1,4 @@
-import { tween } from '../src';
+import { easings, tween } from '../src';
 
 const targets = document.querySelectorAll<HTMLElement>('.anim');
 
@@ -55,13 +55,17 @@ const targets = document.querySelectorAll<HTMLElement>('.anim');
 //
 
 const timeline = tween.timeline({
-  delay: 500
+  delay: 500,
+  onComplete: () => console.log('completed')
 });
 
-timeline.add(tween.fromTo(targets[0], { y: 0 }, { y: 500 }, { duration: 1000 }));
-timeline.add(tween.set(targets[0], { y: 0 }));
-timeline.add(tween.fromTo(targets[0], { y: 0 }, { y: 500 }, { duration: 1000 }));
-timeline.add(tween.set(targets[0], { y: 100 }));
+const config = { duration: 10000, easing: easings.easeOutCirc }
+
+timeline.add(tween.fromTo(targets[0], { y: 0 }, { y: 500 }, config));
+timeline.add(tween.fromTo(targets[2], { y: 0 }, { y: 500 }, { duration: 3000 }), { offset: 0.5 });
+timeline.add(tween.fromTo(targets[1], { y: 0 }, { y: 500 }, { duration: 4000 }), { offset: -1 });
+timeline.add(tween.fromTo(targets[3], { y: 0 }, { y: 500 }, config), { offset: 0 });
+// timeline.add(tween.fromTo(targets[4], { y: 0 }, { y: 500 }, config), { offset: -1 });
 
 
 // timeline.add(
