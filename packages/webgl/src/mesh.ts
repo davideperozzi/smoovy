@@ -17,10 +17,13 @@ export enum GLMeshDrawMode {
 }
 
 export enum GLMeshEvent {
-  BEFORE_RECALC = 'beforerecalc'
+  BEFORE_RECALC = 'beforerecalc',
+  BEFORE_DRAW = 'beforedraw',
+  AFTER_DRAW = 'afterdraw'
 }
 
 export interface GLMeshConfig {
+  features?: { value: GLenum, disable?: boolean }[];
   drawMode?: GLMeshDrawMode;
   uniforms?: { [name: string]: Uniform };
 }
@@ -90,8 +93,50 @@ export class GLMesh extends EventEmitter {
         : GLMeshDrawMode.TRIANGLES;
 
       this.beforeDraw();
-      this.viewport.gl.drawArrays(mode, 0, verticesCount);
+      this.emit(GLMeshEvent.BEFORE_DRAW);
+
+      const gl = this.viewport.gl;
+      const features = this.config.features;
+      let enables: GLenum[] | undefined;
+      let disables: GLenum[] | undefined;
+
+      if (features) {
+        enables = [];
+        disables = [];
+
+        for (const feature of features) {
+          const wasEnabled = gl.getParameter(feature.value);
+
+          if (wasEnabled) {
+            enables.push(feature.value);
+          } else {
+            disables.push(feature.value);
+          }
+
+          if (feature.disable) {
+            gl.disable(feature.value);
+          } else {
+            gl.enable(feature.value);
+          }
+        }
+      }
+
+      gl.drawArrays(mode, 0, verticesCount);
+
       this.afterDraw();
+      this.emit(GLMeshEvent.AFTER_DRAW);
+
+      if (enables) {
+        for (const enable of enables) {
+          gl.enable(enable);
+        }
+      }
+
+      if (disables) {
+        for (const disable of disables) {
+          gl.disable(disable);
+        }
+      }
     }
   }
 

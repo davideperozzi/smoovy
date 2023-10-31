@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.10
+
+### Patch Changes
+
+- feat(webgl): added enable/disable logic on mesh
+
 ## 1.1.9
 
 ### Patch Changes

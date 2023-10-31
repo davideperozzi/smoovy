@@ -249,14 +249,13 @@ export class GLImage extends GLPlane {
       if (cache && cache.texture && cache.image) {
         this.imageLoading = true;
 
-        this.textures.set(mainSlot, cache);
+        this.setTexture(mainSlot, cache);
         this.loadEnd();
       } else {
         console.warn('image: cache is invalid for ' + this.config.source);
       }
     } else {
       this.imageLoading = true;
-
 
       const prevTexture = this.textures.get(mainSlot);
 
@@ -331,7 +330,6 @@ export class GLImage extends GLPlane {
   }
 
   public recalc() {
-    this.bindTextures();
     this.buffers.texCoord.update(triangulate(this.segments, uvSize));
 
     super.recalc();

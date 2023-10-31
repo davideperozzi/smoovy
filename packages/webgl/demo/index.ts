@@ -109,7 +109,10 @@ pane.controller_.view.element.style.position = 'fixed';
 const dimage = webgl.image({
   source: 'https://picsum.photos/800/600',
   x: 500,
-  y: 500
+  y: 500,
+  features: [
+    { value: webgl.gl.CULL_FACE, disable: true },
+  ]
 })
 
 dimage.loadTexture('image1', 'https://picsum.photos/536/354');
