@@ -117,7 +117,7 @@ export class Tween<
   }
 
   protected beforeStart() {
-    if (this.config.from instanceof HTMLElement) {
+    if (this.domTarget) {
       this.updateChanges();
     }
 
@@ -126,6 +126,12 @@ export class Tween<
     }
 
     this.registry.set(this.key, this as any);
+  }
+
+  protected beforeSeek() {
+    if (this.domTarget) {
+      this.updateChanges();
+    }
   }
 
   protected process(eased: number, linear: number) {

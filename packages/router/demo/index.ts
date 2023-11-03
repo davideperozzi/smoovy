@@ -1,63 +1,16 @@
-import { listen } from '@smoovy/listener';
+import { Router, RouterEventType } from '../src/router';
+import { animations } from "@smoovy/router";
 
-import { FadeTransition, Router, RouterEvent } from '../src';
+const router = new Router();
 
-const router = new Router(
-  window.location.href,
-  {
-    outlet: 'main',
-    transitions: [ new FadeTransition() ]
-  }
-);
+router.animate(animations.fade());
 
-router.on(RouterEvent.NAVIGATION_END, () => {
-  // console.log('ENDEDEDED');
-  console.log(router.url, router.hash);
-});
-
-document.querySelectorAll('a').forEach(link => {
-  listen(link, 'click', (event) => {
-    event.preventDefault();
-
-    const target = event.currentTarget as HTMLAnchorElement;
-    // console.log(target.href);
-
-    router.navigate(target.href);
-  });
-});
-
-
-// manual steering: baypassing all events
-// async function main() {
-//   const url = 'http://localhost:1234/sample.html';
-//   const text = await router.preload(url);
-//   const prev = { ...router.state.current } as Route;
-
-//   if (text) {
-//     const { element, title } = router.prepareContent(text);
-
-//     setTimeout(() => {
-//       router.replace(url, true);
-
-//       if (router.outlet) {
-//         const viewElement = router.outlet.parsePayload(element);
-
-//         router.outlet.root.appendChild(viewElement);
-
-//         setTimeout(() => {
-//           if (router.outlet) {
-//             router.outlet.root.removeChild(viewElement);
-//             router.replace(prev as Route, true)
-//           }
-//         }, 1500);
-//       }
-
-//       if (title) {
-//         document.title = title;
-//       }
-//     }, 1500);
-//   }
-// }
-
-// main();
-
+router.on(RouterEventType.NAV_START, () => { console.log('nav-start') });
+router.on(RouterEventType.AFTER_ENTER, () => { console.log('after-enter') });
+router.on(RouterEventType.AFTER_LEAVE, () => { console.log('after-leave') });
+router.on(RouterEventType.BEFORE_ENTER, () => { console.log('before-enter') });
+router.on(RouterEventType.BEFORE_LEAVE, () => { console.log('before-leave') });
+// router.on(RouterEventType.NAV_PROGRESS, () => { console.log('nav-progress') });
+router.on(RouterEventType.NAV_CANCEL, () => { console.log('nav-cancel') });
+router.on(RouterEventType.NAV_END, () => { console.log('nav-end') });
+router.on(RouterEventType.NAV_SETTLED, () => { console.log('nav-settled') });

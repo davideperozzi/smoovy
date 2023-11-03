@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.3
+
+### Patch Changes
+
+- feat(tween): added callbacks to timeline
+
 ## 1.1.2
 
 ### Patch Changes

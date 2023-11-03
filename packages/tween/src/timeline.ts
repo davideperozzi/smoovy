@@ -9,6 +9,13 @@ export interface TimelineItemConfig {
   offset?: number;
 }
 
+export interface TimlineSideEffect {
+  callback: () => void;
+  config: TimelineItemConfig;
+  called: boolean;
+  item?: TimelineItem
+}
+
 export interface TimelineItem {
   controller: TweenController;
   config: TimelineItemConfig;
@@ -16,6 +23,7 @@ export interface TimelineItem {
 
 export class Timeline extends TweenController<TimelineConfig> {
   readonly items: TimelineItem[] = [];
+  private sideEffects: TimlineSideEffect[] = [];
   private timelineReversed = false;
 
   constructor(
@@ -36,11 +44,22 @@ export class Timeline extends TweenController<TimelineConfig> {
     }
   }
 
+  call(callback: () => void, config: TimelineItemConfig = {}) {
+    this.sideEffects.push({
+      item: this.items[this.items.length-1],
+      called: false,
+      callback,
+      config,
+    });
+
+    return this;
+  }
+
   add(
-    controllers: TweenController | TweenController[],
+    item: TweenController | TweenController[],
     config: TimelineItemConfig = {}
   ) {
-    controllers = Array.isArray(controllers) ? controllers : [controllers];
+    const controllers = Array.isArray(item) ? item : [item];
 
     for (let i = 0, len = controllers.length; i < len; i++) {
       const controller = controllers[i].override().pause().reset();
@@ -115,18 +134,43 @@ export class Timeline extends TweenController<TimelineConfig> {
       reversed ? i >= 0 : i < maxItems;
       reversed ? i-- : i++
     ) {
+      let offset = 0;
       const neighbour = reversed ? this.items[i + 1] : this.items[i - 1];
       const { controller, config } = this.items[i];
       const duration = controller.duration;
-      let offset = 0;
+      const effects = this.sideEffects.filter(effect => {
+        return effect.item === this.items[i];
+      });
 
       if (neighbour && config.offset) {
         offset = neighbour.controller.duration * config.offset;
       }
 
-      controller.seek(totalTime - (currentTime + offset));
+      const seekTime = totalTime - (currentTime + offset);
+
+      if (effects.length > 0) {
+        for (const effect of effects) {
+          if (
+            ! effect.called &&
+            seekTime >= duration + duration * (effect.config.offset || 0)
+          ) {
+            effect.called = true;
+            effect.callback();
+          }
+        }
+      }
+
+      controller.seek(seekTime);
 
       currentTime += duration + offset;
+    }
+  }
+
+  protected beforeStart() {
+    this.resetEffects();
+
+    for (const effect of this.sideEffects.filter(effect => !effect.item)) {
+      effect.callback();
     }
   }
 
@@ -142,12 +186,20 @@ export class Timeline extends TweenController<TimelineConfig> {
     return this;
   }
 
+  resetEffects() {
+    for (const effect of this.sideEffects) {
+      effect.called = false;
+    }
+  }
+
   reset() {
     super.reset();
 
     for (const { controller } of this.items) {
       controller.reset();
     }
+
+    this.resetEffects();
 
     return this;
   }

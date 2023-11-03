@@ -72,6 +72,7 @@ export class TweenController<
   }
 
   protected beforeStart() {}
+  protected beforeSeek() {}
 
   get progress() {
     return this._progress;
@@ -188,11 +189,12 @@ export class TweenController<
     }
 
     if (
-      (! this._reversed && ms > 0 || this._reversed && ms < this.duration) &&
+      ( ! this._reversed && ms > 0 || this._reversed && ms < this.duration) &&
       ! this._started
     ) {
       this._started = true;
 
+      this.beforeSeek();
       this.callback(this.config.onStart);
     }
 

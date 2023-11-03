@@ -1,366 +1,385 @@
-import { EventEmitter } from '@smoovy/emitter';
-import { listen, Unlisten } from '@smoovy/listener';
-import {
-  BrowserUrl, GoFetch, goFetch, parseUrl, serializeUrl,
-} from '@smoovy/utils';
-
-import { RouterOutlet } from './outlet';
-import { Route, RouteChangeEvent } from './route';
-import { processTransitions, RouterTransition } from './transition';
-
-export interface RouterState {
-  current: Route;
-}
-
-export interface NavigateConfig {
-  outlet?: boolean;
-  history?: boolean;
-  trigger?: RouteChangeEvent['trigger'];
-}
-
-export enum RouterEvent {
-  INIT = 'init',
-  NAVIGATION_START = 'navigationstart',
-  NAVIGATION_END = 'navigationend',
-  NAVIGATION_CANCEL = 'navigationcancel',
-  CONTENT_LOAD_START = 'contentloadstart',
-  CONTENT_LOAD_END = 'contentloadend',
-  CONTENT_LOAD_CANCEL = 'contentloadcancel',
-  CONTENT_LOAD_ERROR = 'contentloaderror'
-}
+/* eslint-disable lines-between-class-members */
+import { BrowserUrl, parseUrl, queryEl } from "@smoovy/utils";
+import { Unlisten, listen, listenCompose } from "@smoovy/listener";
+import { Trigger } from "./trigger";
+import { createRouteFromPath, parseRouteHtml, routesMatch } from "./utils";
+import { Route } from "./route";
+import { Timeline, tween, TweenController } from "@smoovy/tween";
+import { EventEmitter } from "@smoovy/emitter";
 
 export interface RouterConfig {
-  outlet?: string | RouterOutlet;
-  transitions?: (RouterTransition | [ RouterTransition, string[] ])[];
+  /**
+   * The outlet is the container that holds the view elements.
+   * It will not leave the dom. Only the `view` within it will
+   * enter and leave the dom. This is a standard queryselector
+   * as you would do with `document.querySelector`.
+   *
+   * @default 'main'
+   */
+  outlet?: string;
+
+  /**
+   * This is the view within the outlet that will be swapped
+   * when navigating. This is a standard queryselector.
+   *
+   * @default '.router-view'
+   */
+  view?: string;
+
+  /**
+   * The trigger is the element that will trigger the navigation
+   * when clicked. This is a standard queryselector.
+   *
+   * @default 'a[href]:not([data-no-route])'
+   */
+  trigger?: string;
+
+  /**
+   * If set to true, the router will cache the views and will
+   * not fetch them again when navigating to the same route.
+   *
+   * @default true
+   */
+  cache?: boolean;
+}
+
+export enum RouterNavResult {
+  SUCESS = 1,
+  CANCELED = 2,
+  ERROR = 4,
+  NO_VIEW = 8,
+  SAME = 16,
+}
+
+export interface RouterEvent {
+  fromElement: HTMLElement;
+  fromRoute: Route;
+  toRoute: Route;
+  trigger: 'user' | 'popstate';
+}
+
+export interface RouterSwapEvent extends RouterEvent {
+  fromElement: HTMLElement;
+  toElement: HTMLElement;
+}
+
+export interface RouterChangeState
+  extends Omit<RouterSwapEvent, 'fromElement' | 'toElement'>
+{
+  timeline: Timeline;
+  fromElement?: HTMLElement;
+  toElement?: HTMLElement;
+}
+
+export interface RouterAnimationHooks {
+  navStart?: (event: RouterEvent) => TweenController | void;
+  navCancel?: (event: RouterEvent) => void;
+  navEnd?: (event: RouterSwapEvent) => void;
+  beforeEnter?: (event: RouterSwapEvent) => TweenController;
+  afterEnter?: (event: RouterSwapEvent) => TweenController;
+  beforeLeave?: (event: RouterSwapEvent) => TweenController;
+  afterLeave?: (event: RouterSwapEvent) => TweenController;
+  afterRelease?: (element: HTMLElement) => void;
+}
+
+export interface RouterAnimation extends RouterAnimationHooks {
+  name: string;
+  when?: (event: RouterEvent) => boolean;
+}
+
+export enum RouterEventType {
+  TRIGGER_CLICK = 'triggerclick',
+  NAV_START = 'navstart',
+  NAV_END = 'navend',
+  NAV_CANCEL = 'navcancel',
+  NAV_SETTLED = 'navsettled',
+  NAV_PROGRESS = 'navprogress',
+  BEFORE_ENTER = 'beforeenter',
+  AFTER_ENTER = 'afterenter',
+  BEFORE_LEAVE = 'beforeleave',
+  AFTER_LEAVE = 'afterleave',
+  AFTER_RELEASE = 'afterrelease'
 }
 
 export class Router extends EventEmitter {
-  public outlet?: RouterOutlet;
+  private abortController?: AbortController;
+  private animations: RouterAnimation[] = [];
+  private outlet: HTMLElement;
+  private view: HTMLElement;
+  private route: Route;
   private baseUrl: BrowserUrl;
-  private _state: RouterState = { current: { url: '', load: '' } };
-  private fetch?: GoFetch;
-  private pendingEvent?: RouteChangeEvent;
-  private unlistenPopstate?: Unlisten;
-  private contentCache = new Map<string, string>();
-  private transitions = new Map<string, RouterTransition[]>();
+  private trigger: Trigger;
+  private unlisten: Unlisten;
+  private changeStates: RouterChangeState[] = [];
+  private viewCache = new Map<string, HTMLElement>();
+  private triggerSelector: string;
+  private viewSelector: string;
+  private outletSelector: string;
 
-  public constructor(
-    baseUrl: string | BrowserUrl,
-    config?: RouterConfig
+  constructor(
+    private config: RouterConfig = {}
   ) {
     super();
 
-    if (typeof baseUrl === 'string') {
-      this.baseUrl = parseUrl(baseUrl);
-    } else {
-      this.baseUrl = baseUrl as BrowserUrl;
-    }
+    this.outletSelector = config.outlet || 'main';
+    this.viewSelector = config.view || '.router-view';
+    this.triggerSelector = config.trigger || 'a[href]:not([data-no-route])';
+    this.baseUrl = parseUrl(window.location.href);
+    this.route = createRouteFromPath(this.baseUrl);
+    this.outlet = queryEl(this.outletSelector);
+    this.view = this.queryView(this.outlet);
+    this.unlisten = this.listen();
+    this.trigger = new Trigger(this.triggerSelector, (url, target) => {
+      this.emit(RouterEventType.TRIGGER_CLICK, { url, target });
+      this.to(url);
+    });
 
-    if (config && config.outlet) {
-      if ( ! (config.outlet instanceof RouterOutlet)) {
-        this.outlet = new RouterOutlet(config.outlet);
-      } else {
-        this.outlet = config.outlet;
-      }
-    }
-
-    if (config && config.transitions) {
-      config.transitions.forEach(transition => {
-        if (transition instanceof Array) {
-          this.addTransition(transition[0], transition[1]);
-        } else {
-          this.addTransition(transition);
-        }
-      });
-    }
-
-    this.init();
+    this.viewCache.set(this.route.id, this.view);
   }
 
-  private init() {
-    const route = {
-      url: `${this.baseUrl.pathname}${this.baseUrl.search}`,
-      hash: this.baseUrl.hash,
-      load: serializeUrl(this.baseUrl)
-    };
-
-    this.replace(route, true);
-    this.emit(RouterEvent.INIT, route);
-
-    this.unlistenPopstate = listen(
-      window,
-      'popstate',
-      (event) => {
-        this.navigate(event.state, { history: false, trigger: 'popstate' });
-      }
+  private listen() {
+    return listenCompose(
+      listen(window, 'popstate', (event: PopStateEvent) => {
+        this.navigate(event.state, { trigger: 'popstate' });
+      }),
     );
   }
 
-  public destroy() {
-    if (this.unlistenPopstate) {
-      this.unlistenPopstate();
-      delete this.unlistenPopstate;
-    }
+  update(scope?: HTMLElement) {
+    this.trigger.update(scope);
   }
 
-  public addTransition(
-    transition: RouterTransition,
-    constraints: string[] = [ '.* => .*' ]
+  animate(...animations: RouterAnimation[]) {
+    animations.forEach(animation => this.animations.push(animation));
+  }
+
+  removeAnimation(name: string) {
+    return this.animations.splice(
+      this.animations.findIndex(animation => animation.name === name),
+      1
+    )[0];
+  }
+
+  to(url: string, options?: { replace?: boolean }) {
+    const route = createRouteFromPath(url);
+    const method = options?.replace ? 'replaceState' : 'pushState';
+
+    window.history[method](route, '', route.url + (route.hash || ''));
+    this.navigate(route);
+  }
+
+  private animateCycle(
+    timeline: Timeline,
+    animations: RouterAnimation[],
+    event: RouterSwapEvent
   ) {
-    constraints.forEach(constraint => {
-      if (this.transitions.has(constraint)) {
-        const transitions = this.transitions.get(constraint);
+    if ( ! document.documentElement.contains(event.toElement)) {
+      this.animateHook(event, 'beforeEnter', timeline, animations);
+      timeline.call(() => this.emit(RouterEventType.BEFORE_ENTER, event));
 
-        if (transitions && ! transitions.includes(transition)) {
-          transitions.push(transition);
-        }
-      } else {
-        this.transitions.set(constraint, [ transition ]);
-      }
-    });
-  }
+      timeline.call(() => this.outlet.append(event.toElement));
 
-  public removeTransition(...transitions: RouterTransition[]) {
-    const emptyConstraints: string[] = [];
-
-    transitions.forEach(transition => {
-      this.transitions.forEach((currentTransitions, constraint) => {
-        const index = currentTransitions.indexOf(transition);
-
-        if (index > -1) {
-          currentTransitions.splice(index, 1);
-        }
-
-        if (currentTransitions.length === 0) {
-          emptyConstraints.push(constraint);
-        }
-      });
-    });
-
-    emptyConstraints.forEach(constr => this.transitions.delete(constr));
-  }
-
-  public get url() {
-    return this.state.current.url;
-  }
-
-  public get hash() {
-    return this.state.current.hash;
-  }
-
-  public replace(route: Route | string, history = false) {
-    if (typeof route === 'string') {
-      route = this.routeFromUrl(route);
+      this.animateHook(event, 'afterEnter', timeline, animations);
+      timeline.call(() => this.emit(RouterEventType.AFTER_ENTER, event));
     }
 
-    this._state.current = route;
+    this.animateHook(event, 'beforeLeave', timeline, animations);
+    timeline.call(() => this.emit(RouterEventType.BEFORE_LEAVE, event));
 
-    if (history) {
-      window.history.replaceState(route, '', route.url + (route.hash || ''));
-    }
+    timeline.call(() => event.fromElement.remove());
+
+    this.animateHook(event, 'afterLeave', timeline, animations);
+    timeline.call(() => this.emit(RouterEventType.AFTER_LEAVE, event));
   }
 
-  public push(route: Route | string, history = false) {
-    if (typeof route === 'string') {
-      route = this.routeFromUrl(route);
-    }
-
-    this._state.current = route;
-
-    if (history) {
-      window.history.pushState(route, '', route.url + (route.hash || ''));
-    }
-  }
-
-  private parseContent(html: string) {
-    const parser = document.createElement('div');
-
-    parser.innerHTML = html;
-
-    return parser;
-  }
-
-  public prepareContent(html: string) {
-    const element = this.parseContent(html);
-    const titleEl = element.querySelector('title');
-
-    return {
-      element,
-      title: titleEl && titleEl.textContent
-    };
-  }
-
-  private async loadContent(
-    event: RouteChangeEvent,
-    transitions?: RouterTransition[]
+  private animateHook(
+    event: RouterSwapEvent,
+    hook: keyof RouterAnimationHooks,
+    timeline: Timeline,
+    animations: RouterAnimationHooks[],
+  ): void;
+  private animateHook(
+    event: RouterEvent,
+    hook: keyof RouterAnimationHooks,
+    timeline: Timeline,
+    animations: RouterAnimationHooks[],
+  ): void;
+  private animateHook(
+    event: any,
+    hook: keyof RouterAnimationHooks,
+    timeline: Timeline,
+    animations: RouterAnimationHooks[],
   ) {
-    if (this.fetch) {
-      if  (this.fetch.controller) {
-        this.fetch.controller.abort();
-      }
+    const controllers: TweenController[] = [];
 
-      this.emit<RouteChangeEvent>(RouterEvent.CONTENT_LOAD_CANCEL);
-    }
+    for (const animation of animations) {
+      const callback = animation[hook];
 
-    this.emit<RouteChangeEvent>(
-      RouterEvent.CONTENT_LOAD_START,
-      {
-        ...event
-      }
-    );
+      if (callback instanceof Function) {
+        const controller = callback(event);
 
-    await this.preload(event.to).catch((error) => {
-      this.emit<RouteChangeEvent>(
-        RouterEvent.CONTENT_LOAD_ERROR,
-        {
-          ...event,
-          error
+        if (controller instanceof TweenController) {
+          controllers.push(controller);
         }
-      );
-    });
-
-    const content = this.contentCache.get(event.to.load);
-
-    if (content) {
-      const prepared = this.prepareContent(content);
-
-      if (prepared.title) {
-        document.title = prepared.title;
-      }
-
-      this.emit<RouteChangeEvent>(
-        RouterEvent.CONTENT_LOAD_END,
-        {
-          ...event,
-          payload: prepared.element,
-        }
-      );
-
-      if (this.outlet) {
-        await this.outlet.update(
-          prepared.element,
-          transitions,
-          event.trigger
-        );
-      }
-    }
-  }
-
-  private getTransitions(from: Route, to: Route) {
-    const transitions: RouterTransition[] = [];
-
-    this.transitions.forEach((trans, pattern) => {
-      const parts = pattern.split('=>');
-      const fromPattern = new RegExp(`^${parts[0].trim()}$`, 'gi');
-      const toPattern = new RegExp(`^${parts[1].trim()}$`, 'gi');
-
-      if (
-        fromPattern.test(from.url) &&
-        toPattern.test(to.url)
-      ) {
-        transitions.push(...trans);
-      }
-    });
-
-    return transitions;
-  }
-
-  public get state() {
-    return Object.freeze({ ...this._state });
-  }
-
-  private routeFromUrl(loadUrl: string) {
-    const url = parseUrl(loadUrl);
-
-    return {
-      url: `${url.pathname}${url.search}`,
-      hash: url.hash,
-      load: loadUrl
-    } as Route;
-  }
-
-  public async preload(route: Route | string) {
-    if (typeof route === 'string') {
-      route = this.routeFromUrl(route);
-    }
-
-    if ( ! this.contentCache.has(route.load)) {
-      this.fetch = goFetch(route.load);
-
-      const content = await this.fetch.then((result) => result.text());
-
-      if (content) {
-        this.contentCache.set(route.load, content);
-
-        return content;
       }
     }
 
-    return this.contentCache.get(route.load);
+    timeline.add(controllers);
   }
 
-  public async navigate(
-    toRoute: Route | string,
-    config: NavigateConfig = {}
-  ) {
-    const fromRoute = this._state.current;
-    const useHistory = typeof config.history === 'undefined'
-      ? true
-      : config.history;
-
-    if (typeof toRoute === 'string') {
-      toRoute = this.routeFromUrl(toRoute);
-    }
-
-    if ( ! fromRoute) {
-      throw new Error('No initial route found!');
-    }
-
-    const urlChanged = this._state.current.url !== toRoute.url;
-    const hashChanged = this._state.current.hash !== toRoute.hash;
-
-    if ( ! urlChanged && ! hashChanged) {
+  async navigate(to: Route, options?: { trigger?: 'user' | 'popstate' }) {
+    if ( ! to) {
       return;
     }
 
-    if (this.pendingEvent) {
-      this.emit<RouteChangeEvent>(
-        RouterEvent.NAVIGATION_CANCEL,
-        this.pendingEvent
-      );
-    }
-
-    const pendingEvent: RouteChangeEvent = {
-      from: fromRoute,
-      to: toRoute,
-      trigger: config.trigger || 'user'
+    const trigger = options?.trigger || 'user';
+    const event: RouterEvent = {
+      fromElement: this.view,
+      fromRoute: this.route,
+      toRoute: to,
+      trigger
     };
 
-    this.pendingEvent = pendingEvent;
-
-    this.emit<RouteChangeEvent>(
-      RouterEvent.NAVIGATION_START,
-      this.pendingEvent
-    );
-
-    const transitions = this.getTransitions(fromRoute, toRoute);
-
-    await processTransitions(transitions.slice(), (transition) => {
-      return transition.navStart(pendingEvent)
-    });
-
-    this.push(toRoute, useHistory);
-
-    if (urlChanged) {
-      await this.loadContent(this.pendingEvent, transitions);
+    if (routesMatch(this.route, to)) {
+      return RouterNavResult.SAME;
     }
 
-    this.emit<RouteChangeEvent>(RouterEvent.NAVIGATION_END, this.pendingEvent);
-
-    await processTransitions(transitions.slice(), (transition) => {
-      return transition.navEnd(pendingEvent)
+    const fromElement = event.fromElement;
+    const animations = this.animations.filter(anim => {
+      return anim.when ? anim.when(event) : true
     });
 
-    delete this.pendingEvent;
+    const timeline = tween.timeline({
+      autoStart: false,
+      onComplete: () => {
+        this.emit(RouterEventType.NAV_SETTLED, event);
+
+        this.changeStates = [];
+      },
+      onSeek: (progress) => this.emit(RouterEventType.NAV_PROGRESS, progress),
+      onStop: (wasRunning) => {
+        if (changeState.fromElement) {
+          for (const animation of animations) {
+            if (animation.afterRelease) {
+              animation.afterRelease(changeState.fromElement);
+            }
+          }
+
+          this.emit(RouterEventType.AFTER_RELEASE, event);
+        }
+
+        requestAnimationFrame(() => {
+          if ( ! timeline.complete && wasRunning) {
+            this.emit(RouterEventType.NAV_CANCEL, event);
+
+            for (const animation of animations) {
+              if (animation.navCancel) {
+                animation.navCancel(event);
+              }
+            }
+          }
+        })
+      }
+    });
+
+    this.emit(RouterEventType.NAV_START, event);
+    this.animateHook(event, 'navStart', timeline, animations);
+
+    const toElement = await this.findView(to);
+    const changeState: RouterChangeState = { timeline, ...event };
+
+    for (const swapState of this.changeStates) {
+      swapState.timeline.stop();
+    }
+
+    this.changeStates.push(changeState);
+
+    this.route = to;
+
+    if ( ! toElement) {
+      return RouterNavResult.NO_VIEW;
+    }
+
+    const swapEvent: RouterSwapEvent = { toElement, ...event };
+
+    changeState.fromElement = fromElement;
+    changeState.toElement = toElement;
+
+    this.view = toElement;
+
+    this.animateCycle(timeline, animations, swapEvent);
+    this.trigger.update(toElement);
+
+    for (const animation of animations) {
+      if (animation.navEnd) {
+        timeline.call(() => animation.navEnd?.(swapEvent));
+      }
+    }
+
+    timeline.call(() => this.emit(RouterEventType.NAV_END, event));
+    timeline.start();
+
+    this.clearChangeStates([ fromElement, toElement ]);
+
+    return RouterNavResult.SUCESS;
+  }
+
+  private clearChangeStates(activeElements: HTMLElement[]) {
+    for (const changeState of this.changeStates) {
+      if ( ! activeElements.includes(changeState.fromElement as HTMLElement)) {
+        if (changeState.fromElement) {
+          changeState.fromElement.remove();
+        }
+      }
+
+      if ( ! activeElements.includes(changeState.toElement as HTMLElement)) {
+        if (changeState.toElement) {
+          changeState.toElement.remove();
+        }
+      }
+    }
+  }
+
+  private queryView(outlet: HTMLElement) {
+    return queryEl(this.viewSelector, outlet);
+  }
+
+  async findView(route: Route) {
+    if (this.viewCache.has(route.id) && this.config.cache !== false) {
+      return this.viewCache.get(route.id) as HTMLElement;
+    } else {
+      try {
+        const { outlet } = await this.load(route);
+
+        if (outlet) {
+          const view = this.queryView(outlet);
+
+          this.viewCache.set(route.id, view);
+
+          return view;
+        }
+      } catch(err) {
+        console.warn(`Something went wrong when fetching route`, err);
+      }
+    }
+  }
+
+  async load(route: Route) {
+    if (this.abortController) {
+      this.abortController.abort();
+
+      this.abortController = new AbortController();
+    }
+
+    const response = await fetch(route.load, {
+      signal: this.abortController?.signal
+    });
+
+    return parseRouteHtml(await response.text(), this.outletSelector);
+  }
+
+  destroy() {
+    this.trigger.clear();
+    this.unlisten();
   }
 }

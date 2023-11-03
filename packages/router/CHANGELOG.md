@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.0
+
+### Minor Changes
+
+- feat(router): improved architecture, animations, performance
+
 ## 1.1.0
 
 ### Minor Changes

@@ -1,13 +1,6 @@
 export interface Route {
+  id: string;
   url: string;
   load: string;
   hash?: string;
-}
-
-export interface RouteChangeEvent {
-  from: Route;
-  to: Route;
-  error?: any;
-  payload?: HTMLDivElement;
-  trigger: 'popstate' | 'user';
 }

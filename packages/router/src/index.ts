@@ -1,4 +1,4 @@
 export * from './router';
-export * from './outlet';
-export * from './transition';
-export * from './transitions/fade';
+export * from './route';
+export * from './trigger';
+export * as animations from './animations';

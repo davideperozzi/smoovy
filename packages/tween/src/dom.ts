@@ -165,9 +165,9 @@ export function mergeDomProps(
 
 export function getDomProps(dom: HTMLElement) {
   const values = getTransformValues(dom);
-  const opacity = parseFloat(getComputedStyle(dom).opacity || '1');
+  const opacity = parseFloat(dom.style.opacity);
 
-  return { ...values, opacity };
+  return { ...values, opacity: isNaN(opacity) ? 1 : opacity };
 }
 
 export function setDomProps(

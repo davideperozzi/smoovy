@@ -59,12 +59,17 @@ const timeline = tween.timeline({
   onComplete: () => console.log('completed')
 });
 
-const config = { duration: 10000, easing: easings.easeOutCirc }
+const config = { duration: 1000, easing: easings.easeOutCirc }
 
+timeline.call(() => console.log('start'));
 timeline.add(tween.fromTo(targets[0], { y: 0 }, { y: 500 }, config));
-timeline.add(tween.fromTo(targets[2], { y: 0 }, { y: 500 }, { duration: 3000 }), { offset: 0.5 });
-timeline.add(tween.fromTo(targets[1], { y: 0 }, { y: 500 }, { duration: 4000 }), { offset: -1 });
+timeline.call(() => console.log('first finished 1'));
+timeline.add(tween.fromTo(targets[2], { y: 0 }, { y: 500 }, { duration: 1000 }), { offset: 0.5 });
+timeline.call(() => console.log('second finished'), { offset: -0.5 });
+timeline.add(tween.fromTo(targets[1], { y: 0 }, { y: 500 }, { duration: 2000 }), { offset: -1 });
+timeline.call(() => console.log('third finished'));
 timeline.add(tween.fromTo(targets[3], { y: 0 }, { y: 500 }, config), { offset: 0 });
+timeline.call(() => console.log('last finished'), { offset: 0 });
 // timeline.add(tween.fromTo(targets[4], { y: 0 }, { y: 500 }, config), { offset: -1 });
 
 
