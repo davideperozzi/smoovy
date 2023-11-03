@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.2
+
+### Patch Changes
+
+- fix(router): invalid var used before init
+
 ## 1.2.1
 
 ### Patch Changes

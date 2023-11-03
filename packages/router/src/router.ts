@@ -66,7 +66,7 @@ export interface RouterSwapEvent extends RouterEvent {
 export interface RouterChangeState
   extends Omit<RouterSwapEvent, 'fromElement' | 'toElement'>
 {
-  timeline: Timeline;
+  timeline?: Timeline;
   fromElement?: HTMLElement;
   toElement?: HTMLElement;
 }
@@ -249,6 +249,7 @@ export class Router extends EventEmitter {
     }
 
     const fromElement = event.fromElement;
+    const changeState: RouterChangeState = { ...event };
     const animations = this.animations.filter(anim => {
       return anim.when ? anim.when(event) : true
     });
@@ -293,6 +294,8 @@ export class Router extends EventEmitter {
       }
     });
 
+    changeState.timeline = timeline;
+
     this._route = to;
 
     this.emit(RouterEventType.NAV_START, event);
@@ -302,10 +305,9 @@ export class Router extends EventEmitter {
     }
 
     const toElement = await this.findView(to);
-    const changeState: RouterChangeState = { timeline, ...event };
 
     for (const swapState of this.changeStates) {
-      swapState.timeline.stop();
+      swapState.timeline?.stop();
     }
 
     this.changeStates.push(changeState);
