@@ -117,9 +117,7 @@ export class Tween<
   }
 
   protected beforeStart() {
-    if (this.domTarget) {
-      this.updateChanges();
-    }
+    this.updateChanges();
 
     if (this.registry.has(this.key) && this.config.overwrite !== false) {
       this.overwrite(this.key);
@@ -129,9 +127,7 @@ export class Tween<
   }
 
   protected beforeSeek() {
-    if (this.domTarget) {
-      this.updateChanges();
-    }
+    this.updateChanges();
   }
 
   protected process(eased: number, linear: number) {
