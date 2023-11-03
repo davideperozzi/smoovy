@@ -106,7 +106,7 @@ export class Router extends EventEmitter {
   private animations: RouterAnimation[] = [];
   private outlet: HTMLElement;
   private view: HTMLElement;
-  private route: Route;
+  private _route: Route;
   private baseUrl: BrowserUrl;
   private trigger: Trigger;
   private unlisten: Unlisten;
@@ -125,7 +125,7 @@ export class Router extends EventEmitter {
     this.viewSelector = config.view || '.router-view';
     this.triggerSelector = config.trigger || 'a[href]:not([data-no-route])';
     this.baseUrl = parseUrl(window.location.href);
-    this.route = createRouteFromPath(this.baseUrl);
+    this._route = createRouteFromPath(this.baseUrl);
     this.outlet = queryEl(this.outletSelector);
     this.view = this.queryView(this.outlet);
     this.unlisten = this.listen();
@@ -134,7 +134,11 @@ export class Router extends EventEmitter {
       this.to(url);
     });
 
-    this.viewCache.set(this.route.id, this.view);
+    this.viewCache.set(this._route.id, this.view);
+  }
+
+  get route() {
+    return { ...this._route };
   }
 
   private listen() {
@@ -235,12 +239,12 @@ export class Router extends EventEmitter {
     const trigger = options?.trigger || 'user';
     const event: RouterEvent = {
       fromElement: this.view,
-      fromRoute: this.route,
+      fromRoute: this._route,
       toRoute: to,
       trigger
     };
 
-    if (routesMatch(this.route, to)) {
+    if (routesMatch(this._route, to)) {
       return RouterNavResult.SAME;
     }
 
@@ -259,13 +263,20 @@ export class Router extends EventEmitter {
       onSeek: (progress) => this.emit(RouterEventType.NAV_PROGRESS, progress),
       onStop: (wasRunning) => {
         if (changeState.fromElement) {
-          for (const animation of animations) {
-            if (animation.afterRelease) {
-              animation.afterRelease(changeState.fromElement);
-            }
-          }
+          const beingUsed = this.changeStates.some(state => {
+            return state.fromElement === changeState.fromElement ||
+                   state.toElement === changeState.fromElement
+          });
 
-          this.emit(RouterEventType.AFTER_RELEASE, event);
+          if ( ! beingUsed) {
+            for (const animation of animations) {
+              if (animation.afterRelease) {
+                animation.afterRelease(changeState.fromElement);
+              }
+            }
+
+            this.emit(RouterEventType.AFTER_RELEASE, event);
+          }
         }
 
         requestAnimationFrame(() => {
@@ -282,8 +293,13 @@ export class Router extends EventEmitter {
       }
     });
 
+    this._route = to;
+
     this.emit(RouterEventType.NAV_START, event);
-    this.animateHook(event, 'navStart', timeline, animations);
+
+    if (document.documentElement.contains(fromElement)) {
+      this.animateHook(event, 'navStart', timeline, animations);
+    }
 
     const toElement = await this.findView(to);
     const changeState: RouterChangeState = { timeline, ...event };
@@ -293,8 +309,6 @@ export class Router extends EventEmitter {
     }
 
     this.changeStates.push(changeState);
-
-    this.route = to;
 
     if ( ! toElement) {
       return RouterNavResult.NO_VIEW;
