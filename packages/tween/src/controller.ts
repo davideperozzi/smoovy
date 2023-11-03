@@ -295,5 +295,7 @@ export class TweenController<
     });
   }
 
-  protected process(eased: number, linear: number) {}
+  process(eased: number, linear: number) {
+    return this;
+  }
 }

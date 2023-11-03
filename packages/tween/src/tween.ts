@@ -58,7 +58,7 @@ export class Tween<
   ) {
     super(config);
 
-    this.updateChanges();
+    this.update();
   }
 
   public get key() {
@@ -75,7 +75,7 @@ export class Tween<
     }
   }
 
-  private updateChanges() {
+  update() {
     const config = this.config;
 
     if (config.target && config.target instanceof HTMLElement) {
@@ -114,10 +114,12 @@ export class Tween<
           : { ...this.originState };
       }
     }
+
+    return this;
   }
 
   protected beforeStart() {
-    this.updateChanges();
+    this.update();
 
     if (this.registry.has(this.key) && this.config.overwrite !== false) {
       this.overwrite(this.key);
@@ -127,10 +129,10 @@ export class Tween<
   }
 
   protected beforeSeek() {
-    this.updateChanges();
+    this.update();
   }
 
-  protected process(eased: number, linear: number) {
+  process(eased: number, linear: number) {
     for (const prop in this.changedState) {
       if (Object.prototype.hasOwnProperty.call(this.changedState, prop)) {
         const change = this.changedState[prop] as number;
@@ -150,5 +152,7 @@ export class Tween<
       this.config.onUpdate,
       [ this.resultState, { target: this, linear, eased } ]
     );
+
+    return this;
   }
 }

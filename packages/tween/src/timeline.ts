@@ -123,7 +123,7 @@ export class Timeline extends TweenController<TimelineConfig> {
     this._duration = highestEdge;
   }
 
-  protected process(eased: number) {
+  process(eased: number) {
     const totalTime = (this.duration - this.delay) * eased;
     const reversed = this.timelineReversed;
     const maxItems = this.items.length;
@@ -164,6 +164,8 @@ export class Timeline extends TweenController<TimelineConfig> {
 
       currentTime += duration + offset;
     }
+
+    return this;
   }
 
   protected beforeStart() {
