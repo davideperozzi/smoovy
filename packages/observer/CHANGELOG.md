@@ -1,5 +1,11 @@
 # @smoovy/observer
 
+## 1.0.6
+
+### Patch Changes
+
+- fix(observer): sync updae call on creation
+
 ## 1.0.5
 
 ### Patch Changes

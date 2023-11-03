@@ -328,6 +328,7 @@ export class Observable<
         ? config.initUpdatePeriods
         : [50, 250, 500, 1000];
 
+    this.update();
     requestAnimationFrame(() => this.update());
     periods.forEach(ms => setTimeout(() => this.update(), ms));
   }
