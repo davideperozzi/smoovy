@@ -11,24 +11,19 @@ export interface RouterFadeAnimationConfig {
 export const fade = (config: RouterFadeAnimationConfig = {}) => ({
   name: config.name || 'smoovy:fade',
   when: config.when,
-  navStart: ({ fromElement }) => tween.to(
-    fromElement,
-    { opacity: 0 },
-    {
-      duration: config.duration || 500,
-      easing: config.easing
-    }
-  ),
-  beforeEnter: ({ toElement }) => tween.set(toElement, { opacity: 0 }),
-  afterLeave: ({ toElement }) => tween.to(
-    toElement,
-    { opacity: 1 },
-    {
-      duration: config.duration || 500,
-      easing: config.easing
-    }
-  ),
-  afterRelease: (element) => {
+  release: (element) => {
     element.style.opacity = '';
+  },
+  beforeEnter: ({ fromElement }) => {
+    return tween.fromTo(fromElement, { opacity: 1 }, { opacity: 0 }, {
+      duration: config.duration || 500,
+      easing: config.easing
+    })
+  },
+  leave: ({ toElement }) => {
+    return tween.fromTo(toElement, { opacity: 0 }, { opacity: 1 }, {
+      duration: config.duration || 500,
+      easing: config.easing
+    })
   }
 } as RouterAnimation);

@@ -6,6 +6,7 @@ import { createRouteFromPath, parseRouteHtml, routesMatch } from "./utils";
 import { Route } from "./route";
 import { Timeline, tween, TweenController } from "@smoovy/tween";
 import { EventEmitter } from "@smoovy/emitter";
+import { TimelineItem } from "packages/tween/src/timeline";
 
 export interface RouterConfig {
   /**
@@ -72,14 +73,13 @@ export interface RouterChangeState
 }
 
 export interface RouterAnimationHooks {
-  navStart?: (event: RouterEvent) => TweenController | void;
-  navCancel?: (event: RouterEvent) => void;
-  navEnd?: (event: RouterSwapEvent) => void;
-  beforeEnter?: (event: RouterSwapEvent) => TweenController;
-  afterEnter?: (event: RouterSwapEvent) => TweenController;
-  beforeLeave?: (event: RouterSwapEvent) => TweenController;
-  afterLeave?: (event: RouterSwapEvent) => TweenController;
-  afterRelease?: (element: HTMLElement) => void;
+  start?: (event: RouterEvent) => TweenController | void;
+  enter?: (event: RouterSwapEvent) => TweenController | void;
+  leave?: (event: RouterSwapEvent) => TweenController | void;
+  beforeEnter?: (event: RouterSwapEvent) => TweenController | void;
+  cancel?: (event: RouterEvent) => void;
+  release?: (element: HTMLElement) => void;
+  complete?: (event: RouterSwapEvent) => void;
 }
 
 export interface RouterAnimation extends RouterAnimationHooks {
@@ -177,22 +177,22 @@ export class Router extends EventEmitter {
     animations: RouterAnimation[],
     event: RouterSwapEvent
   ) {
-    if ( ! document.documentElement.contains(event.toElement)) {
-      this.animateHook(event, 'beforeEnter', timeline, animations);
-      timeline.call(() => this.emit(RouterEventType.BEFORE_ENTER, event));
+    timeline.call(() => this.emit(RouterEventType.BEFORE_ENTER, event));
 
-      timeline.call(() => this.outlet.append(event.toElement));
+    this.animateHook(event, 'beforeEnter', timeline, animations);
 
-      this.animateHook(event, 'afterEnter', timeline, animations);
-      timeline.call(() => this.emit(RouterEventType.AFTER_ENTER, event));
-    }
+    timeline.call(() => this.outlet.append(event.toElement));
 
-    this.animateHook(event, 'beforeLeave', timeline, animations);
-    timeline.call(() => this.emit(RouterEventType.BEFORE_LEAVE, event));
+    this.animateHook(event, 'enter', timeline, animations);
 
-    timeline.call(() => event.fromElement.remove());
+    timeline.call(() => {
+      this.emit(RouterEventType.AFTER_ENTER, event);
+      this.emit(RouterEventType.BEFORE_LEAVE, event);
+      event.fromElement.remove();
+    });
 
-    this.animateHook(event, 'afterLeave', timeline, animations);
+    this.animateHook(event, 'leave', timeline, animations);
+
     timeline.call(() => this.emit(RouterEventType.AFTER_LEAVE, event));
   }
 
@@ -214,7 +214,7 @@ export class Router extends EventEmitter {
     timeline: Timeline,
     animations: RouterAnimationHooks[],
   ) {
-    const controllers: TweenController[] = [];
+    const timelineItems: TimelineItem[] = [];
 
     for (const animation of animations) {
       const callback = animation[hook];
@@ -223,12 +223,17 @@ export class Router extends EventEmitter {
         const controller = callback(event);
 
         if (controller instanceof TweenController) {
-          controllers.push(controller);
+          timelineItems.push({
+            controller,
+            config: { offset: -1 }
+          });
         }
       }
     }
 
-    timeline.add(controllers);
+    if (timelineItems.length > 0) {
+      timeline.add(tween.timeline({ items: timelineItems }));
+    }
   }
 
   async navigate(to: Route, options?: { trigger?: 'user' | 'popstate' }) {
@@ -271,8 +276,8 @@ export class Router extends EventEmitter {
 
           if ( ! beingUsed) {
             for (const animation of animations) {
-              if (animation.afterRelease) {
-                animation.afterRelease(changeState.fromElement);
+              if (animation.release) {
+                animation.release(changeState.fromElement);
               }
             }
 
@@ -285,8 +290,8 @@ export class Router extends EventEmitter {
             this.emit(RouterEventType.NAV_CANCEL, event);
 
             for (const animation of animations) {
-              if (animation.navCancel) {
-                animation.navCancel(event);
+              if (animation.cancel) {
+                animation.cancel(event);
               }
             }
           }
@@ -299,10 +304,7 @@ export class Router extends EventEmitter {
     this._route = to;
 
     this.emit(RouterEventType.NAV_START, event);
-
-    if (document.documentElement.contains(fromElement)) {
-      this.animateHook(event, 'navStart', timeline, animations);
-    }
+    this.animateHook(event, 'start', timeline, animations);
 
     const toElement = await this.findView(to);
 
@@ -327,8 +329,8 @@ export class Router extends EventEmitter {
     this.trigger.update(toElement);
 
     for (const animation of animations) {
-      if (animation.navEnd) {
-        timeline.call(() => animation.navEnd?.(swapEvent));
+      if (animation.complete) {
+        timeline.call(() => animation.complete?.(swapEvent));
       }
     }
 
