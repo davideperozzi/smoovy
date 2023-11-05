@@ -1,5 +1,5 @@
 export type TweenProps = Record<string, number>;
-export interface TransformTweenProps extends TweenProps {
+export interface TransformTweenProps {
   x: number;
   y: number;
   z: number;

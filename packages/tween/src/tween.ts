@@ -9,6 +9,7 @@ export interface TweenConfig<
   to: Partial<V>;
   key?: any;
   target?: V | HTMLElement;
+  recover?: boolean;
   units?: Record<string, string>;
   mutate?: boolean;
   overwrite?: boolean;
@@ -22,6 +23,9 @@ export interface TweenConfig<
     }
   ) => void;
 }
+
+export type SimpleTweenConfig<V extends (TweenProps | object)>
+  = Omit<TweenConfig<V>, 'from' | 'to'>;
 
 function getChanges<T extends (TweenProps | object)>(from: T, to: Partial<T>) {
   const changes = {} as typeof to;
@@ -47,6 +51,7 @@ export class Tween<
   T extends (TweenProps | object) = TweenProps
 > extends TweenController<TweenConfig<T>> {
   private static registry = new WeakMap<any, Tween>();
+  private static recovers = new WeakMap<any, Partial<TweenProps>>();
   private registry = Tween.registry;
   private originState: Partial<T> = {};
   private changedState: Partial<T> = {};
@@ -77,18 +82,27 @@ export class Tween<
 
   update() {
     const config = this.config;
+    let fromState = config.from;
 
     if (config.target && config.target instanceof HTMLElement) {
       this.domTarget = config.target;
-    } else if (config.from instanceof HTMLElement) {
-      this.domTarget = config.from;
+    } else if (fromState instanceof HTMLElement) {
+      this.domTarget = fromState;
+    }
+
+    if (config.recover !== false && ! (fromState instanceof HTMLElement)) {
+      const lastTween = Tween.registry.get(this.key);
+
+      if (lastTween) {
+        fromState = lastTween.resultState as any;
+      }
     }
 
     if (this.domTarget) {
       const currentState = getDomProps(this.domTarget);
-      const initialState = config.from instanceof HTMLElement
+      const initialState = fromState instanceof HTMLElement
         ? { ...currentState }
-        : mergeDomProps(currentState, config.from as any as DOMTweenProps);
+        : mergeDomProps(currentState, fromState as any as DOMTweenProps);
       const desiredState = mergeDomProps(
         currentState,
         config.to as any as DOMTweenProps
@@ -100,7 +114,7 @@ export class Tween<
       this.resultState = { ...this.originState };
     }
     else {
-      const initialState = config.from as any as Partial<T>;
+      const initialState = fromState as any as Partial<T>;
       const desiredState = config.to as any as Partial<T>;
 
       this.originState = { ...initialState };
@@ -118,7 +132,7 @@ export class Tween<
     return this;
   }
 
-  protected beforeStart() {
+  protected beforeSeek() {
     this.update();
 
     if (this.registry.has(this.key) && this.config.overwrite !== false) {
@@ -126,10 +140,6 @@ export class Tween<
     }
 
     this.registry.set(this.key, this as any);
-  }
-
-  protected beforeSeek() {
-    this.update();
   }
 
   process(eased: number, linear: number) {

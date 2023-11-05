@@ -1,4 +1,8 @@
+/* eslint-disable lines-between-class-members */
 import { TweenController, TweenControllerConfig } from './controller';
+import { fromTo, to } from './helper/tween';
+import { DOMTweenProps, TweenProps } from './props';
+import { SimpleTweenConfig } from './tween';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TimelineConfig extends Omit<TweenControllerConfig, 'duration'> {
@@ -30,6 +34,8 @@ export class Timeline extends TweenController<TimelineConfig> {
     protected config: TimelineConfig
   ) {
     super(config);
+
+    this._duration = 0;
 
     if (config.reversed) {
       this.reverse();
@@ -83,6 +89,41 @@ export class Timeline extends TweenController<TimelineConfig> {
     this.updateDuration();
 
     return this;
+  }
+
+  to<V extends DOMTweenProps>(
+    from: HTMLElement,
+    to: Partial<V>,
+    config?: SimpleTweenConfig<V> & TimelineItemConfig
+  ): Timeline;
+  to<V extends object>(
+    from: V,
+    to: Partial<V>,
+    config?: SimpleTweenConfig<V> & TimelineItemConfig
+  ): Timeline;
+  to(target: any, props: Partial<any>, config?: any) {
+    return this.add(to(target, props, config), config);
+  }
+
+  fromTo<V extends DOMTweenProps>(
+    target: HTMLElement,
+    from: Partial<V>,
+    to: Partial<V>,
+    config?: SimpleTweenConfig<V> & TimelineItemConfig
+  ): Timeline;
+  fromTo<V extends object>(
+    target: V,
+    from: Partial<V>,
+    to: Partial<V>,
+    config?: SimpleTweenConfig<V> & TimelineItemConfig
+  ): Timeline;
+  fromTo(
+    target: any,
+    fromProps: Partial<any>,
+    toProps: Partial<any>,
+    config?: any
+  ) {
+    return this.add(fromTo(target, fromProps, toProps, config), config);
   }
 
   remove(controller: TweenController) {

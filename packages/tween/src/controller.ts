@@ -2,6 +2,7 @@ import { Ticker, TickerThread } from '@smoovy/ticker';
 
 export interface TweenControllerConfig {
   duration?: number;
+
   delay?: number;
   reversed?: boolean;
   autoStart?: boolean;
@@ -72,6 +73,7 @@ export class TweenController<
   }
 
   protected beforeStart() {}
+  protected beforeStop() {}
   protected beforeSeek() {}
 
   get progress() {
@@ -171,6 +173,8 @@ export class TweenController<
       this.thread?.kill();
       delete this.thread;
     }
+
+    this.beforeStop();
 
     if ( ! silent) {
       this.callback(this.config.onStop, [running]);

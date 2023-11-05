@@ -172,7 +172,7 @@ export function getDomProps(dom: HTMLElement) {
 
 export function setDomProps(
   dom: HTMLElement,
-  props: Partial<DOMTweenProps>,
+  props: Partial<DOMTweenProps & Omit<CSSStyleDeclaration, 'opacity'>>,
   units: Record<string, string> = {}
 ) {
   setTransformValues(dom, props, units);
@@ -182,6 +182,12 @@ export function setDomProps(
       dom.style.opacity = '';
     } else {
       dom.style.opacity = props.opacity.toString();
+    }
+  }
+
+  for (const key in props) {
+    if (Object.prototype.hasOwnProperty.call(props, key) && key !== 'opacity') {
+      dom.style[key as any] = props[key as keyof typeof props] as any;
     }
   }
 }

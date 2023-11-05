@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.6
+
+### Patch Changes
+
+- feat(tween): improved api + bugfixes
+
 ## 1.1.5
 
 ### Patch Changes
