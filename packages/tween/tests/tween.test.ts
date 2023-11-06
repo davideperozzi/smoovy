@@ -213,7 +213,7 @@ describe('tween', () => {
 
         expect(pauseFn).toBeCalledTimes(1);
         expect(resumeFn).toBeCalledTimes(1);
-        expect(startFn).toBeCalledTimes(0);
+        expect(startFn).toBeCalledTimes(1);
 
         setTimeout(() => {
           expect(tween.progress).toBeGreaterThanOrEqual(1);
@@ -312,39 +312,44 @@ describe('tween', () => {
     setTimeout(() => resolve(), 200);
   }));
 
-  it('should run callbacks if already active on start & pause', () => new Promise<void>((resolve) => {
-    const startFn = vi.fn();
-    const pauseFn = vi.fn();
-    const tween = tveen.to(
-      { x: 0 },
-      { x: 100 },
-      {
-        delay: 100,
-        autoStart: false,
-        duration: 100,
-        onStart: startFn,
-        onPause: pauseFn
-      }
-    );
-
-    setTimeout(() => {
-      tween.start();
-      tween.start();
-      tween.start();
-      tween.start();
+  it(
+    'should not run callbacks twice if already active on start & pause',
+    () => new Promise<void>((resolve) => {
+      const startFn = vi.fn();
+      const pauseFn = vi.fn();
+      const tween = tveen.to(
+        { x: 0 },
+        { x: 100 },
+        {
+          delay: 100,
+          autoStart: false,
+          duration: 100,
+          onStart: startFn,
+          onPause: pauseFn
+        }
+      );
 
       setTimeout(() => {
-        tween.pause();
-        tween.pause();
-        tween.pause();
-        tween.pause();
+        tween.start();
+        tween.start();
+        tween.start();
+        tween.start();
 
-        expect(startFn).toBeCalledTimes(1);
-        expect(pauseFn).toBeCalledTimes(1);
-        resolve();
+        setTimeout(() => {
+          tween.pause();
+          tween.pause();
+          tween.pause();
+          tween.pause();
+
+          setTimeout(() => {
+            expect(startFn).toBeCalledTimes(1);
+            expect(pauseFn).toBeCalledTimes(1);
+            resolve();
+          }, 100);
+        }, 200);
       }, 10);
-    }, 10);
-  }));
+    })
+  );
 
   it('should reset without mutation', () => new Promise<void>((resolve) => {
     const target = { x: 0 };
