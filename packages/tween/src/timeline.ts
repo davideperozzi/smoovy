@@ -236,6 +236,16 @@ export class Timeline extends TweenController<TimelineConfig> {
     return this;
   }
 
+  stop(silent = false) {
+    super.stop();
+
+    for (const { controller } of this.items) {
+      controller.stop(silent);
+    }
+
+    return this;
+  }
+
   resetEffects() {
     for (const effect of this.sideEffects) {
       effect.called = false;

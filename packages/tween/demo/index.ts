@@ -3,8 +3,21 @@ import { easings, tween } from '../src';
 const targets = document.querySelectorAll<HTMLElement>('.anim');
 const timeline = tween.timeline({ delay: 500, autoStart: false });
 
-timeline.to(targets[0], { y: 500 }, { duration: 1000 });
-// timeline.start();
+timeline.add(
+  tween.timeline().add(
+    tween.timeline().add(
+      tween.timeline({
+        onStop: () => console.log('stopped')
+      }).to(targets[0], { y: 300 }, { duration: 1000 })
+    )
+  )
+);
+
+timeline.start();
+
+// setTimeout(() => {
+//   timeline.stop().start();
+// }, 750)
 
 // setTimeout(() => {
 //   timeline.stop();

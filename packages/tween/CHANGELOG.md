@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.10
+
+### Patch Changes
+
+- fix(tween): timeline recursive stop
+
 ## 1.1.9
 
 ### Patch Changes

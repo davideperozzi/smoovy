@@ -108,18 +108,18 @@ describe('tween', () => {
   }));
 
   it('should call the stop method', () => new Promise<void>((resolve) => {
-    const stopRunning = vi.fn();
-    const stopNotRunning = vi.fn();
+    const stopTicking = vi.fn();
+    const stopNotTicking = vi.fn();
     const tween = tveen.to(
       { y: 0 },
       { y: 50 },
       {
         duration: 500,
-        onStop: (running) => {
-          if (running) {
-            stopRunning();
+        onStop: (ticking) => {
+          if (ticking) {
+            stopTicking();
           } else {
-            stopNotRunning();
+            stopNotTicking();
           }
         }
       }
@@ -129,8 +129,8 @@ describe('tween', () => {
       tween.stop();
       tween.stop();
 
-      expect(stopRunning).toBeCalledTimes(1);
-      expect(stopNotRunning).toBeCalledTimes(1);
+      expect(stopTicking).toBeCalledTimes(1);
+      expect(stopNotTicking).toBeCalledTimes(0);
       resolve();
     }, 50);
   }));

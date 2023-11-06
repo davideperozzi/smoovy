@@ -13,7 +13,7 @@ export interface TweenControllerConfig {
   onDelay?: (ms: number, progress: number) => void;
   onPause?: () => void;
   onResume?: () => void;
-  onStop?: (wasRunning: boolean) => void;
+  onStop?: (wasTicking: boolean) => void;
   onComplete?: () => void;
   onReset?: () => void;
   onStart?: () => void;
@@ -153,19 +153,20 @@ export class TweenController<
   }
 
   stop(silent = false) {
-    const running = !!this.thread && ! this.thread.dead;
+    const ticking = !!this.thread && ! this.thread.dead;
+    const started = this._started
 
     this._started = false;
 
-    if (running) {
+    if (ticking) {
       this.thread?.kill();
       delete this.thread;
     }
 
     this.beforeStop();
 
-    if ( ! silent) {
-      this.callback(this.config.onStop, [running]);
+    if ( ! silent && started) {
+      this.callback(this.config.onStop, [ticking]);
     }
 
     return this;
