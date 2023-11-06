@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.8
+
+### Patch Changes
+
+- fix(tween): invalid state property deletion
+
 ## 1.1.7
 
 ### Patch Changes

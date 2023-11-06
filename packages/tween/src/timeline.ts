@@ -48,6 +48,14 @@ export class Timeline extends TweenController<TimelineConfig> {
         }
       }
     }
+
+    if (config.initSeek !== false) {
+      this.seek(0, true);
+    }
+
+    if (config.autoStart !== false) {
+      this.start();
+    }
   }
 
   call(callback: () => void, config: TimelineItemConfig = {}) {

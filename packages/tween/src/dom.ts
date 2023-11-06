@@ -172,6 +172,12 @@ export function getDomProps(dom: HTMLElement) {
   return { ...values, opacity: isNaN(opacity) ? 1 : opacity };
 }
 
+const noStyleProps = [
+   'opacity', 'x', 'y', 'z', 'rotate',
+   'rotateX', 'rotateY', 'rotateZ', 'scale',
+   'scaleX', 'scaleY', 'scaleZ'
+];
+
 export function setDomProps(
   dom: HTMLElement,
   props: Partial<DOMTweenProps & Omit<CSSStyleDeclaration, 'opacity'>>,
@@ -187,20 +193,11 @@ export function setDomProps(
     }
   }
 
-  delete props.opacity;
-  delete props.x;
-  delete props.y;
-  delete props.z;
-  delete props.rotate;
-  delete props.rotateX;
-  delete props.rotateY;
-  delete props.rotateZ;
-  delete props.scale;
-  delete props.scaleX;
-  delete props.scaleY;
-  delete props.scaleZ;
-
   for (const key in props) {
+    if (noStyleProps.includes(key)) {
+      continue;
+    }
+
     if (Object.prototype.hasOwnProperty.call(props, key)) {
       dom.style[key as any] = props[key as keyof typeof props] as any;
     }

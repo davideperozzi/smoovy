@@ -32,15 +32,15 @@ export function mapRange(
 export class TweenController<
   T extends TweenControllerConfig = TweenControllerConfig,
 > {
-  private ticker = new Ticker();
+  protected ticker = new Ticker();
+  protected _overridden = false;
+  protected _duration = 0;
   private _resolved = false;
   private _paused = false;
-  private _overridden = false;
   private _passed = 0;
   private _progress = 0;
   private _reversed = false;
   private _started = false;
-  protected _duration = 0;
   private thread?: TickerThread;
   private lastProgress = 0;
   private lastDelay = 0;
@@ -52,18 +52,6 @@ export class TweenController<
     this._duration = typeof config.duration !== 'undefined'
       ? config.duration
       : 500;
-
-    if (config.reversed) {
-      this.reverse();
-    }
-
-    if (config.initSeek !== false) {
-      requestAnimationFrame(() => this.seek(0, true));
-    }
-
-    if (config.autoStart !== false) {
-      requestAnimationFrame(() => this.start());
-    }
   }
 
   protected callback(fn?: any, values: any[] = []) {
@@ -250,6 +238,8 @@ export class TweenController<
   }
 
   reset(seek = 0, silent = false) {
+    const lastActivity = this._reversed ? 1 - this._progress : this._progress;
+
     this._resolved = false;
     this.lastProgress = 0;
     this.lastDelay = 0;
@@ -258,11 +248,13 @@ export class TweenController<
       this.callback(this.config.onReset);
     }
 
+    if (this._started || seek > 0 || lastActivity > 0) {
+      this.seek(seek, true);
+    }
+
     if (this.thread && ! this.thread.dead) {
       this.stop(silent);
     }
-
-    this.seek(seek, true);
 
     return this;
   }

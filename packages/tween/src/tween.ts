@@ -52,11 +52,11 @@ export class Tween<
   T extends (TweenProps | object) = TweenProps
 > extends TweenController<TweenConfig<T>> {
   private static registry = new WeakMap<any, Tween>();
-  private static recovers = new WeakMap<any, Partial<TweenProps>>();
   private registry = Tween.registry;
   private originState: Partial<T> = {};
   private changedState: Partial<T> = {};
   private resultState: Partial<T> = {};
+  private prevResultState: Partial<T> = {};
   private domTarget?: HTMLElement;
 
   constructor(
@@ -65,14 +65,32 @@ export class Tween<
     super(config);
 
     this.update();
+
+    if (config.reversed) {
+      this.reverse();
+    }
+
+    if (config.initSeek !== false) {
+      this.seek(0, true);
+    }
+
+    if (config.autoStart !== false) {
+      this.start();
+    }
   }
 
   public get key() {
     return this.config.key || this.config.target || this.config.from;
   }
 
-  protected beforeStart(): void {
+  protected beforeStart() {
+
+  }
+
+  protected updateRegistry() {
     if (this.registry.has(this.key) && this.config.overwrite !== false) {
+      this.prevResultState = this.registry.get(this.key)?.resultState as any;
+
       this.overwrite(this.key);
     }
 
@@ -80,10 +98,14 @@ export class Tween<
   }
 
   protected beforeStop() {
+    this.prevResultState = {};
+
     this.registry.delete(this.key);
   }
 
   protected beforeSeek() {
+    this.updateRegistry();
+
     if (this.config.seekUpdate !== false) {
       this.update();
     }
@@ -92,10 +114,13 @@ export class Tween<
   private overwrite(key: T) {
     const tween = this.registry.get(key);
 
-    if (tween instanceof Tween) {
-      tween.stop();
+    if (tween) {
+      if ( ! this._overridden) {
+        tween.stop();
+      }
+
       this.registry.delete(key);
-      this.callback(this.config.onOverwrite);
+      this.callback(this.config.onOverwrite, [tween]);
     }
   }
 
@@ -110,14 +135,11 @@ export class Tween<
     }
 
     if (config.recover && ! (fromState instanceof HTMLElement)) {
-      const lastTween = Tween.registry.get(this.key);
+      for (const x in this.prevResultState) {
+        if (Object.prototype.hasOwnProperty.call(config.to, x)) {
+          const key = x as keyof typeof fromState;
 
-      if (lastTween) {
-        for (const x in lastTween.resultState) {
-          if (Object.prototype.hasOwnProperty.call(config.to, x)) {
-            fromState[x as keyof typeof fromState]
-              = lastTween.resultState[x] as any;
-          }
+          fromState[key] = this.prevResultState[key] as any;
         }
       }
     }
@@ -173,7 +195,6 @@ export class Tween<
         }
       }
     }
-
 
     if (this.domTarget) {
       setDomProps(this.domTarget, this.resultState, this.config.units);
