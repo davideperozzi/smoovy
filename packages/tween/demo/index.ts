@@ -1,42 +1,14 @@
 import { easings, tween } from '../src';
 
 const targets = document.querySelectorAll<HTMLElement>('.anim');
+const timeline = tween.timeline({ delay: 500, autoStart: false });
 
-const tveen = tween.to(
-  { x: 0 },
-  { x: 100 },
-  {
-    delay: 100,
-    autoStart: false,
-    duration: 100,
-    onStart: () => console.log('start'),
-    onPause: () => console.log('pause')
-  }
-);
-
-setTimeout(() => {
-  tveen.start();
-  tveen.start();
-  tveen.start();
-  tveen.start();
-
-  setTimeout(() => {
-    tveen.pause();
-    tveen.pause();
-    tveen.pause();
-    tveen.pause();
-
-    // expect(startFn).toBeCalledTimes(1);
-    // expect(pauseFn).toBeCalledTimes(1);
-    // resolve();
-  }, 10);
-}, 10);
-
-// const timeline = tween.timeline({ delay: 500, autoStart: false });
-
-// timeline.fromTo(targets[0], { y: 0 }, { y: 500 });
-// timeline.fromTo(targets[0], { x: 0 }, { x: 500 }, { offset: -.3 });
+timeline.to(targets[0], { y: 500 }, { duration: 1000 });
 // timeline.start();
+
+// setTimeout(() => {
+//   timeline.stop();
+// }, 800)
 
 // tween.fromTo(
 //   targets[0],

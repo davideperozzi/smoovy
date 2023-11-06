@@ -1,5 +1,13 @@
 # @smoovy/router
 
+## 1.2.4
+
+### Patch Changes
+
+- feat(router, tween): reliablity
+- Updated dependencies
+  - @smoovy/tween@1.1.9
+
 ## 1.2.3
 
 ### Patch Changes

@@ -787,7 +787,7 @@ __metadata:
   dependencies:
     "@smoovy/emitter": ^1.0.2
     "@smoovy/listener": ^1.0.1
-    "@smoovy/tween": ^1.1.0
+    "@smoovy/tween": ^1.1.9
     "@smoovy/utils": ^1.0.1
     vitest: ^0.25.3
   languageName: unknown
@@ -815,7 +815,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smoovy/tween@^1.1.0, @smoovy/tween@workspace:packages/tween":
+"@smoovy/tween@^1.1.9, @smoovy/tween@workspace:packages/tween":
   version: 0.0.0-use.local
   resolution: "@smoovy/tween@workspace:packages/tween"
   dependencies:

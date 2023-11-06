@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.9
+
+### Patch Changes
+
+- feat(router, tween): reliablity
+
 ## 1.1.8
 
 ### Patch Changes

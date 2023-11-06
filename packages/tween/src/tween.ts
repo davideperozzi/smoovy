@@ -70,7 +70,7 @@ export class Tween<
       this.reverse();
     }
 
-    if (config.initSeek !== false) {
+    if (config.initSeek) {
       this.seek(0, true);
     }
 
@@ -83,13 +83,13 @@ export class Tween<
     return this.config.key || this.config.target || this.config.from;
   }
 
-  protected beforeStart() {
-
-  }
+  protected beforeStart() {}
 
   protected updateRegistry() {
     if (this.registry.has(this.key) && this.config.overwrite !== false) {
-      this.prevResultState = this.registry.get(this.key)?.resultState as any;
+      const prevTween = this.registry.get(this.key) as Tween;
+
+      this.prevResultState = prevTween.resultState as any;
 
       this.overwrite(this.key);
     }

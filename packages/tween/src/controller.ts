@@ -153,7 +153,7 @@ export class TweenController<
   }
 
   stop(silent = false) {
-    const running = this.thread && ! this.thread.dead;
+    const running = !!this.thread && ! this.thread.dead;
 
     this._started = false;
 

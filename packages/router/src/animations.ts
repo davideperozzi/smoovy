@@ -14,14 +14,18 @@ export const fade = (config: RouterFadeAnimationConfig = {}) => ({
   release: (element) => {
     element.style.opacity = '';
   },
-  beforeEnter: ({ fromElement }) => {
-    return tween.fromTo(fromElement, { opacity: 1 }, { opacity: 0 }, {
-      duration: config.duration || 500,
-      easing: config.easing
-    })
+  beforeEnter: ({ fromElement, fromInDom }) => {
+    if (fromInDom) {
+      return tween.fromTo(fromElement, { opacity: 1 }, { opacity: 0 }, {
+        recover: true,
+        duration: config.duration || 500,
+        easing: config.easing
+      })
+    }
   },
   leave: ({ toElement }) => {
     return tween.fromTo(toElement, { opacity: 0 }, { opacity: 1 }, {
+      recover: true,
       duration: config.duration || 500,
       easing: config.easing
     })

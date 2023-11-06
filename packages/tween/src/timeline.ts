@@ -5,7 +5,8 @@ import { DOMTweenProps } from './props';
 import { SimpleTweenConfig } from './tween';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TimelineConfig extends Omit<TweenControllerConfig, 'duration'> {
+export interface TimelineConfig extends
+  Omit<TweenControllerConfig, 'duration' | 'initSeek'> {
   items?: Partial<TimelineItem>[];
 }
 
@@ -49,12 +50,8 @@ export class Timeline extends TweenController<TimelineConfig> {
       }
     }
 
-    if (config.initSeek !== false) {
-      this.seek(0, true);
-    }
-
     if (config.autoStart !== false) {
-      this.start();
+      requestAnimationFrame(() => this.start());
     }
   }
 

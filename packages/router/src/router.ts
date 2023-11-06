@@ -62,6 +62,7 @@ export interface RouterEvent {
 export interface RouterSwapEvent extends RouterEvent {
   fromElement: HTMLElement;
   toElement: HTMLElement;
+  fromInDom: boolean;
 }
 
 export interface RouterChangeState
@@ -254,7 +255,9 @@ export class Router extends EventEmitter {
     }
 
     const fromElement = event.fromElement;
-    const changeState: RouterChangeState = { ...event };
+    const fromInDom = this.outlet.contains(fromElement);
+    const changeState: RouterChangeState = { ...event, fromInDom };
+
     const animations = this.animations.filter(anim => {
       return anim.when ? anim.when(event) : true
     });
@@ -318,7 +321,7 @@ export class Router extends EventEmitter {
       return RouterNavResult.NO_VIEW;
     }
 
-    const swapEvent: RouterSwapEvent = { toElement, ...event };
+    const swapEvent: RouterSwapEvent = { toElement, fromInDom, ...event };
 
     changeState.fromElement = fromElement;
     changeState.toElement = toElement;
