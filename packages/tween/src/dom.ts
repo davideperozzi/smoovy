@@ -78,6 +78,8 @@ export function setTransformValues(
 ): void {
   let transform = '';
   const values = { ...inputValues };
+  // @todo: prevent getDomProps (use caching?)
+  const current = getDomProps(element);
 
   values.rotateZ = values.rotateZ !== undefined
     ? values.rotateZ
@@ -97,9 +99,9 @@ export function setTransformValues(
     values.y !== undefined ||
     values.z !== undefined
   ) {
-    const x = values.x !== undefined ? values.x : 0;
-    const y = values.y !== undefined ? values.y : 0;
-    const z = values.z !== undefined ? values.z : 0;
+    const x = values.x !== undefined ? values.x : current.x;
+    const y = values.y !== undefined ? values.y : current.y;
+    const z = values.z !== undefined ? values.z : current.z;
     const unitX = units.x || 'px';
     const unitY = units.y || 'px';
     const unitZ = units.z || 'px';
@@ -132,9 +134,9 @@ export function setTransformValues(
     values.scaleY !== undefined ||
     values.scaleZ !== undefined
   ) {
-    const scaleX = values.scaleX !== undefined ? values.scaleX : 1;
-    const scaleY = values.scaleY !== undefined ? values.scaleY : 1;
-    const scaleZ = values.scaleZ !== undefined ? values.scaleZ : 1;
+    const scaleX = values.scaleX !== undefined ? values.scaleX : current.scaleX;
+    const scaleY = values.scaleY !== undefined ? values.scaleY : current.scaleY;
+    const scaleZ = values.scaleZ !== undefined ? values.scaleZ : current.scaleZ;
 
     if (scaleX !== 1 || scaleY !== 1 || scaleZ !== 1) {
       transform += ` scale3d(${scaleX}, ${scaleY}, ${scaleZ})`;
@@ -185,8 +187,21 @@ export function setDomProps(
     }
   }
 
+  delete props.opacity;
+  delete props.x;
+  delete props.y;
+  delete props.z;
+  delete props.rotate;
+  delete props.rotateX;
+  delete props.rotateY;
+  delete props.rotateZ;
+  delete props.scale;
+  delete props.scaleX;
+  delete props.scaleY;
+  delete props.scaleZ;
+
   for (const key in props) {
-    if (Object.prototype.hasOwnProperty.call(props, key) && key !== 'opacity') {
+    if (Object.prototype.hasOwnProperty.call(props, key)) {
       dom.style[key as any] = props[key as keyof typeof props] as any;
     }
   }

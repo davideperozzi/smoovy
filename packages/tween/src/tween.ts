@@ -13,6 +13,7 @@ export interface TweenConfig<
   units?: Record<string, string>;
   mutate?: boolean;
   overwrite?: boolean;
+  seekUpdate?: boolean;
   onOverwrite?: () => void;
   onUpdate?: (
     values: V,
@@ -70,6 +71,24 @@ export class Tween<
     return this.config.key || this.config.target || this.config.from;
   }
 
+  protected beforeStart(): void {
+    if (this.registry.has(this.key) && this.config.overwrite !== false) {
+      this.overwrite(this.key);
+    }
+
+    this.registry.set(this.key, this as any);
+  }
+
+  protected beforeStop() {
+    this.registry.delete(this.key);
+  }
+
+  protected beforeSeek() {
+    if (this.config.seekUpdate !== false) {
+      this.update();
+    }
+  }
+
   private overwrite(key: T) {
     const tween = this.registry.get(key);
 
@@ -82,7 +101,7 @@ export class Tween<
 
   update() {
     const config = this.config;
-    let fromState = config.from;
+    const fromState = config.from;
 
     if (config.target && config.target instanceof HTMLElement) {
       this.domTarget = config.target;
@@ -90,11 +109,16 @@ export class Tween<
       this.domTarget = fromState;
     }
 
-    if (config.recover !== false && ! (fromState instanceof HTMLElement)) {
+    if (config.recover && ! (fromState instanceof HTMLElement)) {
       const lastTween = Tween.registry.get(this.key);
 
       if (lastTween) {
-        fromState = lastTween.resultState as any;
+        for (const x in lastTween.resultState) {
+          if (Object.prototype.hasOwnProperty.call(config.to, x)) {
+            fromState[x as keyof typeof fromState]
+              = lastTween.resultState[x] as any;
+          }
+        }
       }
     }
 
@@ -112,6 +136,12 @@ export class Tween<
       this.originState = initialState as any as Partial<T>;
       this.changedState = changedState as any as Partial<T>;
       this.resultState = { ...this.originState };
+
+      for (const x in this.resultState) {
+        if ( ! Object.hasOwnProperty.call(this.changedState, x)) {
+          delete this.resultState[x];
+        }
+      }
     }
     else {
       const initialState = fromState as any as Partial<T>;
@@ -132,16 +162,6 @@ export class Tween<
     return this;
   }
 
-  protected beforeSeek() {
-    this.update();
-
-    if (this.registry.has(this.key) && this.config.overwrite !== false) {
-      this.overwrite(this.key);
-    }
-
-    this.registry.set(this.key, this as any);
-  }
-
   process(eased: number, linear: number) {
     for (const prop in this.changedState) {
       if (Object.prototype.hasOwnProperty.call(this.changedState, prop)) {
@@ -154,8 +174,9 @@ export class Tween<
       }
     }
 
+
     if (this.domTarget) {
-      setDomProps(this.domTarget, this.resultState as any, this.config.units);
+      setDomProps(this.domTarget, this.resultState, this.config.units);
     }
 
     this.callback(

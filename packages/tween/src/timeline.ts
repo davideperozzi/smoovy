@@ -1,7 +1,7 @@
 /* eslint-disable lines-between-class-members */
 import { TweenController, TweenControllerConfig } from './controller';
 import { fromTo, to } from './helper/tween';
-import { DOMTweenProps, TweenProps } from './props';
+import { DOMTweenProps } from './props';
 import { SimpleTweenConfig } from './tween';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -201,7 +201,9 @@ export class Timeline extends TweenController<TimelineConfig> {
         }
       }
 
-      controller.seek(seekTime);
+      if (seekTime >= 0 && seekTime <= duration) {
+        controller.seek(seekTime);
+      }
 
       currentTime += duration + offset;
     }
@@ -235,11 +237,13 @@ export class Timeline extends TweenController<TimelineConfig> {
     }
   }
 
-  reset() {
-    super.reset();
+  reset(seek = 0, silent = false) {
+    super.reset(seek, silent);
 
-    for (const { controller } of this.items) {
-      controller.reset();
+    const items = this.items.slice().reverse();
+
+    for (const { controller } of items) {
+      controller.reset(seek, silent);
     }
 
     this.resetEffects();

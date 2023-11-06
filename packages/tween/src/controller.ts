@@ -262,7 +262,7 @@ export class TweenController<
       this.stop(silent);
     }
 
-    this.seek(seek);
+    this.seek(seek, true);
 
     return this;
   }

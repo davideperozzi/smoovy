@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.7
+
+### Patch Changes
+
+- feat(tween): added recoverbility + seekUpdate control
+
 ## 1.1.6
 
 ### Patch Changes
