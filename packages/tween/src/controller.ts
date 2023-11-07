@@ -214,10 +214,6 @@ export class TweenController<
     const passed = Math.min(Math.max(ms, 0), this.duration);
     this._progress = Math.min(Math.max(ms / this.duration, 0), 1);
 
-    if ((this as any).items instanceof Array) {
-      console.log(passed);
-    }
-
     this.callback(this.config.onSeek, [this._progress]);
 
     if (

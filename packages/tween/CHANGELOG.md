@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.12
+
+### Patch Changes
+
+- fix: removed console.log
+
 ## 1.1.11
 
 ### Patch Changes
