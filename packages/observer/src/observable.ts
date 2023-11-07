@@ -122,15 +122,21 @@ export class Observable<
   private _scrollWidth = 0;
   private _scrollHeight = 0;
   private _visible = false;
+  private _interecKey = '{}';
 
   private static handleEntries<E extends { target: Element }>(
     entries: E[],
-    cb: (observable: Observable, entry: E) => void
+    cb: (observable: Observable, entry: E) => void,
+    intersecKey?: string
   ) {
     entries.forEach(entry => {
-      const observables = Observable.items.get(entry.target as HTMLElement);
+      let observables = Observable.items.get(entry.target as HTMLElement);
 
       if (observables) {
+        if (intersecKey) {
+          observables = observables.filter(o => o.intersecKey === intersecKey);
+        }
+
         for (let i = 0, len = observables.length; i < len; i++) {
           cb(observables[i], entry);
         }
@@ -237,6 +243,10 @@ export class Observable<
     return { x: this.left, y: this.top };
   }
 
+  get intersecKey() {
+    return this._interecKey;
+  }
+
   attach() {
     const config = this.config;
 
@@ -255,27 +265,22 @@ export class Observable<
 
     if (config.visibilityDetection && config.target instanceof HTMLElement) {
       const observers = Observable.intersecObservers;
-      const observerConfig: IntersectionObserverInit = {
-        ...(typeof config.visibilityDetection === 'object'
-          ? config.visibilityDetection
-          : {}
-        )
-      };
+      const observerConfig = this.getIntersectionObserverConfig();
+      this._interecKey = this.getIdFromConfig(observerConfig);
 
-      const observerKey = this.getIdFromConfig(observerConfig);
-
-      if ( ! observers.has(observerKey)) {
-        observers.set(observerKey, new IntersectionObserver((entries) => {
+      if ( ! observers.has(this._interecKey)) {
+        observers.set(this._interecKey, new IntersectionObserver((entries) => {
           Observable.handleEntries<IntersectionObserverEntry>(
             entries,
             (observable, entry) => {
               observable.visible = entry.isIntersecting;
-            }
+            },
+            this._interecKey
           );
         }, observerConfig));
       }
 
-      this.intersecObserver = observers.get(observerKey);
+      this.intersecObserver = observers.get(this._interecKey);
 
       this.intersecObserver?.observe(config.target);
     }
@@ -420,6 +425,15 @@ export class Observable<
     }
 
     this.emit(ObservableEventType.VISIBILITY_CHANGE, this);
+  }
+
+  private getIntersectionObserverConfig() {
+    return {
+      ...(typeof this.config.visibilityDetection === 'object'
+        ? this.config.visibilityDetection
+        : {}
+      )
+    } as IntersectionObserverInit;
   }
 
   private getIdFromConfig<C>(config: C) {

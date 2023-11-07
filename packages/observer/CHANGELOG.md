@@ -1,5 +1,11 @@
 # @smoovy/observer
 
+## 1.0.7
+
+### Patch Changes
+
+- fix(observer): invalid intersection observer config
+
 ## 1.0.6
 
 ### Patch Changes
