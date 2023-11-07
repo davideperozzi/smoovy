@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.11
+
+### Patch Changes
+
+- fix(webgl): initial resize of viewport
+
 ## 1.1.10
 
 ### Patch Changes

@@ -75,11 +75,14 @@ export class WebGL extends EventEmitter {
   create() {
     if (this.config.fullscreen !== false) {
       const style = this.viewport.element.style;
+      const size = this.observable.size;
 
       style.pointerEvents = 'none';
       style.position = 'fixed';
       style.left = '0px';
       style.top = '0px';
+
+      this.setSize(size.width, size.height);
 
       this.unlistenResize = this.observable.onChange(state => {
         this.setSize(state.width, state.height);
