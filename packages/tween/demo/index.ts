@@ -1,19 +1,41 @@
 import { easings, tween } from '../src';
 
 const targets = document.querySelectorAll<HTMLElement>('.anim');
-const timeline = tween.timeline({ delay: 500, autoStart: false });
+// const timeline = tween.timeline({ delay: 500, autoStart: false });
 
-timeline.add(
-  tween.timeline().add(
-    tween.timeline().add(
-      tween.timeline({
-        onStop: () => console.log('stopped')
-      }).to(targets[0], { y: 300 }, { duration: 1000 })
-    )
-  )
-);
+// timeline.add(
+//   tween.staggerFromTo(targets, { y: 0 }, { y: 120 }, {
+//     duration: 1200,
+//     units: { y: '%' },
+//     easing: easings.easeOutExpo,
+//     initSeek: false,
+//     autoStart: false,
+//     stagger: {
+//       offset: 0.2
+//     }
+//   }),
+// );
 
-timeline.start();
+const timeline = tween.staggerFromTo(targets, { y: 0 }, { y: 120 }, {
+  duration: 1200,
+  units: { y: '%' },
+  easing: easings.easeOutExpo,
+  initSeek: false,
+  autoStart: false,
+  timeline: {
+    delay: 500,
+    autoStart: false,
+  },
+  stagger: {
+    offset: 0.2
+  }
+});
+
+// timeline.seek(3949349349);
+// timeline.seek(3949349349, true);
+// timeline.start();
+
+// timeline.start();
 
 // setTimeout(() => {
 //   timeline.stop().start();

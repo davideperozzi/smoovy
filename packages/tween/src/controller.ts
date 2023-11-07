@@ -29,12 +29,19 @@ export function mapRange(
   return outMin + (outMax - outMin) / (inEnd - inStart) * (value - inStart);
 }
 
+interface SeekVars {
+  ms: number;
+  noDelay: boolean;
+  reversed: boolean;
+}
+
 export class TweenController<
   T extends TweenControllerConfig = TweenControllerConfig,
 > {
   protected ticker = new Ticker();
   protected _overridden = false;
   protected _duration = 0;
+  private lastSeekVars: SeekVars = { ms: 0, noDelay: false, reversed: false  };
   private _resolved = false;
   private _paused = false;
   private _passed = 0;
@@ -177,6 +184,18 @@ export class TweenController<
       return this;
     }
 
+    if (
+      this.lastSeekVars.ms === ms &&
+      this.lastSeekVars.noDelay === noDelay &&
+      this.lastSeekVars.reversed === this._reversed
+    ) {
+      return this;
+    }
+
+    this.lastSeekVars.ms = ms;
+    this.lastSeekVars.noDelay = noDelay;
+    this.lastSeekVars.reversed = this._reversed;
+
     if (this._reversed) {
       ms = this.duration - ms;
     }
@@ -194,6 +213,10 @@ export class TweenController<
     const delay = noDelay ? 0 : this.delay;
     const passed = Math.min(Math.max(ms, 0), this.duration);
     this._progress = Math.min(Math.max(ms / this.duration, 0), 1);
+
+    if ((this as any).items instanceof Array) {
+      console.log(passed);
+    }
 
     this.callback(this.config.onSeek, [this._progress]);
 

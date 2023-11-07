@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.11
+
+### Patch Changes
+
+- feat(tween): fixed sync of timeline items
+
 ## 1.1.10
 
 ### Patch Changes

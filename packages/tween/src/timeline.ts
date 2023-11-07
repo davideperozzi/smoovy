@@ -206,9 +206,7 @@ export class Timeline extends TweenController<TimelineConfig> {
         }
       }
 
-      if (seekTime >= 0 && seekTime <= duration) {
-        controller.seek(seekTime);
-      }
+      controller.seek(seekTime);
 
       currentTime += duration + offset;
     }
