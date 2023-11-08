@@ -24,7 +24,6 @@ const timeline = tween.staggerFromTo(targets, { y: 0 }, { y: 120 }, {
   autoStart: false,
   timeline: {
     delay: 500,
-    autoStart: false,
   },
   stagger: {
     offset: 0.2

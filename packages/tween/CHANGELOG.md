@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.13
+
+### Patch Changes
+
+- feat(tween): added callbacks
+
 ## 1.1.12
 
 ### Patch Changes

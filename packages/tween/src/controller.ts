@@ -41,6 +41,7 @@ export class TweenController<
   protected ticker = new Ticker();
   protected _overridden = false;
   protected _duration = 0;
+  private listeners = new Map<string, any>();
   private lastSeekVars: SeekVars = { ms: 0, noDelay: false, reversed: false  };
   private _resolved = false;
   private _paused = false;
@@ -51,7 +52,7 @@ export class TweenController<
   private thread?: TickerThread;
   private lastProgress = 0;
   private lastDelay = 0;
-  private resolveFn?: () => void;
+  private resolveFn?: (...args: any[]) => void;
 
   constructor(
     protected config: T = {} as T
@@ -70,6 +71,40 @@ export class TweenController<
   protected beforeStart() {}
   protected beforeStop() {}
   protected beforeSeek() {}
+
+  onStart(cb: () => void) {
+    this.setListener('onStart', cb);
+
+    return this;
+  }
+
+  onComplete(cb: () => void) {
+    this.setListener('onComplete', cb);
+
+    return this;
+  }
+
+  onStop(cb: (wasTicking: boolean) => void) {
+    this.setListener('onStop', cb);
+
+    return this;
+  }
+
+  private callListeners(name: string, args: any[] = []) {
+    const listeners = this.listeners.get(name);
+
+    if (listeners) {
+      listeners.forEach((cb: any) => cb(...args));
+    }
+  }
+
+  private setListener(name: string, cb: (...args: any[]) => void) {
+    if ( ! this.listeners.has(name)) {
+      this.listeners.set(name, []);
+    }
+
+    this.listeners.get(name).push(cb);
+  }
 
   get progress() {
     return this._progress;
@@ -174,6 +209,7 @@ export class TweenController<
 
     if ( ! silent && started) {
       this.callback(this.config.onStop, [ticking]);
+      this.callListeners('onStop', [ticking]);
     }
 
     return this;
@@ -208,6 +244,7 @@ export class TweenController<
 
       this.beforeSeek();
       this.callback(this.config.onStart);
+      this.callListeners('onStart');
     }
 
     const delay = noDelay ? 0 : this.delay;
@@ -224,6 +261,7 @@ export class TweenController<
       this.stop();
       this.resolve();
       this.callback(this.config.onComplete);
+      this.callListeners('onComplete');
 
       return;
     }
