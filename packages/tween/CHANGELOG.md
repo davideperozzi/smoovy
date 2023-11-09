@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.14
+
+### Patch Changes
+
+- feat(timeline): added reset
+
 ## 1.1.13
 
 ### Patch Changes

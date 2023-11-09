@@ -66,6 +66,16 @@ export class Timeline extends TweenController<TimelineConfig> {
     return this;
   }
 
+  clear() {
+    this.reset();
+
+    this.items.length = 0;
+    this.sideEffects.length = 0;
+    this._duration = 0;
+
+    return this;
+  }
+
   add(
     item: TweenController | TweenController[],
     config: TimelineItemConfig = {}
