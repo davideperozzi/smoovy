@@ -1,5 +1,11 @@
 # @smoovy/ticker
 
+## 1.0.2
+
+### Patch Changes
+
+- feat: updated ticker
+
 ## 1.0.1
 
 ### Patch Changes

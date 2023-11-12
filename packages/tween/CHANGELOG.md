@@ -1,5 +1,13 @@
 # @smoovy/tween
 
+## 1.1.16
+
+### Patch Changes
+
+- feat: updated ticker
+- Updated dependencies
+  - @smoovy/ticker@1.0.2
+
 ## 1.1.15
 
 ### Patch Changes

@@ -28,6 +28,12 @@ function createScroller(type: string) {
           enableMouseEvents: true
         }
       });
+
+      setTimeout(() => {
+        scroller?.scrollTo({ y: 500 }, true);
+        scroller?.scrollTo({ y: 1500 }, true);
+        scroller?.scrollTo({ y: 2000 }, true);
+      }, 2000);
       break;
 
     case 'native':
@@ -69,8 +75,8 @@ let scroller: Scroller | undefined;
 const gui = new dat.GUI();
 const config = {
   scroller: {
-    dir: 'horizontal',
-    type: 'hybrid',
+    dir: 'vertical',
+    type: 'default',
   },
 };
 
@@ -84,6 +90,6 @@ gui.add(config.scroller, 'type', {
 }).onChange((type) => createScroller(type));
 
 gui.add(config.scroller, 'dir', {
-  Vertical: '',
+  Vertical: 'vertical',
   Horizontal: 'horizontal'
 }).onChange((dir) => updateDirection(dir));

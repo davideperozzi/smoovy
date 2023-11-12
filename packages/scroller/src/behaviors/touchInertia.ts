@@ -1,5 +1,5 @@
 import { listenCompose, listen } from '@smoovy/listener';
-import { Ticker } from '@smoovy/ticker';
+import { Ticker, TickerTask } from '@smoovy/ticker';
 import { between, isFunc, lerp } from '@smoovy/utils';
 
 import { ScrollBehavior, ScrollerEvent } from '../core';
@@ -79,10 +79,11 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
   return (scroller) => {
     const doc = document.documentElement;
     const target = cfg.target || doc;
-    const ticker = new Ticker();
+    const ticker = Ticker.main;
     const startPos = { x: 0, y: 0 };
     const velocity = { x: 0, y: 0 };
     const threshold = minimumThreshold();
+    let task: TickerTask | undefined;
     let lastMove = 0;
     let down = false;
 
@@ -95,7 +96,10 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     };
 
     const handleStart = (event: TouchEvent | MouseEvent) => {
-      ticker.kill();
+      if (task) {
+        task.kill();
+        task = undefined;
+      }
 
       const pos = getPosition(event);
 
@@ -108,7 +112,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
     const handleEnd = () => {
       if (down) {
         if (velocity.x !== 0 || velocity.y !== 0) {
-          ticker.add((_delta, _time, kill) => {
+          task = ticker.add((_delta, _time, kill) => {
             velocity.x = lerp(velocity.x, 0, velocityDamping());
             velocity.y = lerp(velocity.y, 0, velocityDamping());
             velocity.x = isFinite(velocity.x) ? velocity.x : 0;
@@ -124,6 +128,7 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
               velocity.y = 0;
 
               kill();
+              task = undefined;
             }
           });
         }

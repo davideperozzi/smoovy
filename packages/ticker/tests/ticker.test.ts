@@ -1,7 +1,7 @@
-import { Ticker, TickerThread } from '../src';
 import { JSDOM } from 'jsdom';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Ticker } from '../src';
 
 describe('ticker', () => {
   const glob = (global as any);
@@ -11,59 +11,43 @@ describe('ticker', () => {
   glob.document = dom.window.document;
   glob.navigator = dom.window.navigator;
 
-  const ticker = new Ticker();
+  const ticker = Ticker.main;
 
   beforeEach(() => {
     ticker.override = false;
-
-    ticker.kill();
   });
 
-  it('should be defined', () => {
-    return expect(Ticker).toBeDefined();
-  });
-
-  it('should return a thread', () => {
-    return expect(ticker.add(() => {})).toBeInstanceOf(TickerThread);
-  });
-
-  it('should start functioning thread', async () => {
-    const start = Ticker.now();
-
+  it('should be defined', () => expect(Ticker).toBeDefined());
+  it('should add to raf', async () => {
     await new Promise<void>((resolve) => {
       setTimeout(() => {
         ticker.add((delta, time, kill) => {
           expect(delta).toBeGreaterThan(0);
           expect(delta).toBeLessThan(30);
-          expect(time).toBeGreaterThanOrEqual(start);
-          expect(kill).toBeInstanceOf(Function);
+          expect(time).toBeGreaterThanOrEqual(0);
+          kill();
           resolve();
         });
       }, 100);
     });
   });
 
-  it('should spawn a destroyable thread', async () => {
-    const thread = ticker.add((delta, time, kill) => {});
-
-    expect(thread.dead).toBe(false);
-
-    thread.kill();
+  it('should spawn a destroyable task', async () => {
+    const task = ticker.add((delta, time) => {});
 
     await new Promise<void>((resolve) => {
       setTimeout(() => {
-        expect(thread.dead).toBe(true);
+        task.kill();
+        expect(ticker.ticking).toBe(true);
         resolve();
       }, 100);
     });
   });
 
   it('should tick normally for 300ms', async () => {
-    const start = Ticker.now();
-
     await new Promise<void>((resolve) => {
       ticker.add((delta, time, kill) => {
-        if (time - start >= 300) {
+        if (time >= 300) {
           resolve();
           kill();
         }
@@ -72,15 +56,15 @@ describe('ticker', () => {
   });
 
   it('should be overwritable', async () => {
+    const newTicker = new Ticker(true);
     await new Promise<void>((resolve) => {
       setTimeout(() => {
-        ticker.override = true;
 
-        ticker.add(() => {});
-        ticker.add(() => {});
-        ticker.add(() => {});
+        newTicker.add(() => {});
+        newTicker.add(() => {});
+        newTicker.add(() => {});
 
-        expect(ticker.ticking).toBe(false);
+        expect(newTicker.ticking).toBe(false);
         resolve();
       }, 50);
     });
@@ -93,13 +77,14 @@ describe('ticker', () => {
 
         ticker.override = true;
         ticker.add(fn);
-        ticker.update();
-        ticker.update();
-        ticker.update();
-        ticker.update();
+        ticker.tick(0);
+        ticker.tick(performance.now());
+        ticker.tick(performance.now() + 1);
+        ticker.tick(performance.now() + 2);
+        ticker.tick(performance.now() + 3);
 
         setTimeout(() => {
-          expect(fn).toBeCalledTimes(4);
+          expect(fn).toBeCalledTimes(5);
           resolve();
         }, 10);
       }, 50);

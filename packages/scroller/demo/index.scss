@@ -21,7 +21,8 @@ body {
 html:not(.scroller-hybrid) {
   height: 100%;
 
-  body {
+  body,
+  main {
     height: 100%;
   }
 }

@@ -222,7 +222,7 @@ describe('tween', () => {
           resolve();
         }, 300);
       }, 20);
-    }, 20);
+    }, 50);
   }));
 
   it('should start after the delay', () => new Promise<void>((resolve) => {

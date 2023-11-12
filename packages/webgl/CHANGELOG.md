@@ -1,5 +1,13 @@
 # @smoovy/webgl
 
+## 1.1.12
+
+### Patch Changes
+
+- feat: updated ticker
+- Updated dependencies
+  - @smoovy/ticker@1.0.2
+
 ## 1.1.11
 
 ### Patch Changes

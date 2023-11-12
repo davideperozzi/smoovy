@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { DOMTweenProps, TransformTweenProps } from "./props";
+import { DOMTweenProps, TransformTweenProps } from './props';
+
+const transformCache = new WeakMap<HTMLElement, TransformTweenProps>();
 
 export function getTransformValues(element: HTMLElement): TransformTweenProps {
+  const cacheItem = transformCache.get(element);
+
+  if (cacheItem) {
+    return cacheItem;
+  }
+
   const style = getComputedStyle(element);
   const transform = style.transform;
   const values: TransformTweenProps = {
@@ -68,6 +76,8 @@ export function getTransformValues(element: HTMLElement): TransformTweenProps {
   values.scale = values.scaleX;
   values.rotate = values.rotateZ;
 
+  transformCache.set(element, values);
+
   return values;
 }
 
@@ -78,7 +88,6 @@ export function setTransformValues(
 ): void {
   let transform = '';
   const values = { ...inputValues };
-  // @todo: prevent getDomProps (use caching?)
   const current = getDomProps(element);
 
   values.rotateZ = values.rotateZ !== undefined
@@ -107,6 +116,10 @@ export function setTransformValues(
     const unitZ = units.z || 'px';
 
     if (x !== 0 || y !== 0 || z !== 0) {
+      current.x = x;
+      current.y = y;
+      current.z = z;
+
       transform += ` translate3d(${x}${unitX}, ${y}${unitY}, ${z}${unitZ})`;
     }
   }
@@ -114,17 +127,23 @@ export function setTransformValues(
   if (values.rotateX !== undefined && values.rotateX !== 0) {
     const unit = units.rotateX || units.rotate || 'deg';
 
+    current.rotateX = values.rotateX;
+
     transform += ` rotateX(${values.rotateX}${unit})`;
   }
 
   if (values.rotateY !== undefined && values.rotateY !== 0) {
     const unit = units.rotateY || units.rotate || 'deg';
 
+    current.rotateY = values.rotateY;
+
     transform += ` rotateY(${values.rotateY}${unit})`;
   }
 
   if (values.rotateZ !== undefined && values.rotateZ !== 0) {
     const unit = units.rotateZ || units.rotate || 'deg';
+
+    current.rotateZ = values.rotateZ;
 
     transform += ` rotateZ(${values.rotateZ}${unit})`;
   }
@@ -139,6 +158,10 @@ export function setTransformValues(
     const scaleZ = values.scaleZ !== undefined ? values.scaleZ : current.scaleZ;
 
     if (scaleX !== 1 || scaleY !== 1 || scaleZ !== 1) {
+      current.scaleX = scaleX;
+      current.scaleY = scaleY;
+      current.scaleZ = scaleZ;
+
       transform += ` scale3d(${scaleX}, ${scaleY}, ${scaleZ})`;
     }
   }

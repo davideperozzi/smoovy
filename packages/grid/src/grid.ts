@@ -1,4 +1,4 @@
-import { Ticker, TickerThread } from '@smoovy/ticker';
+import { Ticker, TickerTask } from '@smoovy/ticker';
 import { Coordinate, isNum } from '@smoovy/utils';
 
 import { GridConfig } from './config';
@@ -10,8 +10,7 @@ export class Grid<T extends GridData> {
   readonly mesh: GridMesh;
   private _items: GridItem<T>[] = [];
   private translation: Coordinate = { x: 0, y: 0 };
-  private ticker?: Ticker;
-  private thread?: TickerThread;
+  private task?: TickerTask;
 
   constructor(
     private readonly config: GridConfig<T>
@@ -23,8 +22,7 @@ export class Grid<T extends GridData> {
     }
 
     if (this.config.autoRender !== false) {
-      this.ticker = new Ticker();
-      this.thread = this.ticker.add(() => this.render());
+      this.task = Ticker.main.add(() => this.render());
     }
   }
 
@@ -128,26 +126,22 @@ export class Grid<T extends GridData> {
   }
 
   pause() {
-    if (this.thread) {
-      this.thread.kill();
-
-      delete this.thread;
+    if (this.task) {
+      this.task.kill();
+      delete this.task;
     }
   }
 
   resume() {
-    if ( ! this.thread) {
-      if ( ! this.ticker) {
-        this.ticker = new Ticker();
-      }
-
-      this.thread = this.ticker.add(() => this.render());
+    if ( ! this.task) {
+      this.task = Ticker.main.add(() => this.render());
     }
   }
 
   destroy() {
-    if (this.ticker) {
-      this.ticker.kill();
+    if (this.task) {
+      this.task.kill();
+      delete this.task;
     }
 
     this.items.forEach(item => item.destroy());

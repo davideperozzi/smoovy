@@ -1,5 +1,13 @@
 # @smoovy/scroller
 
+## 1.0.9
+
+### Patch Changes
+
+- feat: updated ticker
+- Updated dependencies
+  - @smoovy/ticker@1.0.2
+
 ## 1.0.8
 
 ### Patch Changes

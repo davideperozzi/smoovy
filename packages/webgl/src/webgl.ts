@@ -1,7 +1,7 @@
 import { EventEmitter } from '@smoovy/emitter';
 import { Unlisten } from '@smoovy/listener';
 import { Observable, observe } from '@smoovy/observer';
-import { Ticker } from '@smoovy/ticker';
+import { Ticker, TickerTask } from '@smoovy/ticker';
 import { Coordinate } from '@smoovy/utils';
 
 import { GLMesh } from './mesh';
@@ -23,6 +23,15 @@ export interface WebGLConfig extends Partial<ViewportConfig> {
    * The default has no frame-lock.
    */
   ticker?: Ticker;
+
+  /**
+   * The order of the the ticker task. This is useful if you want to
+   * control the order of the tasks. So if you have some values that
+   * need to be calculated in the same frame before the webgl renders
+   *
+   * Default = 100
+   */
+  taskOrder?: number;
 
   /**
    * Automatically init WebGL on creation. If you disable this, you need
@@ -52,6 +61,7 @@ export class WebGL extends EventEmitter {
   protected viewport: Viewport;
   protected observable: Observable<Window>;
   protected ticker: Ticker;
+  protected task?: TickerTask;
   private unlistenResize?: Unlisten;
   private paused = false;
   private startTime = 0;
@@ -63,7 +73,7 @@ export class WebGL extends EventEmitter {
   ) {
     super();
 
-    this.ticker = config.ticker || new Ticker();
+    this.ticker = config.ticker || Ticker.main;
     this.viewport = new Viewport(this.initCanvas(config.canvas), config);
     this.observable = observe(window, { resizeDetection: true });
 
@@ -92,13 +102,16 @@ export class WebGL extends EventEmitter {
     this.viewport.on(ViewportEvent.RESIZE, () => this.recalc());
     this.viewport.attach();
 
-    this.startTime = Ticker.now();
+    const taskOrder = this.config.taskOrder !== undefined
+      ? this.config.taskOrder
+      : 100;
 
-    this.ticker.add((delta, time) => {
+    this.startTime = Ticker.now();
+    this.task = this.ticker.add((delta, time) => {
       if (this.ticking) {
         this.render(time);
       }
-    });
+    }, taskOrder);
   }
 
   destroy() {
@@ -107,7 +120,10 @@ export class WebGL extends EventEmitter {
       delete this.unlistenResize;
     }
 
-    this.ticker.kill();
+    if (this.task) {
+      this.task.kill();
+      delete this.task;
+    }
   }
 
   private initCanvas(canvas?: HTMLCanvasElement | string) {

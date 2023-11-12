@@ -1,5 +1,13 @@
 # @smoovy/grid
 
+## 0.0.8
+
+### Patch Changes
+
+- feat: updated ticker
+- Updated dependencies
+  - @smoovy/ticker@1.0.2
+
 ## 0.0.7
 
 ### Patch Changes

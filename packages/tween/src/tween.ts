@@ -56,7 +56,6 @@ export class Tween<
   private originState: Partial<T> = {};
   private changedState: Partial<T> = {};
   private resultState: Partial<T> = {};
-  private prevResultState: Partial<T> = {};
   private domTarget?: HTMLElement;
 
   constructor(
@@ -86,22 +85,14 @@ export class Tween<
   protected beforeStart() {}
 
   protected updateRegistry() {
-    if (this.registry.has(this.key)) {
-      const prevTween = this.registry.get(this.key) as Tween;
-
-      this.prevResultState = prevTween.resultState as any;
-
-      if (this.config.overwrite !== false) {
-        this.overwrite(this.key);
-      }
+    if (this.registry.has(this.key) && this.config.overwrite !== false) {
+      this.overwrite(this.key);
     }
 
     this.registry.set(this.key, this as any);
   }
 
   protected beforeStop() {
-    this.prevResultState = {};
-
     this.registry.delete(this.key);
   }
 
@@ -134,16 +125,6 @@ export class Tween<
       this.domTarget = config.target;
     } else if (fromState instanceof HTMLElement) {
       this.domTarget = fromState;
-    }
-
-    if (config.recover && ! (fromState instanceof HTMLElement)) {
-      for (const x in this.prevResultState) {
-        if (Object.prototype.hasOwnProperty.call(config.to, x)) {
-          const key = x as keyof typeof fromState;
-
-          fromState[key] = this.prevResultState[key] as any;
-        }
-      }
     }
 
     if (this.domTarget) {
@@ -187,18 +168,21 @@ export class Tween<
   }
 
   process(eased: number, linear: number) {
+    let changed = false;
+
     for (const prop in this.changedState) {
-      if (Object.prototype.hasOwnProperty.call(this.changedState, prop)) {
+      if (this.changedState[prop] !== undefined) {
         const change = this.changedState[prop] as number;
         const origin = this.originState[prop] as number;
 
-        if (typeof origin !== undefined) {
+        if (origin !== undefined) {
           (this.resultState[prop] as any) = origin + change * eased;
+          changed = true;
         }
       }
     }
 
-    if (this.domTarget && Object.keys(this.resultState).length > 0) {
+    if (this.domTarget && changed) {
       setDomProps(this.domTarget, this.resultState, this.config.units);
     }
 

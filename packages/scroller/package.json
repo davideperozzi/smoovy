@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "smooth scrolling for the world",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
@@ -27,7 +27,7 @@
     "@smoovy/emitter": "^1.0.2",
     "@smoovy/listener": "^1.0.1",
     "@smoovy/observer": "^1.0.5",
-    "@smoovy/ticker": "^1.0.1",
+    "@smoovy/ticker": "^1.0.2",
     "@smoovy/utils": "^1.0.1"
   },
   "author": "Davide Perozzi",

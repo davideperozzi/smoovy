@@ -1,96 +1,81 @@
-export type TickerUpdateCallback = (
+export type TickerKill = () => void;
+
+export type TickerUpdate = (
   delta: number,
   time: number,
-  kill: () => void
+  kill: TickerKill
 ) => void;
 
-export class TickerThread {
-  public dead = false;
-
-  public constructor(
-    private calllback: TickerUpdateCallback
-  ) {}
-
-  public update(delta: number, time: number) {
-    this.calllback(delta, time, this.kill.bind(this));
-  }
-
-  public kill() {
-    this.dead = true;
-  }
+export interface TickerTask {
+  update: TickerUpdate;
+  start: number;
+  order: number;
+  dead: boolean;
+  kill: TickerKill;
 }
 
 export class Ticker {
-  public override = false;
-  private threads: TickerThread[] = [];
-  private lastTime = 0;
-  private _ticking = false;
+  static main = new Ticker();
+  ticking = false;
+  private tasks: TickerTask[] = [];
+  private time = 0;
 
-  public static now() {
-    return Date.now();
+  constructor(
+    public override = false
+  ) {
+    if ( ! this.override) {
+      this.loop();
+    }
   }
 
-  public get ticking() {
-    return this._ticking;
+  static now() {
+    return this.main.time;
   }
 
-  private tick(delta: number, time: number) {
-    const deadThreads: Array<TickerThread> = [];
+  tick(passed: number) {
+    for (let i = 0, len = this.tasks.length; i < len; i++) {
+      const task = this.tasks[i];
 
-    for (let i = 0, len = this.threads.length; i < len; i++) {
-      const thread = this.threads[i];
-
-      if (thread.dead) {
-        deadThreads.push(thread);
-      } else {
-        thread.update(delta, time);
+      if ( ! task || task.dead) {
+        continue;
       }
+
+      task.update(passed - this.time, this.time - task.start, task.kill);
     }
 
-    for (let i = 0, len = deadThreads.length; i < len; i++) {
-      this.buryThread(deadThreads[i]);
-    }
+    this.time = passed;
   }
 
-  public update(time = Ticker.now()) {
-    this.tick(
-      time - this.lastTime,
-      this.lastTime = time
-    );
-  }
+  loop() {
+    this.ticking = true;
 
-  public animate() {
-    window.requestAnimationFrame(() => {
-      this.update();
+    window.requestAnimationFrame((time) => {
+      this.tick(time);
 
-      if (this._ticking && ! this.override && this.threads.length > 0) {
-        this.animate();
+      if ( ! this.override) {
+        this.loop();
       } else {
-        this._ticking = false;
+        this.ticking = false;
       }
     });
   }
 
-  public kill() {
-    this.threads.forEach((thread) => thread.kill());
-  }
+  add(update: TickerUpdate, order = 0): TickerTask {
+    const task = {
+      update,
+      order,
+      start: this.time,
+      dead: false,
+      kill: () => {
+        task.dead = true;
 
-  private buryThread(thread: TickerThread) {
-    this.threads.splice(this.threads.indexOf(thread), 1);
-  }
+        this.tasks.splice(this.tasks.indexOf(task), 1);
+      }
+    };
 
-  public add(callback: TickerUpdateCallback): TickerThread {
-    const thread = new TickerThread(callback);
+    this.tasks.push(task);
+    this.tasks.sort((a, b) => a.order - b.order);
 
-    this.threads.push(thread);
-
-    if ( ! this._ticking && ! this.override) {
-      this.lastTime = Ticker.now();
-      this._ticking = true;
-
-      this.animate();
-    }
-
-    return thread;
+    return task;
   }
 }

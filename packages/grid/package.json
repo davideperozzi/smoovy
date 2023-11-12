@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/grid",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "scrollable infinite grid handler",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
@@ -22,7 +22,7 @@
     "typecript"
   ],
   "dependencies": {
-    "@smoovy/ticker": "^1.0.1",
+    "@smoovy/ticker": "^1.0.2",
     "@smoovy/utils": "^1.0.2"
   },
   "author": "Davide Perozzi",

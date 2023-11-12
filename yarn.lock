@@ -746,7 +746,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smoovy/grid@workspace:packages/grid"
   dependencies:
-    "@smoovy/ticker": ^1.0.1
+    "@smoovy/ticker": ^1.0.2
     "@smoovy/utils": ^1.0.2
     "@types/dat.gui": ^0.7.7
     dat.gui: ^0.7.9
@@ -800,14 +800,14 @@ __metadata:
     "@smoovy/emitter": ^1.0.2
     "@smoovy/listener": ^1.0.1
     "@smoovy/observer": ^1.0.5
-    "@smoovy/ticker": ^1.0.1
+    "@smoovy/ticker": ^1.0.2
     "@smoovy/utils": ^1.0.1
     "@types/dat.gui": ^0.7.7
     dat.gui: ^0.7.9
   languageName: unknown
   linkType: soft
 
-"@smoovy/ticker@^1.0.1, @smoovy/ticker@workspace:packages/ticker":
+"@smoovy/ticker@^1.0.2, @smoovy/ticker@workspace:packages/ticker":
   version: 0.0.0-use.local
   resolution: "@smoovy/ticker@workspace:packages/ticker"
   dependencies:
@@ -819,7 +819,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smoovy/tween@workspace:packages/tween"
   dependencies:
-    "@smoovy/ticker": ^1.0.1
+    "@smoovy/ticker": ^1.0.2
     vitest: ^0.25.3
   languageName: unknown
   linkType: soft
@@ -839,7 +839,7 @@ __metadata:
     "@smoovy/emitter": ^1.0.2
     "@smoovy/listener": ^1.0.1
     "@smoovy/observer": ^1.0.2
-    "@smoovy/ticker": ^1.0.1
+    "@smoovy/ticker": ^1.0.2
     "@smoovy/utils": ^1.0.1
     "@tweakpane/core": ^1.1.4
     tweakpane: ^3.1.4

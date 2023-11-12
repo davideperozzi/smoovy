@@ -1,5 +1,5 @@
 import { listenCompose } from '@smoovy/listener';
-import { Ticker, TickerThread } from '@smoovy/ticker';
+import { Ticker, TickerTask } from '@smoovy/ticker';
 import { Browser, lerp } from '@smoovy/utils';
 
 import { OutputTransformEvent, ScrollBehavior, ScrollerEvent } from '../core';
@@ -50,11 +50,6 @@ interface Config {
   ticker?: Ticker;
 }
 
-enum Event {
-  LERP_CONTENT_START = '+lerp-content-start',
-  LERP_CONTENT_END = '+lerp-content-end'
-}
-
 const defaultConfig = {
   damping: 0.1,
   precision: 0.009,
@@ -67,59 +62,49 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
   const cfg = Object.assign({ ...defaultConfig }, config);
 
   return (scroller) => {
-    let thread: TickerThread;
     let running = false;
-    const ticker = cfg.ticker || new Ticker();
+    let disabled = false;
+    let transform: OutputTransformEvent | undefined;
+    const ticker = cfg.ticker || Ticker.main;
     const damping = Browser.mobile ? cfg.mobileDamping : cfg.damping;
     const unlisten = scroller.on<OutputTransformEvent>(
       ScrollerEvent.TRANSFORM_OUTPUT,
-      ({ pos, step }) => {
-        if (thread) {
-          thread.kill();
-        }
-
-        thread = ticker.add((delta, _time, kill) => {
-          const hzDelta = delta * (cfg.deltaBaseHz / 1000);
-          const lerpDamp = damping * (cfg.multiplyDelta ? hzDelta : 1);
-          const virtual = scroller.position.virtual;
-          const outputX = lerp(pos.x, virtual.x, lerpDamp);
-          const outputY = lerp(pos.y, virtual.y, lerpDamp);
-          const diffX = Math.abs(virtual.x - outputX);
-          const diffY = Math.abs(virtual.y - outputY);
-          const newPos = { x: outputX, y: outputY };
-          const changed = (
-            (diffX - cfg.precision) > 0 ||
-            (diffY - cfg.precision) > 0
-          );
-
-          if ( ! running && changed) {
-            running = true;
-
-            scroller.emit(Event.LERP_CONTENT_START, newPos);
-          }
-
-          if (diffX < cfg.precision && diffY < cfg.precision) {
-            kill();
-
-            if (running) {
-              running = false;
-
-              requestAnimationFrame(() => {
-                scroller.emit(Event.LERP_CONTENT_END, newPos);
-              });
-            }
-          } else {
-            step(newPos);
-          }
-        });
+      (event: OutputTransformEvent) => {
+        disabled = false;
+        transform = event;
       }
     );
+    const task = ticker.add((delta) => {
+      if ( ! transform || disabled) {
+        return;
+      }
+
+      const hzDelta = delta * (cfg.deltaBaseHz / 1000);
+      const precision = cfg.precision;
+      const lerpDamp = damping * (cfg.multiplyDelta ? hzDelta : 1);
+      const virtual = scroller.position.virtual;
+      const outputX = lerp(transform.pos.x, virtual.x, lerpDamp);
+      const outputY = lerp(transform.pos.y, virtual.y, lerpDamp);
+      const diffX = Math.abs(virtual.x - outputX);
+      const diffY = Math.abs(virtual.y - outputY);
+      const newPos = { x: outputX, y: outputY };
+      const changed = diffX - precision > 0 || diffY - precision > 0;
+
+      if ( ! running && changed) {
+        running = true;
+      }
+
+      if (diffX < precision && diffY < precision) {
+        disabled = true;
+        running = false;
+      } else {
+        transform.step(newPos);
+      }
+    });
 
     return listenCompose(
       scroller.on(ScrollerEvent.SCROLL_TO, (event: any) => {
-        if (thread) {
-          thread.kill();
-        }
+        disabled = true;
 
         if (event.skipOutputTransform) {
           scroller.muteEvents(ScrollerEvent.TRANSFORM_OUTPUT);
@@ -142,14 +127,11 @@ const behavior: ScrollBehavior<Config> = (config = {}) => {
         }
       }),
       unlisten,
-      () => ticker.kill()
+      () => task?.kill()
     );
   };
 };
 
-export {
-  Config as LerpContentConfig,
-  Event as LerpContentEvent
-};
+export { Config as LerpContentConfig };
 
 export default behavior;

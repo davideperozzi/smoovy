@@ -1,8 +1,7 @@
-import { Ticker, TickerThread } from '@smoovy/ticker';
+import { Ticker, TickerTask } from '@smoovy/ticker';
 
 export interface TweenControllerConfig {
   duration?: number;
-
   delay?: number;
   reversed?: boolean;
   autoStart?: boolean;
@@ -38,7 +37,7 @@ interface SeekVars {
 export class TweenController<
   T extends TweenControllerConfig = TweenControllerConfig,
 > {
-  protected ticker = new Ticker();
+  protected ticker = Ticker.main;
   protected _overridden = false;
   protected _duration = 0;
   protected  lastSeekVars: SeekVars = { ms: 0, noDelay: false, reversed: false  };
@@ -50,8 +49,8 @@ export class TweenController<
   protected _reversed = false;
   protected _started = false;
   protected lastProgress = 0;
-  private thread?: TickerThread;
   protected lastDelay = 0;
+  private task?: TickerTask;
   private resolveFn?: (...args: any[]) => void;
 
   constructor(
@@ -156,11 +155,9 @@ export class TweenController<
     this.beforeStart();
     this.reset(0, true);
 
-    const start = Ticker.now();
-
-    this.thread = this.ticker.add((_delta, time) => {
+    this.task = this.ticker.add((_delta, time) => {
       if ( ! this._paused) {
-        this.seek(startFrom + time - start);
+        this.seek(startFrom + time);
       }
     });
 
@@ -175,9 +172,9 @@ export class TweenController<
     if (this._paused !== paused) {
       this._paused = paused;
 
-      if (paused && this.thread) {
-        this.thread.kill();
-        delete this.thread;
+      if (paused && this.task) {
+        this.task.kill();
+        delete this.task;
       }
 
       if (paused) {
@@ -186,7 +183,7 @@ export class TweenController<
         this.callback(this.config.onResume);
       }
 
-      if ( ! paused && ! this.thread) {
+      if ( ! paused && ! this.task) {
         this.start(this._passed);
       }
     }
@@ -195,14 +192,14 @@ export class TweenController<
   }
 
   stop(silent = false) {
-    const ticking = !!this.thread && ! this.thread.dead;
+    const ticking = !!this.task;
     const started = this._started
 
     this._started = false;
 
-    if (ticking) {
-      this.thread?.kill();
-      delete this.thread;
+    if (ticking && this.task) {
+      this.task.kill();
+      delete this.task;
     }
 
     this.beforeStop();
@@ -336,7 +333,7 @@ export class TweenController<
       this.seek(seek, true);
     }
 
-    if (this.thread && ! this.thread.dead) {
+    if (this.task) {
       this.stop(silent);
     }
 

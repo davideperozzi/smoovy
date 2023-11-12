@@ -10,18 +10,19 @@ const timeline = tween.timeline({
   // onComplete: () => console.log('complete')
 });
 
-timeline.add(tween.to(targets[0], { y: 500 }, { duration: 2000 }));
-timeline.add(() => {
-  return tween.to(targets[1], { y: 500 });
-}, { offset: -1 });
-timeline.add(tween.to(targets[2], { y: 500 }), { offset: 0 });
-timeline.add(() => tween.timeline().add(
-  () => tween.timeline()
-    .add(() => tween.to(targets[3], { y: 500 }))
-    .add(tween.to(targets[4], { y: 500 }))
-    .add(() => tween.timeline().add(tween.to(targets[5], { y: 500 })))
-), { offset: 0 });
+tween.to({ y: 0 }, { y: 500 }, { onStart: () => console.log('start') });
 
+// timeline.add(tween.to(targets[0], { y: 500 }, { duration: 3000 }));
+// timeline.add(() => {
+//   return tween.to(targets[1], { y: 500 });
+// }, { offset: -1 });
+// timeline.add(tween.to(targets[2], { y: 500 }), { offset: 0 });
+// timeline.add(() => tween.timeline().add(
+//   () => tween.timeline()
+//     .add(() => tween.to(targets[3], { y: 500 }))
+//     .add(tween.to(targets[4], { y: 500 }))
+//     .add(() => tween.timeline().add(tween.to(targets[5], { y: 500 })))
+// ), { offset: 0 });
 
 // console.log(timeline.duration);
 // timeline.start().then(() => console.log(timeline.duration))
