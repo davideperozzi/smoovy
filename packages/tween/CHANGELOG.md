@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.15
+
+### Patch Changes
+
+- feat(tween): added dynamic timeline
+
 ## 1.1.14
 
 ### Patch Changes

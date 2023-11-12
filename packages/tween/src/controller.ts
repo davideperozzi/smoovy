@@ -9,7 +9,7 @@ export interface TweenControllerConfig {
   reverseDelay?: boolean;
   initSeek?: boolean;
   easing?: (x: number) => number;
-  onSeek?: (progress: number) => void;
+  onSeek?: (ms: number, progress: number) => void;
   onDelay?: (ms: number, progress: number) => void;
   onPause?: () => void;
   onResume?: () => void;
@@ -41,17 +41,17 @@ export class TweenController<
   protected ticker = new Ticker();
   protected _overridden = false;
   protected _duration = 0;
-  private listeners = new Map<string, any>();
-  private lastSeekVars: SeekVars = { ms: 0, noDelay: false, reversed: false  };
-  private _resolved = false;
-  private _paused = false;
-  private _passed = 0;
-  private _progress = 0;
-  private _reversed = false;
-  private _started = false;
+  protected  lastSeekVars: SeekVars = { ms: 0, noDelay: false, reversed: false  };
+  protected listeners = new Map<string, any>();
+  protected _resolved = false;
+  protected _paused = false;
+  protected _passed = 0;
+  protected _progress = 0;
+  protected _reversed = false;
+  protected _started = false;
+  protected lastProgress = 0;
   private thread?: TickerThread;
-  private lastProgress = 0;
-  private lastDelay = 0;
+  protected lastDelay = 0;
   private resolveFn?: (...args: any[]) => void;
 
   constructor(
@@ -90,7 +90,7 @@ export class TweenController<
     return this;
   }
 
-  private callListeners(name: string, args: any[] = []) {
+  protected callListeners(name: string, args: any[] = []) {
     const listeners = this.listeners.get(name);
 
     if (listeners) {
@@ -134,7 +134,7 @@ export class TweenController<
     return this._reversed;
   }
 
-  private resolve() {
+  protected resolve() {
     if (this.resolveFn && ! this._resolved) {
       this.resolveFn();
     }
@@ -215,9 +215,26 @@ export class TweenController<
     return this;
   }
 
-  seek(ms: number, noDelay = false) {
+  seekDelay(ms: number, noDelay = false) {
+    const delay = noDelay ? 0 : this.delay;
+
+    if ( ! noDelay && ms <= delay) {
+      this.callback(this.config.onDelay, [ ms, ms / delay ]);
+      this.lastDelay = ms;
+
+      return false;
+    } else if ( ! noDelay && ms >= delay && this.lastDelay !== delay) {
+      this.callback(this.config.onDelay, [ delay, 1 ]);
+
+      this.lastDelay = delay;
+    }
+
+    return true;
+  }
+
+  preSeek(ms: number, noDelay = false) {
     if (this._resolved) {
-      return this;
+      return false;
     }
 
     if (
@@ -225,12 +242,28 @@ export class TweenController<
       this.lastSeekVars.noDelay === noDelay &&
       this.lastSeekVars.reversed === this._reversed
     ) {
-      return this;
+      return false;
     }
 
     this.lastSeekVars.ms = ms;
     this.lastSeekVars.noDelay = noDelay;
     this.lastSeekVars.reversed = this._reversed;
+
+    if (ms > 0 && ! this._started) {
+      this._started = true;
+
+      this.beforeSeek();
+      this.callback(this.config.onStart);
+      this.callListeners('onStart');
+    }
+
+    return true;
+  }
+
+  seek(ms: number, noDelay = false) {
+    if ( ! this.preSeek(ms, noDelay)) {
+      return this;
+    }
 
     if (this._reversed) {
       ms = this.duration - ms;
@@ -251,7 +284,7 @@ export class TweenController<
     const passed = Math.min(Math.max(ms, 0), this.duration);
     this._progress = Math.min(Math.max(ms / this.duration, 0), 1);
 
-    this.callback(this.config.onSeek, [this._progress]);
+    this.callback(this.config.onSeek, [passed, this._progress]);
 
     if (
       ! this._reversed && passed >= this.duration ||
@@ -263,24 +296,17 @@ export class TweenController<
       this.callback(this.config.onComplete);
       this.callListeners('onComplete');
 
-      return;
+      return this;
     }
 
-    if ( ! noDelay && ms <= delay) {
-      this.callback(this.config.onDelay, [ ms, ms / delay ]);
-      this.lastDelay = ms;
-
+    if ( ! this.seekDelay(ms, noDelay)) {
       if (this.lastProgress !== 0) {
         this.lastProgress = 0;
 
         this.process(0, 0);
       }
 
-      return;
-    } else if ( ! noDelay && ms >= delay && this.lastDelay !== delay) {
-      this.callback(this.config.onDelay, [ delay, 1 ]);
-
-      this.lastDelay = delay;
+      return this;
     }
 
     this.lastProgress = (passed - delay) / (this.duration - delay);

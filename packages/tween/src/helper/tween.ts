@@ -1,3 +1,4 @@
+import { TweenController, TweenControllerConfig } from '../controller';
 import { DOMTweenProps, TweenProps } from '../props';
 import { SimpleTweenConfig, Tween } from '../tween';
 
@@ -44,4 +45,12 @@ function from() {
   throw new Error('Not implemented yet');
 }
 
-export { fromTo, to, from };
+function noop() {
+  return new TweenController({ duration: 0.001 }).start();
+}
+
+function delay(duration = 100, config: TweenControllerConfig = {}) {
+  return new TweenController({ duration, ...config }).start();
+}
+
+export { fromTo, to, from, noop, delay };

@@ -86,12 +86,14 @@ export class Tween<
   protected beforeStart() {}
 
   protected updateRegistry() {
-    if (this.registry.has(this.key) && this.config.overwrite !== false) {
+    if (this.registry.has(this.key)) {
       const prevTween = this.registry.get(this.key) as Tween;
 
       this.prevResultState = prevTween.resultState as any;
 
-      this.overwrite(this.key);
+      if (this.config.overwrite !== false) {
+        this.overwrite(this.key);
+      }
     }
 
     this.registry.set(this.key, this as any);
@@ -196,7 +198,7 @@ export class Tween<
       }
     }
 
-    if (this.domTarget) {
+    if (this.domTarget && Object.keys(this.resultState).length > 0) {
       setDomProps(this.domTarget, this.resultState, this.config.units);
     }
 

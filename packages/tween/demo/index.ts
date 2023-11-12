@@ -1,84 +1,53 @@
 import { easings, tween } from '../src';
 
 const targets = document.querySelectorAll<HTMLElement>('.anim');
-// const timeline = tween.timeline({ delay: 500, autoStart: false });
-
-// timeline.add(
-//   tween.staggerFromTo(targets, { y: 0 }, { y: 120 }, {
-//     duration: 1200,
-//     units: { y: '%' },
-//     easing: easings.easeOutExpo,
-//     initSeek: false,
-//     autoStart: false,
-//     stagger: {
-//       offset: 0.2
-//     }
-//   }),
-// );
-
-const timeline = tween.staggerFromTo(targets, { y: 0 }, { y: 120 }, {
-  duration: 1200,
-  units: { y: '%' },
-  easing: easings.easeOutExpo,
-  initSeek: false,
-  autoStart: false,
-  timeline: {
-    delay: 500,
-  },
-  stagger: {
-    offset: 0.2
-  }
+const timeline = tween.timeline({
+  delay: 1000,
+  // autoStart: false,
+  // onStart: () => console.log('start'),
+  // onDelay: () => console.log('delay'),
+  // onSeek: (ms, progress) => console.log('seek', ms),
+  // onComplete: () => console.log('complete')
 });
 
-// timeline.seek(3949349349);
-// timeline.seek(3949349349, true);
-// timeline.start();
+timeline.add(tween.to(targets[0], { y: 500 }, { duration: 2000 }));
+timeline.add(() => {
+  return tween.to(targets[1], { y: 500 });
+}, { offset: -1 });
+timeline.add(tween.to(targets[2], { y: 500 }), { offset: 0 });
+timeline.add(() => tween.timeline().add(
+  () => tween.timeline()
+    .add(() => tween.to(targets[3], { y: 500 }))
+    .add(tween.to(targets[4], { y: 500 }))
+    .add(() => tween.timeline().add(tween.to(targets[5], { y: 500 })))
+), { offset: 0 });
 
-// timeline.start();
 
-// setTimeout(() => {
-//   timeline.stop().start();
-// }, 750)
+// console.log(timeline.duration);
+// timeline.start().then(() => console.log(timeline.duration))
+// console.log(timeline.duration);
+// timeline.seek(timeline.duration);
+// timeline.add(tween.to(targets[5], { y: 500 }, { duration: 1500 }), { offset: -1 });
 
-// setTimeout(() => {
-//   timeline.stop();
-// }, 800)
+// console.log(timeline.duration);
 
-// tween.fromTo(
-//   targets[0],
-//   { y: 100 },
-//   { y: 300 },
-//   { delay: 500, duration: 500, autoStart: false, initSeek: false }
-// );
+// const element = document.querySelector<HTMLElement>('.vectors')!;
+// element.innerHTML = '';
+// element.style.height = vectors.length * 60 + 'px';
+// element.style.position = 'relative';
 
-// timeline.add(tween.fromTo(
-//   targets[0],
-//   { y: 100 },
-//   { y: 300 },
-//   {
-//     duration: 500,
-//     // autoStart: false,
-//     initSeek: false
-//   }
-// ));
+// vectors.forEach((vector, i) => {
+//   const [rightEdge, length] = vector;
+//   const element = document.createElement('div');
 
-// timeline.seek(750);
 
-// setTimeout(() => {
-//   // timeline.reset();
-// }, 1000);
+//   element.style.position = 'absolute';
+//   element.style.left = ((rightEdge - length)*.5) + 'px';
+//   element.style.width = (length*.5) + 'px';
+//   element.style.top = (i * 55) + 'px';
+//   element.style.height = '50px';
+//   element.style.background = 'gray';
+//   element.innerHTML = `Duration ${length}ms | Start ${rightEdge-length}ms`;
 
-// requestAnimationFrame(() => {
-//   timeline.reset();
+//   document.querySelector('.vectors')!.appendChild(element);
 // })
-
-// tween.fromTo(targets[0], { y: 0 }, { y: 500 }, { delay: 500, duration: 2000 });
-
-// setTimeout(() => {
-//   tween.fromTo(targets[0], { y: 50 }, { y: 500 }, { duration: 2000, recover: true }).then(() => {
-//     requestAnimationFrame(() => {
-//       tween.fromTo(targets[0], { y: 0 }, { y: 500 });
-//     })
-//   })
-// }, 1000)
-

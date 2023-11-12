@@ -1,6 +1,6 @@
 import { set, setNow } from './helper/setters';
 import { staggerFromTo, staggerTo, timeline } from './helper/timeline';
-import { from, fromTo, to } from './helper/tween';
+import { delay, from, fromTo, noop, to } from './helper/tween';
 
 export const tween = {
   to,
@@ -10,5 +10,7 @@ export const tween = {
   set,
   setNow,
   staggerTo,
+  noop,
+  delay,
   staggerFromTo
 };
