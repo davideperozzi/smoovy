@@ -57,6 +57,7 @@ describe('ticker', () => {
 
   it('should be overwritable', async () => {
     const newTicker = new Ticker(true);
+
     await new Promise<void>((resolve) => {
       setTimeout(() => {
 
@@ -71,17 +72,18 @@ describe('ticker', () => {
   });
 
   it('should tick and update manually', async () => {
+    const newTicker = new Ticker(true);
+
     await new Promise<void>((resolve) => {
       setTimeout(() => {
         const fn = vi.fn();
 
-        ticker.override = true;
-        ticker.add(fn);
-        ticker.tick(0);
-        ticker.tick(performance.now());
-        ticker.tick(performance.now() + 1);
-        ticker.tick(performance.now() + 2);
-        ticker.tick(performance.now() + 3);
+        newTicker.add(fn);
+        newTicker.tick(0);
+        newTicker.tick(performance.now());
+        newTicker.tick(performance.now() + 1);
+        newTicker.tick(performance.now() + 2);
+        newTicker.tick(performance.now() + 3);
 
         setTimeout(() => {
           expect(fn).toBeCalledTimes(5);
