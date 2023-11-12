@@ -56,6 +56,7 @@ export interface RouterEvent {
   fromElement: HTMLElement;
   fromRoute: Route;
   toRoute: Route;
+  outlet: HTMLElement;
   trigger: 'user' | 'popstate';
 }
 
@@ -75,9 +76,9 @@ export interface RouterChangeState
 
 export interface RouterAnimationHooks {
   start?: (event: RouterEvent) => TweenController | void;
+  append?: (event: RouterSwapEvent) => TweenController | void;
   enter?: (event: RouterSwapEvent) => TweenController | void;
   leave?: (event: RouterSwapEvent) => TweenController | void;
-  beforeEnter?: (event: RouterSwapEvent) => TweenController | void;
   cancel?: (event: RouterEvent) => void;
   release?: (element: HTMLElement) => void;
   complete?: (event: RouterSwapEvent) => void;
@@ -180,21 +181,23 @@ export class Router extends EventEmitter {
   ) {
     timeline.call(() => this.emit(RouterEventType.BEFORE_ENTER, event));
 
-    this.animateHook(event, 'beforeEnter', timeline, animations);
+    this.animateHook(event, 'append', timeline, animations);
 
     timeline.call(() => this.outlet.append(event.toElement));
 
     this.animateHook(event, 'enter', timeline, animations);
 
     timeline.call(() => {
-      this.emit(RouterEventType.AFTER_ENTER, event);
+      this.emit(RouterEventType.AFTER_ENTER, event)
       this.emit(RouterEventType.BEFORE_LEAVE, event);
-      event.fromElement.remove();
     });
 
     this.animateHook(event, 'leave', timeline, animations);
 
-    timeline.call(() => this.emit(RouterEventType.AFTER_LEAVE, event));
+    timeline.call(() => {
+      event.fromElement.remove();
+      this.emit(RouterEventType.AFTER_LEAVE, event);
+    });
   }
 
   private animateHook(
@@ -221,19 +224,15 @@ export class Router extends EventEmitter {
       const callback = animation[hook];
 
       if (callback instanceof Function) {
-        const controller = callback(event);
-
-        if (controller instanceof TweenController) {
-          timelineItems.push({
-            controller,
-            config: { offset: -1 }
-          });
-        }
+        timelineItems.push({
+          dynamic: () => callback(event) || tween.noop(),
+          config: { offset: -1 }
+        });
       }
     }
 
     if (timelineItems.length > 0) {
-      timeline.add(tween.timeline({ items: timelineItems }));
+      timeline.add(() => tween.timeline({ items: timelineItems }));
     }
   }
 
@@ -244,6 +243,7 @@ export class Router extends EventEmitter {
 
     const trigger = options?.trigger || 'user';
     const event: RouterEvent = {
+      outlet: this.outlet,
       fromElement: this.view,
       fromRoute: this._route,
       toRoute: to,

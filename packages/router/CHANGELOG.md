@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.5
+
+### Patch Changes
+
+- feat(router): added dynamic timeline animations
+
 ## 1.2.4
 
 ### Patch Changes

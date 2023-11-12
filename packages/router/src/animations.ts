@@ -1,5 +1,5 @@
 import { tween, easings } from "@smoovy/tween";
-import { RouterAnimation, RouterEvent } from "./router";
+import { RouterAnimation, RouterEvent, RouterEventType } from "./router";
 
 export interface RouterFadeAnimationConfig {
   name?: string;
@@ -13,21 +13,30 @@ export const fade = (config: RouterFadeAnimationConfig = {}) => ({
   when: config.when,
   release: (element) => {
     element.style.opacity = '';
+    element.style.display = '';
   },
-  beforeEnter: ({ fromElement, fromInDom }) => {
-    if (fromInDom) {
-      return tween.fromTo(fromElement, { opacity: 1 }, { opacity: 0 }, {
-        recover: true,
-        duration: config.duration || 500,
-        easing: config.easing
-      })
+  append: ({ toElement }) => {
+    toElement.style.display = 'none';
+
+    if (toElement.style.opacity === '') {
+      toElement.style.opacity = '0';
     }
   },
-  leave: ({ toElement }) => {
-    return tween.fromTo(toElement, { opacity: 0 }, { opacity: 1 }, {
-      recover: true,
+  enter: ({ fromElement, toElement, fromInDom }) => {
+    if (fromInDom && fromElement.style.display !== 'none') {
+      return tween.to(fromElement, { opacity: 0 }, {
+        duration: config.duration || 500,
+        easing: config.easing
+      });
+    }
+  },
+  leave: ({ toElement, fromElement }) => {
+    toElement.style.display = '';
+    fromElement.style.display = 'none';
+
+    return tween.to(toElement, { opacity: 1 }, {
       duration: config.duration || 500,
       easing: config.easing
-    })
-  }
+    });
+  },
 } as RouterAnimation);
