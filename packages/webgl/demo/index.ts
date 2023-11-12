@@ -1,4 +1,4 @@
-import { GLImage, GLImageEvent, WebGL } from '../src';
+import { GLImage, GLImageEvent, GLMeshEvent, WebGL } from '../src';
 import { Pane } from 'tweakpane';
 import { mat4tv } from '../src/utils/math';
 
@@ -109,11 +109,16 @@ pane.controller_.view.element.style.position = 'fixed';
 const dimage = webgl.image({
   source: 'https://picsum.photos/800/600',
   x: 500,
-  y: 500,
-  features: [
-    { value: webgl.gl.CULL_FACE, disable: true },
-  ]
-})
+  y: 500
+});
+
+dimage.on(GLMeshEvent.BEFORE_DRAW, () => {
+  webgl.gl.disable(webgl.gl.CULL_FACE);
+});
+
+dimage.on(GLMeshEvent.AFTER_DRAW, () => {
+  webgl.gl.enable(webgl.gl.CULL_FACE);
+});
 
 dimage.loadTexture('image1', 'https://picsum.photos/536/354');
 

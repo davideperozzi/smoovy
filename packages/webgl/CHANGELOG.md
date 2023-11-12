@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.13
+
+### Patch Changes
+
+- feat(webgl): removed feature toggle -> performance
+
 ## 1.1.12
 
 ### Patch Changes
