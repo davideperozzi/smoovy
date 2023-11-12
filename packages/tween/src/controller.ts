@@ -239,7 +239,7 @@ export class TweenController<
       this.lastSeekVars.noDelay === noDelay &&
       this.lastSeekVars.reversed === this._reversed
     ) {
-      return false;
+      // return false;
     }
 
     this.lastSeekVars.ms = ms;

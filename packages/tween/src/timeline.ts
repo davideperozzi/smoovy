@@ -282,7 +282,6 @@ export class Timeline extends TweenController<TimelineConfig> {
     ms -= noDelay ? 0 : this.delay;
 
     const items = this.items;
-    let counter = 0;
 
     for (let i = 0, len = items.length; i < len; i++) {
       const item = this.revealItem(items[i]);
@@ -305,7 +304,6 @@ export class Timeline extends TweenController<TimelineConfig> {
         if (item.controller.progress < 1) {
           item.controller.seek(length);
           this.callEffects(length, effects);
-          counter++;
         }
 
         continue;
@@ -313,7 +311,6 @@ export class Timeline extends TweenController<TimelineConfig> {
 
       item.controller.seek(passed);
       this.callEffects(passed, effects);
-      counter++;
 
       const nextItem = items[i+1];
       const nextOffset = nextItem ? nextItem.config.offset || 0 : 0;
@@ -326,9 +323,8 @@ export class Timeline extends TweenController<TimelineConfig> {
       }
     }
 
-    // If the counter is 0, there are no more tweens to process, so we signal
-    // a complete, stop and resolve the current timeline
-    if (counter === 0) {
+    // If the progress is 1, we're done
+    if (this._progress >= 1) {
       this.stop();
       this.resolve();
       this.callback(this.config.onComplete);

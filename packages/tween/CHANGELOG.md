@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.17
+
+### Patch Changes
+
+- fix(tween): nested timeline complete detection
+
 ## 1.1.16
 
 ### Patch Changes
