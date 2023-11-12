@@ -1,5 +1,5 @@
 import { listen, listenCompose, Unlisten } from '@smoovy/listener';
-import { Ticker } from '@smoovy/ticker';
+import { Ticker, TickerTask } from '@smoovy/ticker';
 
 import { TextureAttrBuffer } from '../buffers';
 import { Program } from '../program';
@@ -17,7 +17,8 @@ export class GLVideo extends GLPlane {
   private texture!: WebGLTexture | null;
   private textCoord = new TextureAttrBuffer();
   private unlistenVideo?: Unlisten;
-  private ticker = new Ticker();
+  private playTask?: TickerTask;
+  private ticker = Ticker.main;
   private video: HTMLVideoElement;
   private playing = false;
 
@@ -91,11 +92,16 @@ export class GLVideo extends GLPlane {
   }
 
   private handlePlay() {
-    this.ticker.add(() => this.updateTexture());
+    if ( ! this.playTask) {
+      this.playTask = this.ticker.add(() => this.updateTexture());
+    }
   }
 
   private handleStop() {
-    this.ticker.kill();
+    if (this.playTask) {
+      this.playTask.kill();
+      delete this.playTask;
+    }
   }
 
   private updateTexture() {
