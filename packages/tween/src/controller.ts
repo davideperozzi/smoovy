@@ -239,7 +239,7 @@ export class TweenController<
       this.lastSeekVars.noDelay === noDelay &&
       this.lastSeekVars.reversed === this._reversed
     ) {
-      // return false;
+      return false;
     }
 
     this.lastSeekVars.ms = ms;
@@ -257,8 +257,8 @@ export class TweenController<
     return true;
   }
 
-  seek(ms: number, noDelay = false) {
-    if ( ! this.preSeek(ms, noDelay)) {
+  seek(ms: number, noDelay = false, force = false) {
+    if ( ! this.preSeek(ms, noDelay) && ! force) {
       return this;
     }
 

@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.18
+
+### Patch Changes
+
+- feat(timeline): added force seek option
+
 ## 1.1.17
 
 ### Patch Changes

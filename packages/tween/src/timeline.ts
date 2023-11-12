@@ -227,7 +227,7 @@ export class Timeline extends TweenController<TimelineConfig> {
     return this.items.some(item => item.dynamic);
   }
 
-  protected getStartMs(items: TimelineItem[], index: number) {
+  protected getStartMs(items: TimelineItem[], index: number, noDelay = false) {
     let leftEdge = 0;
 
     for (let i = 0; i <= index; i++) {
@@ -238,8 +238,9 @@ export class Timeline extends TweenController<TimelineConfig> {
       const item = this.revealItem(items[i-1]);
       const controller = item.controller;
       const offset = items[i].config.offset || 0;
+      const duration = controller.duration - (noDelay ? controller.delay : 0)
 
-      leftEdge += controller.duration + controller.duration * offset;
+      leftEdge += duration + duration * offset;
     }
 
     return leftEdge;
@@ -259,8 +260,8 @@ export class Timeline extends TweenController<TimelineConfig> {
     }
   }
 
-  seek(ms: number, noDelay = false) {
-    if ( ! this.preSeek(ms, noDelay)) {
+  seek(ms: number, noDelay = false, force = false) {
+    if ( ! this.preSeek(ms, noDelay) && ! force) {
       return this;
     }
 
@@ -286,8 +287,9 @@ export class Timeline extends TweenController<TimelineConfig> {
     for (let i = 0, len = items.length; i < len; i++) {
       const item = this.revealItem(items[i]);
       const effects = this.sideEffects.filter(effect => effect.item === item);
-      const startMs = this.getStartMs(items, i);
-      const length = item.controller.duration;
+      const startMs = this.getStartMs(items, i, noDelay);
+      const delayOffset = noDelay ? item.controller.delay : 0;
+      const length = item.controller.duration - delayOffset;
       const endMs = startMs + length;
       const passed = ms - startMs;
 
@@ -302,18 +304,27 @@ export class Timeline extends TweenController<TimelineConfig> {
       // to the end of the controller manually as we would while ticking.
       if (ms > endMs) {
         if (item.controller.progress < 1) {
-          item.controller.seek(length);
+          item.controller.seek(length, noDelay, force);
           this.callEffects(length, effects);
         }
 
         continue;
       }
 
-      item.controller.seek(passed);
+      item.controller.seek(passed, noDelay, force);
       this.callEffects(passed, effects);
 
       const nextItem = items[i+1];
       const nextOffset = nextItem ? nextItem.config.offset || 0 : 0;
+
+      // If force is enabled it will go through all items all the time.
+      // This will result in all items being revealed and processed.
+      // With many items this can cause performance issues, so it should
+      // only be used when you want to set the timeline to a specific point
+      // in time
+      if (force) {
+        continue;
+      }
 
       // If the next item is not in range yet, don't even process.
       // This allows for a more efficient and dynamic animation,

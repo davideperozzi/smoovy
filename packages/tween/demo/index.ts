@@ -3,7 +3,7 @@ import { easings, tween } from '../src';
 const targets = document.querySelectorAll<HTMLElement>('.anim');
 const timeline = tween.timeline({
   delay: 1000,
-  // autoStart: false,
+  autoStart: false,
   // onStart: () => console.log('start'),
   // onDelay: () => console.log('delay'),
   // onSeek: (ms, progress) => console.log('seek', ms),
@@ -14,22 +14,38 @@ const timeline = tween.timeline({
 //   onComplete: () => console.log('onComplete')
 // });
 
-timeline.add(tween.to(targets[0], { y: 500 }, { duration: 3000 }));
-timeline.add(() => {
-  return tween.to(targets[1], { y: 500 });
-}, { offset: -1 });
-timeline.add(tween.to(targets[2], { y: 500 }), { offset: 0 });
-timeline.add(() => tween.timeline({
-  onComplete: () => console.log('complete 1')
-}).add(
-  () => tween.timeline({
-    onComplete: () => console.log('complete 2'),
-    // onSeek: (ms, prograss) => console.log(ms, progress)
-  })
-    .add(() => tween.to(targets[3], { y: 500 }))
-    .add(tween.to(targets[4], { y: 500 }))
-    .add(() => tween.timeline().add(tween.to(targets[5], { y: 500 })))
-), { offset: 0 });
+// timeline.add(tween.to(targets[0], { y: 500 }, { duration: 3000 }));
+// timeline.add(() => {
+//   return tween.to(targets[1], { y: 500 });
+// }, { offset: -1 });
+// timeline.add(tween.to(targets[2], { y: 500 }), { offset: 0 });
+// timeline.add(() => tween.timeline({
+//   onComplete: () => console.log('complete 1')
+// }).add(
+//   () => tween.timeline({
+//     onComplete: () => console.log('complete 2'),
+//     // onSeek: (ms, prograss) => console.log(ms, progress)
+//   })
+//     .add(() => tween.to(targets[3], { y: 500 }))
+//     .add(tween.to(targets[4], { y: 500 }))
+//     .add(() => tween.timeline().add(tween.to(targets[5], { y: 500 })))
+// ), { offset: 0 });
+
+
+const stagger = tween.staggerFromTo(targets, { y: 0 }, { y: 500 }, {
+  delay: 1000,
+  initSeek: true,
+  stagger: {
+    offset: 0.05
+  },
+  timeline: {
+    // autoStart: false
+  }
+});
+
+
+// stagger.seek(0, true, true);
+
 
 // console.log(timeline.duration);
 // timeline.start().then(() => console.log(timeline.duration))
