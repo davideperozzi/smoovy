@@ -261,6 +261,9 @@ export class Timeline extends TweenController<TimelineConfig> {
   }
 
   seek(ms: number, noDelay = false, force = false) {
+    console.log('Seeking');
+
+
     if ( ! this.preSeek(ms, noDelay) && ! force) {
       return this;
     }

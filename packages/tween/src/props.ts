@@ -3,6 +3,7 @@ export interface TransformTweenProps {
   x: number;
   y: number;
   z: number;
+  opacity: number;
   rotate: number;
   rotateX: number;
   rotateY: number;

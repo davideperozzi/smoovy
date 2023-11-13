@@ -35,14 +35,25 @@ const timeline = tween.timeline({
 const stagger = tween.staggerFromTo(targets, { y: 0 }, { y: 500 }, {
   delay: 1000,
   initSeek: true,
+
   stagger: {
-    offset: 0.05
+    offset: 0.01
   },
   timeline: {
-    // autoStart: false
+    autoStart: false,
   }
 });
 
+stagger.stop();
+stagger.seek(0, true, true);
+
+setTimeout(() => {
+  stagger.start();
+
+  setTimeout(() => {
+    stagger.stop();
+  }, 1500);
+}, 500)
 
 // stagger.seek(0, true, true);
 

@@ -16,6 +16,7 @@ export function getTransformValues(element: HTMLElement): TransformTweenProps {
     x: 0,
     y: 0,
     z: 0,
+    opacity: 1,
     rotate: 0,
     rotateX: 0,
     rotateY: 0,
@@ -192,7 +193,9 @@ export function getDomProps(dom: HTMLElement) {
   const values = getTransformValues(dom);
   const opacity = parseFloat(dom.style.opacity);
 
-  return { ...values, opacity: isNaN(opacity) ? 1 : opacity };
+  values.opacity = isNaN(opacity) ? 1 : opacity;
+
+  return values;
 }
 
 const noStyleProps = [
