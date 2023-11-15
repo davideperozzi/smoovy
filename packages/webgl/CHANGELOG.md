@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.14
+
+### Patch Changes
+
+- feat(webgl): added container for multiple scroll contexts
+
 ## 1.1.13
 
 ### Patch Changes

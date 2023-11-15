@@ -24,6 +24,7 @@ export enum GLMeshEvent {
 
 export interface GLMeshConfig {
   drawMode?: GLMeshDrawMode;
+  container?: string;
   uniforms?: { [name: string]: Uniform };
 }
 
@@ -121,12 +122,23 @@ export class GLMesh extends EventEmitter {
     return this._buffers;
   }
 
-  public create() {
+  public isInsideContainer(name: string) {
+    return this.config.container === name;
+  }
+
+  public updateProjection() {
+    const projection = this.config.container
+      ? this.viewport.getContainerProjection(this.config.container)
+      : this.viewport.projection;
+
     this._uniforms.projectionMatrix = {
       type: UniformType.MAT4,
-      value: this.viewport.projection
+      value: projection || this.viewport.projection
     };
+  }
 
+  public create() {
+    this.updateProjection();
     this.program.create();
 
     for (const name in this._buffers) {

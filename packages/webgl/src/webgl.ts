@@ -9,6 +9,7 @@ import { GLImage, GLImageConfig } from './meshes/image';
 import { GLPlane, GLPlaneConfig } from './meshes/plane';
 import { GLVideo, GLVideoConfig } from './meshes/video';
 import { Viewport, ViewportConfig, ViewportEvent } from './viewport';
+import { Container, ContainerConfig } from './container';
 
 export interface WebGLConfig extends Partial<ViewportConfig> {
   /**
@@ -258,5 +259,19 @@ export class WebGL extends EventEmitter {
 
   image(config: GLImageConfig, cb?: (image: GLImage) => void) {
     return this.createMesh(GLImage, config, cb);
+  }
+
+  container(config: Partial<ContainerConfig> & { name: string }) {
+    const container = this.viewport.createContainer(config);
+
+    this.meshes.filter(m => m.isInsideContainer(config.name)).forEach(m => {
+      m.updateProjection();
+    });
+
+    return container;
+  }
+
+  getContainer(name: string) {
+    return this.viewport.getContainer(name);
   }
 }

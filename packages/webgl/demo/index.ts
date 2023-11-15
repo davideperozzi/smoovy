@@ -7,6 +7,12 @@ const pane = new Pane();
 
 function updateScroll() {
   webgl.scrollTo({ x: window.scrollX, y: window.scrollY });
+
+  const conatiner = webgl.getContainer('test');
+
+  if (container) {
+    container.scrollTo({ x: window.scrollX, y: window.scrollY * .5 });
+  }
 }
 
 window.addEventListener('scroll', updateScroll);
@@ -105,9 +111,9 @@ pane.controller_.view.element.style.position = 'fixed';
 // plane.scale(1, 1);
 
 // GLImage.preload(webgl.gl, 'https://i.imgur.com/fHyEMsl.jpg', true);
-
 const dimage = webgl.image({
   source: 'https://picsum.photos/800/600',
+  container: 'test',
   x: 500,
   y: 500
 });
@@ -121,6 +127,8 @@ dimage.on(GLMeshEvent.AFTER_DRAW, () => {
 });
 
 dimage.loadTexture('image1', 'https://picsum.photos/536/354');
+
+const container = webgl.container({ name: 'test' });
 
 
 const createImage = () => webgl.image({
