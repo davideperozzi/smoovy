@@ -10,6 +10,18 @@ const timeline = tween.timeline({
   // onComplete: () => console.log('complete')
 });
 
+const tveen = tween.fromTo(targets[0], { scaleX: 0 }, { scaleX: 1 }, { duration: 1000, autoStart: false });
+
+
+tveen.seek(1000);
+
+// timeline.add(
+//   tween.to(targets[0], { scaleX: 0.3 }, { duration: 1000 })
+// );
+
+// timeline.start();
+
+
 // tween.to({ y: 0 }, { y: 500 }, {
 //   onComplete: () => console.log('onComplete')
 // });
@@ -32,28 +44,28 @@ const timeline = tween.timeline({
 // ), { offset: 0 });
 
 
-const stagger = tween.staggerFromTo(targets, { y: 0 }, { y: 500 }, {
-  delay: 1000,
-  initSeek: true,
+// const stagger = tween.staggerFromTo(targets, { y: 0 }, { y: 500 }, {
+//   delay: 1000,
+//   initSeek: true,
 
-  stagger: {
-    offset: 0.01
-  },
-  timeline: {
-    autoStart: false,
-  }
-});
+//   stagger: {
+//     offset: 0.01
+//   },
+//   timeline: {
+//     autoStart: false,
+//   }
+// });
 
-stagger.stop();
-stagger.seek(0, true, true);
+// stagger.stop();
+// stagger.seek(0, true, true);
 
-setTimeout(() => {
-  stagger.start();
+// setTimeout(() => {
+//   stagger.start();
 
-  setTimeout(() => {
-    stagger.stop();
-  }, 1500);
-}, 500)
+//   setTimeout(() => {
+//     stagger.stop();
+//   }, 1500);
+// }, 500)
 
 // stagger.seek(0, true, true);
 

@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.20
+
+### Patch Changes
+
+- fix(tween): removed console.log
+
 ## 1.1.19
 
 ### Patch Changes
