@@ -270,7 +270,8 @@ export class Timeline extends TweenController<TimelineConfig> {
     // so the progress might jump. To prevent this use the `ms` which keeps
     // increasing constantly, without jumping. It might be not 100% accurate.
     // It can be +-16ms off, but it's good enough for most cases.
-    this._progress = Math.min(ms, this.duration) / this.duration;
+    this._passed = Math.min(ms, this.duration);
+    this._progress = this._passed / this.duration;
 
     if ( ! noEvents) {
       this.callback(this.config.onSeek, [ms, this._progress]);
@@ -345,6 +346,12 @@ export class Timeline extends TweenController<TimelineConfig> {
         break;
       }
     }
+
+    // Recalculate the progress. This is needed because the duration
+    // might have changed while seeking the tweens and we need to
+    // update the progress accordingly, so we don't stop early.
+    // This will mostly happen if dynamic tweens are included
+    this._progress = this._passed / this.duration;
 
     // If the progress is 1, we're done -> call done events
     if (this._progress >= 1 && ! noEvents) {

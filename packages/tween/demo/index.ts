@@ -3,37 +3,42 @@ import { easings, tween } from '../src';
 const targets = document.querySelectorAll<HTMLElement>('.anim');
 const fromProps = { y: 0 };
 
-// const tl = tween.timeline({ autoStart: false })
-//   .to(targets[0], { y: 500 }, { duration: 1000, easing: easings.easeOutExpo })
-//   .fromTo(targets[1], { y: 500 },  { y: 0 }, { duration: 1000, easing: easings.easeOutExpo })
-//   .to(targets[2], { y: 500 }, { duration: 1000, easing: easings.easeOutExpo })
-//   .to(targets[3], { y: 500 }, { duration: 1000, easing: easings.easeOutExpo });
+const tl = tween.timeline({
+  onStart: () => console.log('start 1'),
+  onComplete: () => console.log('complete')
+})
+  .add(tween.delay(1000))
+  .add(() => {
+    return tween.timeline({
+      onStart: () => console.log('start 2'),
+      onComplete: () => console.log('complete 2')
+    })
+      .to(targets[0], { y: 500 }, { duration: 1000, easing: easings.easeOutExpo})
+      .fromTo(targets[1], { y: 500 },  { y: 0 }, { duration: 1000, easing: easings.easeOutExpo })
+      .to(targets[2], { y: 500 }, { duration: 1000, easing: easings.easeOutExpo, onStart: () => console.log('start 3') })
+      .to(targets[3], { y: 500 }, { duration: 1000, easing: easings.easeOutExpo });
+  })
 
-// tl.seek(4000, true, true, true);
+
+// const tveen = tween.fromTo(
+//   targets[0],
+//   fromProps,
+//   { y: 500 },
+//   {
+//     duration: 2100,
+//     easing: easings.easeOutExpo,
+//     onComplete: () => console.log('onComplete'),
+//     onStart: () => console.log('onStart'),
+//   }
+// );
 
 // setTimeout(() => {
-//   tl.reset(1, true).start();
-// }, 2000);
+//   tveen.pause();
 
-const tveen = tween.fromTo(
-  targets[0],
-  fromProps,
-  { y: 500 },
-  {
-    duration: 2100,
-    easing: easings.easeOutExpo,
-    onComplete: () => console.log('onComplete'),
-    onStart: () => console.log('onStart'),
-  }
-);
-
-setTimeout(() => {
-  tveen.pause();
-
-  setTimeout(() => {
-    tveen.resume();
-  }, 500);
-}, 500)
+//   setTimeout(() => {
+//     tveen.resume();
+//   }, 500);
+// }, 500)
 
 
 

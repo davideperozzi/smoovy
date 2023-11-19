@@ -245,7 +245,8 @@ export class TweenController<
       return false;
     }
 
-    if ( ! noEvents && ! this.hasStarted(ms)) {
+
+    if ( ! this._started && ! noEvents && this.hasStarted(ms)) {
       this._started = true;
 
       this.callback(this.config.onStart);

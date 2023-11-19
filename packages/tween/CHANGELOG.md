@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.22
+
+### Patch Changes
+
+- fix(tween): invalid start condition
+
 ## 1.1.21
 
 ### Patch Changes
