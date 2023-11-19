@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.6
+
+### Patch Changes
+
+- feat(router): made outlet public
+
 ## 1.2.5
 
 ### Patch Changes

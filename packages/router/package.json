@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/router",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Simple router",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",

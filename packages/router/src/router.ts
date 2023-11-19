@@ -106,9 +106,9 @@ export enum RouterEventType {
 export class Router extends EventEmitter {
   private abortController?: AbortController;
   private animations: RouterAnimation[] = [];
-  private outlet: HTMLElement;
-  private view: HTMLElement;
   private _route: Route;
+  private _outlet: HTMLElement;
+  private view: HTMLElement;
   private baseUrl: BrowserUrl;
   private trigger: Trigger;
   private unlisten: Unlisten;
@@ -128,8 +128,8 @@ export class Router extends EventEmitter {
     this.triggerSelector = config.trigger || 'a[href]:not([data-no-route])';
     this.baseUrl = parseUrl(window.location.href);
     this._route = createRouteFromPath(this.baseUrl);
-    this.outlet = queryEl(this.outletSelector);
-    this.view = this.queryView(this.outlet);
+    this._outlet = queryEl(this.outletSelector);
+    this.view = this.queryView(this._outlet);
     this.unlisten = this.listen();
     this.trigger = new Trigger(this.triggerSelector, (url, target) => {
       this.emit(RouterEventType.TRIGGER_CLICK, { url, target });
@@ -141,6 +141,10 @@ export class Router extends EventEmitter {
 
   get route() {
     return { ...this._route };
+  }
+
+  get outlet() {
+    return this._outlet;
   }
 
   private listen() {
@@ -183,7 +187,7 @@ export class Router extends EventEmitter {
 
     this.animateHook(event, 'append', timeline, animations);
 
-    timeline.call(() => this.outlet.append(event.toElement));
+    timeline.call(() => this._outlet.append(event.toElement));
 
     this.animateHook(event, 'enter', timeline, animations);
 
@@ -243,7 +247,7 @@ export class Router extends EventEmitter {
 
     const trigger = options?.trigger || 'user';
     const event: RouterEvent = {
-      outlet: this.outlet,
+      outlet: this._outlet,
       fromElement: this.view,
       fromRoute: this._route,
       toRoute: to,
@@ -255,7 +259,7 @@ export class Router extends EventEmitter {
     }
 
     const fromElement = event.fromElement;
-    const fromInDom = this.outlet.contains(fromElement);
+    const fromInDom = this._outlet.contains(fromElement);
     const changeState: RouterChangeState = { ...event, fromInDom };
 
     const animations = this.animations.filter(anim => {
