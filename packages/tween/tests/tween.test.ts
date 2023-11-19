@@ -195,7 +195,7 @@ describe('tween', () => {
       dataFrom,
       dataTo,
       {
-        duration: 100,
+        duration: 200,
         onPause: pauseFn,
         onResume: resumeFn,
         onStart: startFn,
@@ -206,12 +206,14 @@ describe('tween', () => {
     setTimeout(() => {
       tween.pause();
 
+      expect(pauseFn).toBeCalledTimes(1);
+
+
       setTimeout(() => {
         expect(tween.progress).toBeLessThan(1);
 
         tween.resume();
 
-        expect(pauseFn).toBeCalledTimes(1);
         expect(resumeFn).toBeCalledTimes(1);
         expect(startFn).toBeCalledTimes(1);
 

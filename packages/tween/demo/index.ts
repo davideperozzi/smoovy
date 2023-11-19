@@ -18,38 +18,48 @@ const fromProps = { y: 0 };
 const tveen = tween.fromTo(
   targets[0],
   fromProps,
-  { y: 0 },
+  { y: 500 },
   {
     duration: 2100,
-    autoStart: false,
-    initSeek: true,
-    easing: easings.easeOutExpo
+    easing: easings.easeOutExpo,
+    onComplete: () => console.log('onComplete'),
+    onStart: () => console.log('onStart'),
   }
 );
 
 setTimeout(() => {
-  fromProps.y = 500;
-
-  tveen.update().seek(0, true, true);
+  tveen.pause();
 
   setTimeout(() => {
-    fromProps.y = 700;
-
-    tveen.update().seek(0, true, true);
-    tveen.start();
-
-    setTimeout(() => {
-      tween.to(
-        targets[0],
-        { y: 500 },
-        {
-          duration: 1000,
-          easing: easings.easeOutExpo
-        }
-      );
-    }, 800);
+    tveen.resume();
   }, 500);
-}, 1000);
+}, 500)
+
+
+
+// setTimeout(() => {
+//   fromProps.y = 500;
+
+//   tveen.update().seek(0, true, true);
+
+//   setTimeout(() => {
+//     fromProps.y = 700;
+
+//     tveen.update().seek(0, true, true);
+//     tveen.start();
+
+//     // setTimeout(() => {
+//     //   tween.to(
+//     //     targets[0],
+//     //     { y: 500 },
+//     //     {
+//     //       duration: 1000,
+//     //       easing: easings.easeOutExpo
+//     //     }
+//     //   );
+//     // }, 800);
+//   }, 500);
+// }, 1000);
 
 // tveen.start();
 

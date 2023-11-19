@@ -144,13 +144,16 @@ export class TweenController<
     return this;
   }
 
-  start(startFrom = 0) {
+  start(startFrom = 0, noReset = false) {
     if (this._overridden) {
       return this;
     }
 
     this.beforeStart();
-    this.reset(0, true);
+
+    if ( ! noReset) {
+      this.reset(0, true);
+    }
 
     this.task = this.ticker.add((_delta, time) => {
       if ( ! this._paused) {
@@ -181,7 +184,7 @@ export class TweenController<
       }
 
       if ( ! paused && ! this.task) {
-        this.start(this._passed);
+        this.start(this._passed, true);
       }
     }
 
@@ -264,7 +267,9 @@ export class TweenController<
 
     const delay = noDelay ? 0 : this.delay;
     const passed = Math.min(Math.max(ms, 0), this.duration);
+
     this._progress = Math.min(Math.max(ms / this.duration, 0), 1);
+    this._passed = passed;
 
     if ( ! noEvents) {
       this.callback(this.config.onSeek, [passed, this._progress]);
@@ -272,8 +277,10 @@ export class TweenController<
 
     if (
       ! noEvents &&
-      ! this._reversed && passed >= this.duration ||
-      this._reversed && passed <= 0
+      (
+        ! this._reversed && passed >= this.duration ||
+        this._reversed && passed <= 0
+      )
     ) {
       this.process(this._reversed ? 0 : 1, this._reversed ? 0 : 1);
       this.stop();
