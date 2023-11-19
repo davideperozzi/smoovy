@@ -70,7 +70,7 @@ export class Tween<
     }
 
     if (config.initSeek) {
-      this.seek(0, true);
+      this.seek(0, true, true);
     }
 
     if (config.autoStart !== false) {
@@ -82,10 +82,10 @@ export class Tween<
     return this.config.key || this.config.target || this.config.from;
   }
 
-  protected beforeStart() {}
-
   protected updateRegistry() {
-    if (this.registry.has(this.key) && this.config.overwrite !== false) {
+    const tween = this.registry.get(this.key);
+
+    if (this.config.overwrite !== false && tween) {
       this.overwrite(this.key);
     }
 
@@ -108,7 +108,7 @@ export class Tween<
     const tween = this.registry.get(key);
 
     if (tween) {
-      if ( ! this._overridden) {
+      if ( ! this._overridden && tween.ticking) {
         tween.stop();
       }
 

@@ -28,19 +28,12 @@ export function mapRange(
   return outMin + (outMax - outMin) / (inEnd - inStart) * (value - inStart);
 }
 
-interface SeekVars {
-  ms: number;
-  noDelay: boolean;
-  reversed: boolean;
-}
-
 export class TweenController<
   T extends TweenControllerConfig = TweenControllerConfig,
 > {
   protected ticker = Ticker.main;
   protected _overridden = false;
   protected _duration = 0;
-  protected  lastSeekVars: SeekVars = { ms: 0, noDelay: false, reversed: false  };
   protected listeners = new Map<string, any>();
   protected _resolved = false;
   protected _paused = false;
@@ -133,6 +126,10 @@ export class TweenController<
     return this._reversed;
   }
 
+  get ticking() {
+    return !!this.task;
+  }
+
   protected resolve() {
     if (this.resolveFn && ! this._resolved) {
       this.resolveFn();
@@ -191,9 +188,9 @@ export class TweenController<
     return this;
   }
 
-  stop(silent = false) {
-    const ticking = !!this.task;
-    const started = this._started
+  stop(noEvents = false) {
+    const ticking = this.ticking;
+    const started = this._started;
 
     this._started = false;
 
@@ -204,7 +201,7 @@ export class TweenController<
 
     this.beforeStop();
 
-    if ( ! silent && started) {
+    if ( ! noEvents && started) {
       this.callback(this.config.onStop, [ticking]);
       this.callListeners('onStop', [ticking]);
     }
@@ -212,53 +209,52 @@ export class TweenController<
     return this;
   }
 
-  seekDelay(ms: number, noDelay = false) {
+  hasStarted(ms: number) {
+    return !this._reversed && ms > 0 || this._reversed && ms < this.duration;
+  }
+
+  seekDelay(ms: number, noDelay = false, noEvents = false) {
     const delay = noDelay ? 0 : this.delay;
 
-    if ( ! noDelay && ms <= delay) {
-      this.callback(this.config.onDelay, [ ms, ms / delay ]);
-      this.lastDelay = ms;
+    if (delay > 0) {
+      if ( ! noDelay && ms <= delay) {
+        if ( ! noEvents) {
+          this.callback(this.config.onDelay, [ ms, ms / delay ]);
+        }
 
-      return false;
-    } else if ( ! noDelay && ms >= delay && this.lastDelay !== delay) {
-      this.callback(this.config.onDelay, [ delay, 1 ]);
+        this.lastDelay = ms;
 
-      this.lastDelay = delay;
+        return false;
+      } else if ( ! noDelay && ms >= delay && this.lastDelay !== delay) {
+        if ( ! noEvents) {
+          this.callback(this.config.onDelay, [ delay, 1 ]);
+        }
+
+        this.lastDelay = delay;
+      }
     }
 
     return true;
   }
 
-  preSeek(ms: number, noDelay = false) {
+  preSeek(ms: number, noEvents = false) {
     if (this._resolved) {
       return false;
     }
 
-    if (
-      this.lastSeekVars.ms === ms &&
-      this.lastSeekVars.noDelay === noDelay &&
-      this.lastSeekVars.reversed === this._reversed
-    ) {
-      return false;
-    }
-
-    this.lastSeekVars.ms = ms;
-    this.lastSeekVars.noDelay = noDelay;
-    this.lastSeekVars.reversed = this._reversed;
-
-    if (ms > 0 && ! this._started) {
+    if ( ! noEvents && ! this.hasStarted(ms)) {
       this._started = true;
 
-      this.beforeSeek();
       this.callback(this.config.onStart);
       this.callListeners('onStart');
+      this.beforeSeek();
     }
 
     return true;
   }
 
-  seek(ms: number, noDelay = false, force = false) {
-    if ( ! this.preSeek(ms, noDelay) && ! force) {
+  seek(ms: number, noDelay = false, noEvents = false) {
+    if ( ! this.preSeek(ms, noEvents)) {
       return this;
     }
 
@@ -266,24 +262,16 @@ export class TweenController<
       ms = this.duration - ms;
     }
 
-    if (
-      ( ! this._reversed && ms > 0 || this._reversed && ms < this.duration) &&
-      ! this._started
-    ) {
-      this._started = true;
-
-      this.beforeSeek();
-      this.callback(this.config.onStart);
-      this.callListeners('onStart');
-    }
-
     const delay = noDelay ? 0 : this.delay;
     const passed = Math.min(Math.max(ms, 0), this.duration);
     this._progress = Math.min(Math.max(ms / this.duration, 0), 1);
 
-    this.callback(this.config.onSeek, [passed, this._progress]);
+    if ( ! noEvents) {
+      this.callback(this.config.onSeek, [passed, this._progress]);
+    }
 
     if (
+      ! noEvents &&
       ! this._reversed && passed >= this.duration ||
       this._reversed && passed <= 0
     ) {
@@ -296,7 +284,7 @@ export class TweenController<
       return this;
     }
 
-    if ( ! this.seekDelay(ms, noDelay)) {
+    if ( ! this.seekDelay(ms, noDelay, noEvents)) {
       if (this.lastProgress !== 0) {
         this.lastProgress = 0;
 
@@ -318,23 +306,23 @@ export class TweenController<
     return this;
   }
 
-  reset(seek = 0, silent = false) {
+  reset(seek = 0, noEvents = false) {
     const lastActivity = this._reversed ? 1 - this._progress : this._progress;
 
     this._resolved = false;
     this.lastProgress = 0;
     this.lastDelay = 0;
 
-    if ( ! silent) {
+    if ( ! noEvents) {
       this.callback(this.config.onReset);
     }
 
-    if (this._started || seek > 0 || lastActivity > 0) {
-      this.seek(seek, true);
+    if (this._started || lastActivity > 0) {
+      this.seek(seek, true, noEvents);
     }
 
     if (this.task) {
-      this.stop(silent);
+      this.stop(noEvents);
     }
 
     return this;

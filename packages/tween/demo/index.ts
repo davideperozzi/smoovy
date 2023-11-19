@@ -1,82 +1,59 @@
 import { easings, tween } from '../src';
 
 const targets = document.querySelectorAll<HTMLElement>('.anim');
-const timeline = tween.timeline({
-  delay: 1000,
-  autoStart: false,
-  // onStart: () => console.log('start'),
-  // onDelay: () => console.log('delay'),
-  // onSeek: (ms, progress) => console.log('seek', ms),
-  // onComplete: () => console.log('complete')
-});
+const fromProps = { y: 0 };
 
-const tveen = tween.fromTo(targets[0], { scaleX: 0 }, { scaleX: 1 }, { duration: 1000, autoStart: false });
+// const tl = tween.timeline({ autoStart: false })
+//   .to(targets[0], { y: 500 }, { duration: 1000, easing: easings.easeOutExpo })
+//   .fromTo(targets[1], { y: 500 },  { y: 0 }, { duration: 1000, easing: easings.easeOutExpo })
+//   .to(targets[2], { y: 500 }, { duration: 1000, easing: easings.easeOutExpo })
+//   .to(targets[3], { y: 500 }, { duration: 1000, easing: easings.easeOutExpo });
 
-
-tveen.seek(1000);
-
-// timeline.add(
-//   tween.to(targets[0], { scaleX: 0.3 }, { duration: 1000 })
-// );
-
-// timeline.start();
-
-
-// tween.to({ y: 0 }, { y: 500 }, {
-//   onComplete: () => console.log('onComplete')
-// });
-
-// timeline.add(tween.to(targets[0], { y: 500 }, { duration: 3000 }));
-// timeline.add(() => {
-//   return tween.to(targets[1], { y: 500 });
-// }, { offset: -1 });
-// timeline.add(tween.to(targets[2], { y: 500 }), { offset: 0 });
-// timeline.add(() => tween.timeline({
-//   onComplete: () => console.log('complete 1')
-// }).add(
-//   () => tween.timeline({
-//     onComplete: () => console.log('complete 2'),
-//     // onSeek: (ms, prograss) => console.log(ms, progress)
-//   })
-//     .add(() => tween.to(targets[3], { y: 500 }))
-//     .add(tween.to(targets[4], { y: 500 }))
-//     .add(() => tween.timeline().add(tween.to(targets[5], { y: 500 })))
-// ), { offset: 0 });
-
-
-// const stagger = tween.staggerFromTo(targets, { y: 0 }, { y: 500 }, {
-//   delay: 1000,
-//   initSeek: true,
-
-//   stagger: {
-//     offset: 0.01
-//   },
-//   timeline: {
-//     autoStart: false,
-//   }
-// });
-
-// stagger.stop();
-// stagger.seek(0, true, true);
+// tl.seek(4000, true, true, true);
 
 // setTimeout(() => {
-//   stagger.start();
+//   tl.reset(1, true).start();
+// }, 2000);
 
-//   setTimeout(() => {
-//     stagger.stop();
-//   }, 1500);
-// }, 500)
+const tveen = tween.fromTo(
+  targets[0],
+  fromProps,
+  { y: 0 },
+  {
+    duration: 2100,
+    autoStart: false,
+    initSeek: true,
+    easing: easings.easeOutExpo
+  }
+);
 
-// stagger.seek(0, true, true);
+setTimeout(() => {
+  fromProps.y = 500;
+
+  tveen.update().seek(0, true, true);
+
+  setTimeout(() => {
+    fromProps.y = 700;
+
+    tveen.update().seek(0, true, true);
+    tveen.start();
+
+    setTimeout(() => {
+      tween.to(
+        targets[0],
+        { y: 500 },
+        {
+          duration: 1000,
+          easing: easings.easeOutExpo
+        }
+      );
+    }, 800);
+  }, 500);
+}, 1000);
+
+// tveen.start();
 
 
-// console.log(timeline.duration);
-// timeline.start().then(() => console.log(timeline.duration))
-// console.log(timeline.duration);
-// timeline.seek(timeline.duration);
-// timeline.add(tween.to(targets[5], { y: 500 }, { duration: 1500 }), { offset: -1 });
-
-// console.log(timeline.duration);
 
 // const element = document.querySelector<HTMLElement>('.vectors')!;
 // element.innerHTML = '';

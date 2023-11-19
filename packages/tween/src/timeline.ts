@@ -260,8 +260,8 @@ export class Timeline extends TweenController<TimelineConfig> {
     }
   }
 
-  seek(ms: number, noDelay = false, force = false) {
-    if ( ! this.preSeek(ms, noDelay) && ! force) {
+  seek(ms: number, noDelay = false, noEvents = false, force = false) {
+    if ( ! this.preSeek(ms, noEvents)) {
       return this;
     }
 
@@ -272,11 +272,13 @@ export class Timeline extends TweenController<TimelineConfig> {
     // It can be +-16ms off, but it's good enough for most cases.
     this._progress = Math.min(ms, this.duration) / this.duration;
 
-    this.callback(this.config.onSeek, [ms, this._progress]);
+    if ( ! noEvents) {
+      this.callback(this.config.onSeek, [ms, this._progress]);
+    }
 
     // Process the delay, if fals is returned the delay is still in progress
     // and we don't need to process the tweens yet
-    if ( ! this.seekDelay(ms, noDelay)) {
+    if ( ! this.seekDelay(ms, noDelay, noEvents)) {
       return this;
     }
 
@@ -304,14 +306,24 @@ export class Timeline extends TweenController<TimelineConfig> {
       // to the end of the controller manually as we would while ticking.
       if (ms > endMs) {
         if (item.controller.progress < 1) {
-          item.controller.seek(length, noDelay, force);
+          if (item.controller instanceof Timeline) {
+            item.controller.seek(length, noDelay, noEvents, force);
+          } else {
+            item.controller.seek(length, noDelay, noEvents);
+          }
+
           this.callEffects(length, effects);
         }
 
         continue;
       }
 
-      item.controller.seek(passed, noDelay, force);
+      if (item.controller instanceof Timeline) {
+        item.controller.seek(passed, noDelay, noEvents, force);
+      } else {
+        item.controller.seek(passed, noDelay, noEvents);
+      }
+
       this.callEffects(passed, effects);
 
       const nextItem = items[i+1];
@@ -334,8 +346,8 @@ export class Timeline extends TweenController<TimelineConfig> {
       }
     }
 
-    // If the progress is 1, we're done
-    if (this._progress >= 1) {
+    // If the progress is 1, we're done -> call done events
+    if (this._progress >= 1 && ! noEvents) {
       this.stop();
       this.resolve();
       this.callback(this.config.onComplete);
@@ -383,14 +395,19 @@ export class Timeline extends TweenController<TimelineConfig> {
     }
   }
 
-  reset(seek = 0, silent = false) {
-    super.reset(seek, silent);
+  reset(seek = 0, noEvents = false) {
+    super.reset(seek, noEvents);
 
+    const lastActivity = this._reversed ? 1 - this._progress : this._progress;
     const items = this.items.slice().reverse();
+
+    if (this._started || lastActivity > 0) {
+      this.seek(seek, true, noEvents, true);
+    }
 
     for (const { controller } of items) {
       if (controller) {
-        controller.reset(seek, silent);
+        controller.reset(seek, noEvents);
       }
     }
 

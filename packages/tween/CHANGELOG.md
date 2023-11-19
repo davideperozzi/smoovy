@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.21
+
+### Patch Changes
+
+- feat(tween): improved event handling
+
 ## 1.1.20
 
 ### Patch Changes
