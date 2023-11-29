@@ -1,4 +1,4 @@
-import { Unlisten, listen } from "@smoovy/listener";
+import { Unlisten, listen, listenCompose } from "@smoovy/listener";
 import { queryElAll } from "@smoovy/utils";
 
 export class Trigger {
@@ -6,7 +6,11 @@ export class Trigger {
 
   constructor(
     private selector: string,
-    private callback?: (url: string, target: HTMLElement) => void,
+    private callback?: (
+      url: string,
+      target: HTMLElement,
+      type: 'hover' | 'click'
+    ) => void,
   ) {
     this.update();
   }
@@ -26,19 +30,32 @@ export class Trigger {
   }
 
   add(trigger: HTMLElement) {
-    this.listeners.set(trigger, listen(trigger, 'click', (event) => {
-      event.preventDefault();
+    this.listeners.set(trigger, listenCompose(
+      listen(trigger, 'click', (event) => {
+        event.preventDefault();
 
-      const target = event.currentTarget as HTMLElement;
+        const target = event.currentTarget as HTMLElement;
 
-      if (target && this.callback) {
-        const url = target.getAttribute('href') || target.dataset.routeUrl;
+        if (target && this.callback) {
+          const url = target.getAttribute('href') || target.dataset.routeUrl;
 
-        if (url) {
-          this.callback(url, target);
+          if (url) {
+            this.callback(url, target, 'click');
+          }
         }
-      }
-    }));
+      }),
+      listen(trigger, 'mouseenter', (event) => {
+        const target = event.currentTarget as HTMLElement;
+
+        if (target && this.callback) {
+          const url = target.getAttribute('href') || target.dataset.routeUrl;
+
+          if (url) {
+            this.callback(url, target, 'hover');
+          }
+        }
+      })
+    ));
   }
 
   remove(element: HTMLElement) {

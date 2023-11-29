@@ -1,5 +1,5 @@
 /* eslint-disable lines-between-class-members */
-import { BrowserUrl, parseUrl, queryEl } from "@smoovy/utils";
+import { BrowserUrl, isStr, parseUrl, queryEl } from "@smoovy/utils";
 import { Unlisten, listen, listenCompose } from "@smoovy/listener";
 import { Trigger } from "./trigger";
 import { createRouteFromPath, parseRouteHtml, routesMatch } from "./utils";
@@ -42,6 +42,14 @@ export interface RouterConfig {
    * @default true
    */
   cache?: boolean;
+
+  /**
+   * If set to true, the router will preload the view when
+   * hovering over the trigger element.
+   *
+   * @default true
+   */
+  hoverPreload?: boolean;
 }
 
 export enum RouterNavResult {
@@ -58,6 +66,7 @@ export interface RouterEvent {
   toRoute: Route;
   outlet: HTMLElement;
   trigger: 'user' | 'popstate';
+  flags: Record<string, boolean>;
 }
 
 export interface RouterSwapEvent extends RouterEvent {
@@ -89,6 +98,33 @@ export interface RouterAnimation extends RouterAnimationHooks {
   when?: (event: RouterEvent) => boolean;
 }
 
+export interface RouteToOptions {
+  replace?: boolean;
+  flags?: Record<string, boolean>;
+}
+
+export interface RouteNavigateOptions {
+  trigger?: 'user' | 'popstate';
+  flags?: Record<string, boolean>;
+}
+
+export interface RouterRenderOptions {
+  /**
+   * Whether to keep the view in the dom after leaving.
+   *
+   * @default true
+   */
+  keep?: boolean;
+
+  /**
+   * The style to apply to the view element, after it has been appended.
+   * They will only be applied if the current route isn't the one that
+   * has been rendered. These styles are meant to hide the element from
+   * the view, if they don't belong to the current route
+   */
+  style?: Partial<CSSStyleDeclaration>;
+}
+
 export enum RouterEventType {
   TRIGGER_CLICK = 'triggerclick',
   NAV_START = 'navstart',
@@ -106,6 +142,7 @@ export enum RouterEventType {
 export class Router extends EventEmitter {
   private abortController?: AbortController;
   private animations: RouterAnimation[] = [];
+  private keepViews: HTMLElement[] = [];
   private _route: Route;
   private _outlet: HTMLElement;
   private view: HTMLElement;
@@ -131,12 +168,21 @@ export class Router extends EventEmitter {
     this._outlet = queryEl(this.outletSelector);
     this.view = this.queryView(this._outlet);
     this.unlisten = this.listen();
-    this.trigger = new Trigger(this.triggerSelector, (url, target) => {
-      this.emit(RouterEventType.TRIGGER_CLICK, { url, target });
-      this.to(url);
+    this.trigger = new Trigger(this.triggerSelector, (url, target, type) => {
+      if (type === 'click') {
+        this.emit(RouterEventType.TRIGGER_CLICK, { url, target });
+        this.to(url);
+      } else if (type === 'hover' && config.hoverPreload !== false) {
+        this.preload(url);
+      }
     });
 
     this.viewCache.set(this._route.id, this.view);
+    window.history.replaceState(
+      this._route,
+      '',
+      this._route.url + (this._route.hash || '')
+    );
   }
 
   get route() {
@@ -170,12 +216,12 @@ export class Router extends EventEmitter {
     )[0];
   }
 
-  to(url: string, options?: { replace?: boolean }) {
+  to(url: string, options?: RouteToOptions) {
     const route = createRouteFromPath(url);
     const method = options?.replace ? 'replaceState' : 'pushState';
 
     window.history[method](route, '', route.url + (route.hash || ''));
-    this.navigate(route);
+    this.navigate(route, { flags: options?.flags });
   }
 
   private animateCycle(
@@ -199,7 +245,10 @@ export class Router extends EventEmitter {
     this.animateHook(event, 'leave', timeline, animations);
 
     timeline.call(() => {
-      event.fromElement.remove();
+      if ( ! this.keepViews.includes(event.fromElement)) {
+        event.fromElement.remove();
+      }
+
       this.emit(RouterEventType.AFTER_LEAVE, event);
     });
   }
@@ -240,7 +289,41 @@ export class Router extends EventEmitter {
     }
   }
 
-  async navigate(to: Route, options?: { trigger?: 'user' | 'popstate' }) {
+  async preload(route: Route | string) {
+    if (typeof route === 'string') {
+      route = createRouteFromPath(route);
+    }
+
+    return !!await this.findView(route);
+  }
+
+  async render(route: Route | string, options?: RouterRenderOptions) {
+    if (typeof route === 'string') {
+      route = createRouteFromPath(route);
+    }
+
+    const view = await this.findView(route);
+
+    if (view) {
+      if (options?.keep !== false) {
+        this.keepViews.push(view);
+      }
+
+      if (this.route.id !== route.id) {
+        for (const [prop, style] of Object.entries(options?.style || {})) {
+          view.style[prop as any] = style as any;
+        }
+      }
+
+      this._outlet.append(view);
+
+      return true;
+    }
+
+    return false;
+  }
+
+  async navigate(to: Route, options?: RouteNavigateOptions) {
     if ( ! to) {
       return;
     }
@@ -251,7 +334,8 @@ export class Router extends EventEmitter {
       fromElement: this.view,
       fromRoute: this._route,
       toRoute: to,
-      trigger
+      trigger,
+      flags: options?.flags || {}
     };
 
     if (routesMatch(this._route, to)) {

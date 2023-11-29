@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.7
+
+### Patch Changes
+
+- feat(router): added render, preload + flags
+
 ## 1.2.6
 
 ### Patch Changes

@@ -22,7 +22,7 @@ export const fade = (config: RouterFadeAnimationConfig = {}) => ({
       toElement.style.opacity = '0';
     }
   },
-  enter: ({ fromElement, toElement, fromInDom }) => {
+  enter: ({ fromElement, fromInDom }) => {
     if (fromInDom && fromElement.style.display !== 'none') {
       return tween.to(fromElement, { opacity: 0 }, {
         duration: config.duration || 500,
