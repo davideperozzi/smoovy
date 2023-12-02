@@ -1,5 +1,6 @@
-import { Router, RouterEventType } from '../src/router';
-import { animations } from "@smoovy/router";
+import { animations } from '@smoovy/router';
+
+import { Router } from '../src/router';
 
 const router = new Router();
 

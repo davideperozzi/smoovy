@@ -18,9 +18,9 @@ export function parseRouteHtml(html: string, selector: string) {
   element.innerHTML = html;
 
   const title = element.querySelector('title')?.innerText || '';
-  const outlet = element.querySelector<HTMLElement>(selector);
+  const outlet = element.querySelector<HTMLElement>(selector) || undefined;
 
-  return { element, outlet, title };
+  return { outlet, title };
 }
 
 export function routesMatch(a: Route, b: Route) {
@@ -29,4 +29,10 @@ export function routesMatch(a: Route, b: Route) {
 
 export function generatRouteId(url: BrowserUrl) {
   return window.btoa(`${url.host}${url.pathname}${url.search}${url.hash}`);
+}
+
+export function hrefIsValid(href: string) {
+  return !href.startsWith('tel:') &&
+    !href.startsWith('mailto:') &&
+    !href.startsWith('javascript:');
 }

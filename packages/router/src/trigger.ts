@@ -1,5 +1,6 @@
 import { Unlisten, listen, listenCompose } from "@smoovy/listener";
 import { queryElAll } from "@smoovy/utils";
+import { hrefIsValid } from "./utils";
 
 export class Trigger {
   private listeners = new Map<HTMLElement, Unlisten>();
@@ -39,7 +40,7 @@ export class Trigger {
         if (target && this.callback) {
           const url = target.getAttribute('href') || target.dataset.routeUrl;
 
-          if (url) {
+          if (url && hrefIsValid(url)) {
             this.callback(url, target, 'click');
           }
         }
@@ -50,7 +51,7 @@ export class Trigger {
         if (target && this.callback) {
           const url = target.getAttribute('href') || target.dataset.routeUrl;
 
-          if (url) {
+          if (url && hrefIsValid(url)) {
             this.callback(url, target, 'hover');
           }
         }

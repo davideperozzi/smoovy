@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.8
+
+### Patch Changes
+
+- feat(router): improved view loading
+
 ## 1.2.7
 
 ### Patch Changes

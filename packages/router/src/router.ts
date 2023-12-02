@@ -1,12 +1,14 @@
+import { TimelineItem } from 'packages/tween/src/timeline';
+
+import { EventEmitter } from '@smoovy/emitter';
+import { listen, listenCompose, Unlisten } from '@smoovy/listener';
+import { Timeline, tween, TweenController } from '@smoovy/tween';
 /* eslint-disable lines-between-class-members */
-import { BrowserUrl, isStr, parseUrl, queryEl } from "@smoovy/utils";
-import { Unlisten, listen, listenCompose } from "@smoovy/listener";
-import { Trigger } from "./trigger";
-import { createRouteFromPath, parseRouteHtml, routesMatch } from "./utils";
-import { Route } from "./route";
-import { Timeline, tween, TweenController } from "@smoovy/tween";
-import { EventEmitter } from "@smoovy/emitter";
-import { TimelineItem } from "packages/tween/src/timeline";
+import { BrowserUrl, parseUrl, queryEl } from '@smoovy/utils';
+
+import { Route } from './route';
+import { Trigger } from './trigger';
+import { createRouteFromPath, parseRouteHtml, routesMatch } from './utils';
 
 export interface RouterConfig {
   /**
@@ -139,6 +141,11 @@ export enum RouterEventType {
   AFTER_RELEASE = 'afterrelease'
 }
 
+interface ViewResult {
+  title: string;
+  outlet?: HTMLElement;
+}
+
 export class Router extends EventEmitter {
   private abortController?: AbortController;
   private animations: RouterAnimation[] = [];
@@ -150,7 +157,7 @@ export class Router extends EventEmitter {
   private trigger: Trigger;
   private unlisten: Unlisten;
   private changeStates: RouterChangeState[] = [];
-  private viewCache = new Map<string, HTMLElement>();
+  private viewCache = new Map<string, Promise<ViewResult>>();
   private triggerSelector: string;
   private viewSelector: string;
   private outletSelector: string;
@@ -177,7 +184,11 @@ export class Router extends EventEmitter {
       }
     });
 
-    this.viewCache.set(this._route.id, this.view);
+    this.viewCache.set(this._route.id, Promise.resolve({
+      title: document.title,
+      outlet: this.view
+    }));
+
     window.history.replaceState(
       this._route,
       '',
@@ -302,20 +313,20 @@ export class Router extends EventEmitter {
       route = createRouteFromPath(route);
     }
 
-    const view = await this.findView(route);
+    const { outlet } = await this.findView(route);
 
-    if (view) {
+    if (outlet) {
       if (options?.keep !== false) {
-        this.keepViews.push(view);
+        this.keepViews.push(outlet);
       }
 
       if (this.route.id !== route.id) {
         for (const [prop, style] of Object.entries(options?.style || {})) {
-          view.style[prop as any] = style as any;
+          outlet.style[prop as any] = style as any;
         }
       }
 
-      this._outlet.append(view);
+      this._outlet.append(outlet);
 
       return true;
     }
@@ -397,7 +408,9 @@ export class Router extends EventEmitter {
     this.emit(RouterEventType.NAV_START, event);
     this.animateHook(event, 'start', timeline, animations);
 
-    const toElement = await this.findView(to);
+    const { outlet: toElement, title } = await this.findView(to);
+
+    document.title = title;
 
     for (const swapState of this.changeStates) {
       swapState.timeline?.stop();
@@ -449,28 +462,20 @@ export class Router extends EventEmitter {
     }
   }
 
-  private queryView(outlet: HTMLElement) {
+  private queryView(outlet?: HTMLElement) {
     return queryEl(this.viewSelector, outlet);
   }
 
   async findView(route: Route) {
     if (this.viewCache.has(route.id) && this.config.cache !== false) {
-      return this.viewCache.get(route.id) as HTMLElement;
-    } else {
-      try {
-        const { outlet } = await this.load(route);
-
-        if (outlet) {
-          const view = this.queryView(outlet);
-
-          this.viewCache.set(route.id, view);
-
-          return view;
-        }
-      } catch(err) {
-        console.warn(`Something went wrong when fetching route`, err);
-      }
+      return await this.viewCache.get(route.id) as ViewResult;
     }
+
+    const result = this.load(route);
+
+    this.viewCache.set(route.id, result);
+
+    return await result;
   }
 
   async load(route: Route) {
