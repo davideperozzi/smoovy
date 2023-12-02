@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.23
+
+### Patch Changes
+
+- fix: invalid state removal
+
 ## 1.1.22
 
 ### Patch Changes

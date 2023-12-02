@@ -143,7 +143,7 @@ export class Tween<
       this.resultState = { ...this.originState };
 
       for (const x in this.resultState) {
-        if ( ! Object.hasOwnProperty.call(this.changedState, x)) {
+        if ( ! Object.hasOwnProperty.call(desiredState, x)) {
           delete this.resultState[x];
         }
       }
