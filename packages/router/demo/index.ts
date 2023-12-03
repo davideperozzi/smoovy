@@ -6,9 +6,11 @@ const router = new Router();
 
 router.animate(animations.fade());
 
-router.render('/projects.html', { style: { display: 'none' } });
-router.render('/sample.html',  { style: { display: 'none' } });
-router.render('/', { style: { display: 'none' } });
+setTimeout(() => {
+  router.render('/', { style: { display: 'none' } });
+  router.render('/projects.html', { style: { display: 'none' } });
+  router.render('/sample.html',  { style: { display: 'none' } });
+});
 
 // router.on(RouterEventType.NAV_START, () => { console.log('nav-start') });
 // router.on(RouterEventType.AFTER_ENTER, () => { console.log('after-enter') });

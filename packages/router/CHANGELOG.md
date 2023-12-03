@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.9
+
+### Patch Changes
+
+- fix(router): pre-rendering
+
 ## 1.2.8
 
 ### Patch Changes

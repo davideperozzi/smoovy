@@ -144,6 +144,7 @@ export enum RouterEventType {
 interface ViewResult {
   title: string;
   outlet?: HTMLElement;
+  view?: HTMLElement;
 }
 
 export class Router extends EventEmitter {
@@ -186,7 +187,8 @@ export class Router extends EventEmitter {
 
     this.viewCache.set(this._route.id, Promise.resolve({
       title: document.title,
-      outlet: this.view
+      outlet: this._outlet,
+      view: this.view
     }));
 
     window.history.replaceState(
@@ -256,10 +258,7 @@ export class Router extends EventEmitter {
     this.animateHook(event, 'leave', timeline, animations);
 
     timeline.call(() => {
-      if ( ! this.keepViews.includes(event.fromElement)) {
-        event.fromElement.remove();
-      }
-
+      this.detachView(event.fromElement);
       this.emit(RouterEventType.AFTER_LEAVE, event);
     });
   }
@@ -313,20 +312,20 @@ export class Router extends EventEmitter {
       route = createRouteFromPath(route);
     }
 
-    const { outlet } = await this.findView(route);
+    const { view } = await this.findView(route);
 
-    if (outlet) {
+    if (view) {
       if (options?.keep !== false) {
-        this.keepViews.push(outlet);
+        this.keepViews.push(view);
       }
 
       if (this.route.id !== route.id) {
         for (const [prop, style] of Object.entries(options?.style || {})) {
-          outlet.style[prop as any] = style as any;
+          view.style[prop as any] = style as any;
         }
       }
 
-      this._outlet.append(outlet);
+      this._outlet.append(view);
 
       return true;
     }
@@ -408,7 +407,7 @@ export class Router extends EventEmitter {
     this.emit(RouterEventType.NAV_START, event);
     this.animateHook(event, 'start', timeline, animations);
 
-    const { outlet: toElement, title } = await this.findView(to);
+    const { view: toElement, title } = await this.findView(to);
 
     document.title = title;
 
@@ -446,18 +445,24 @@ export class Router extends EventEmitter {
     return RouterNavResult.SUCESS;
   }
 
+  private detachView(view?: HTMLElement) {
+    if (view) {
+      if ( ! this.keepViews.includes(view)) {
+        view.remove();
+      } else {
+        view.style.display = 'none';
+      }
+    }
+  }
+
   private clearChangeStates(activeElements: HTMLElement[]) {
     for (const changeState of this.changeStates) {
       if ( ! activeElements.includes(changeState.fromElement as HTMLElement)) {
-        if (changeState.fromElement) {
-          changeState.fromElement.remove();
-        }
+        this.detachView(changeState.fromElement);
       }
 
       if ( ! activeElements.includes(changeState.toElement as HTMLElement)) {
-        if (changeState.toElement) {
-          changeState.toElement.remove();
-        }
+        this.detachView(changeState.toElement);
       }
     }
   }
@@ -485,11 +490,14 @@ export class Router extends EventEmitter {
       this.abortController = new AbortController();
     }
 
-    const response = await fetch(route.load, {
-      signal: this.abortController?.signal
-    });
+    const abortSignal = this.abortController?.signal;
+    const response = await fetch(route.load, { signal: abortSignal });
+    const result = parseRouteHtml(await response.text(), this.outletSelector);
 
-    return parseRouteHtml(await response.text(), this.outletSelector);
+    return {
+      ...result,
+      view: result.outlet ? this.queryView(result.outlet) : undefined
+    };
   }
 
   destroy() {
