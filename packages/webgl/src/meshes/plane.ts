@@ -134,6 +134,9 @@ export class GLPlane extends GLMesh {
       });
 
       this.unlistenElement = listenCompose(
+        this.observable.onVisChange(() => {
+          this.observable?.update();
+        }),
         this.observable.onChange(state => {
           this.setSize(state.size);
           this.translate(state.coord);

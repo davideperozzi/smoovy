@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.15
+
+### Patch Changes
+
+- fix(webgl): plane vis change detection + dimension update
+
 ## 1.1.14
 
 ### Patch Changes

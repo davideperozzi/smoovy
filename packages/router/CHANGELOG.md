@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.10
+
+### Patch Changes
+
+- feat(router): exposed current view
+
 ## 1.2.9
 
 ### Patch Changes

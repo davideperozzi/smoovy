@@ -153,7 +153,7 @@ export class Router extends EventEmitter {
   private keepViews: HTMLElement[] = [];
   private _route: Route;
   private _outlet: HTMLElement;
-  private view: HTMLElement;
+  private _view: HTMLElement;
   private baseUrl: BrowserUrl;
   private trigger: Trigger;
   private unlisten: Unlisten;
@@ -174,7 +174,7 @@ export class Router extends EventEmitter {
     this.baseUrl = parseUrl(window.location.href);
     this._route = createRouteFromPath(this.baseUrl);
     this._outlet = queryEl(this.outletSelector);
-    this.view = this.queryView(this._outlet);
+    this._view = this.queryView(this._outlet);
     this.unlisten = this.listen();
     this.trigger = new Trigger(this.triggerSelector, (url, target, type) => {
       if (type === 'click') {
@@ -188,7 +188,7 @@ export class Router extends EventEmitter {
     this.viewCache.set(this._route.id, Promise.resolve({
       title: document.title,
       outlet: this._outlet,
-      view: this.view
+      view: this._view
     }));
 
     window.history.replaceState(
@@ -204,6 +204,10 @@ export class Router extends EventEmitter {
 
   get outlet() {
     return this._outlet;
+  }
+
+  get view() {
+    return this._view;
   }
 
   private listen() {
@@ -426,7 +430,7 @@ export class Router extends EventEmitter {
     changeState.fromElement = fromElement;
     changeState.toElement = toElement;
 
-    this.view = toElement;
+    this._view = toElement;
 
     this.animateCycle(timeline, animations, swapEvent);
     this.trigger.update(toElement);
