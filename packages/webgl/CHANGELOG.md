@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.17
+
+### Patch Changes
+
+- feat(webgl): improved raster util
+
 ## 1.1.16
 
 ### Patch Changes

@@ -1,10 +1,10 @@
 import { Coordinate, Size } from '@smoovy/utils';
 
-type WorkerMessage = MessageEvent<Float32Array>;
+type WorkerMessage = MessageEvent<{ key: number, vertices: Float32Array }>;
 
 function createWorker() {
   const blob = new Blob([
-    `self.onmessage = ({ data: { size, amount, posX, posY } }) => {
+    `self.onmessage = ({ data: { key, size, amount, posX, posY } }) => {
       const sX = size.width / amount.x;
       const sY = size.height / amount.y;
       const vertices = new Float32Array(12 * amount.x * amount.y);
@@ -17,26 +17,26 @@ function createWorker() {
           const x = posX + sX * iX;
 
           vertices.set([
-            // top-left triangle
-            x,       y + sY, // top-left corner     = 0, 1
-            x,       y,      // bottom-left corner  = 0, 0
-            x + sX,  y + sY, // top-right corner    = 1, 1
-            // bottom-right triangle
-            x + sX,  y,      // bottom-right corner = 1, 0
-            x + sX,  y + sY, // top-right corner    = 1, 1
-            x,       y,      // bottom-left corner  = 0, 0
+            x,       y + sY,
+            x,       y,
+            x + sX,  y + sY,
+            x + sX,  y,
+            x + sX,  y + sY,
+            x,       y,
           ], index);
 
           index += 12;
         }
       }
 
-      self.postMessage(vertices);
-    }`
+      self.postMessage({ key, vertices });
+    }`.replace(/(\r\n|\n|\r)/gm, "").replace(/\s+/g, ' ').trim()
   ], { type: 'application/javascript' } );
 
   return new Worker(URL.createObjectURL(blob));
 }
+
+let worker: Worker | null = null;
 
 export async function triangulate(
   amount: Coordinate,
@@ -46,14 +46,17 @@ export async function triangulate(
 ): Promise<Float32Array> {
   return new Promise((resolve) => {
     if (window.Worker) {
-      const worker = createWorker();
-
-      worker.onmessage = (event: WorkerMessage) => {
-        resolve(event.data);
-        worker?.terminate();
+      worker = worker || createWorker();
+      const key = performance.now() + Math.random();
+      const onMsg = (event: WorkerMessage) => {
+        if (event.data.key === key) {
+          resolve(event.data.vertices);
+          worker?.removeEventListener('message', onMsg);
+        }
       };
 
-      worker.postMessage({ amount, size, posX, posY });
+      worker.addEventListener('message', onMsg);
+      worker.postMessage({ key, amount, size, posX, posY });
     } else {
       const sX = size.width / amount.x;
       const sY = size.height / amount.y;
