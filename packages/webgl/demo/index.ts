@@ -114,6 +114,7 @@ pane.controller_.view.element.style.position = 'fixed';
 const dimage = webgl.image({
   source: 'https://picsum.photos/800/600',
   container: 'test',
+  segments: 50,
   x: 500,
   y: 500
 });

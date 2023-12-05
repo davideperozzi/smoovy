@@ -358,8 +358,12 @@ export class GLPlane extends GLMesh {
     return { x: 2, y: 2 };
   }
 
-  public recalc() {
+  async recalc() {
     super.recalc();
+
+    const size = this.clipSize;
+    const buffer = this.buffers.vertCoord;
+    const vertices = await triangulate(this.segments, size, 0, -size.height);
 
     if (this.observable) {
       this.setSize(this.observable.size);
@@ -368,11 +372,6 @@ export class GLPlane extends GLMesh {
       this.translate({ x: this.config.x || 0, y: this.config.y || 0 });
     }
 
-    const size = this.clipSize;
-    const buffer = this.buffers.vertCoord;
-
-    buffer.update(
-      triangulate(this.segments, size, 0, -size.height)
-    );
+    buffer.update(vertices);
   }
 }

@@ -329,8 +329,8 @@ export class GLImage extends GLPlane {
     this.unbindTextures();
   }
 
-  public recalc() {
-    this.buffers.texCoord.update(triangulate(this.segments, uvSize));
+  async recalc() {
+    this.buffers.texCoord.update(await triangulate(this.segments, uvSize));
 
     super.recalc();
   }

@@ -128,7 +128,7 @@ export class GLVideo extends GLPlane {
     }
   }
 
-  public recalc() {
+  async recalc() {
     super.recalc();
 
     if (this.viewport && this.texture) {
@@ -137,7 +137,7 @@ export class GLVideo extends GLPlane {
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
-      this.textCoord.update(triangulate(this.segments, uvSize));
+      this.textCoord.update(await triangulate(this.segments, uvSize));
     }
   }
 }

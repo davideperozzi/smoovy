@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.1.16
+
+### Patch Changes
+
+- feat(webgl): improved rasterization with workers
+
 ## 1.1.15
 
 ### Patch Changes

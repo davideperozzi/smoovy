@@ -104,7 +104,7 @@ export class GLMesh extends EventEmitter {
     }
   }
 
-  public recalc() {
+  async recalc() {
     this.emit(GLMeshEvent.BEFORE_RECALC);
 
     for (const name in this._buffers) {
