@@ -1,208 +1,276 @@
-import { EventEmitter } from '@smoovy/emitter';
-import { Resolver } from '@smoovy/utils';
+import { Coordinate } from '@smoovy/utils';
 
-import { Buffer } from './buffers';
-import { Program, Uniform, UniformType } from './program';
-import { mat4 } from './utils/math';
-import { Viewport } from './viewport';
+import { Camera } from './camera';
+import { mat4 } from './math';
+import { Model } from './model';
+import { Program } from './program';
+import { Texture } from './texture';
+import { UniformType, UniformValue } from './uniform';
 
-export enum GLMeshDrawMode {
-  POINTS = 0,
-  LINES = 1,
-  LINE_STRIP = 2,
-  LINE_LOOP = 3,
-  TRIANGLES = 4,
-  TRIANGLE_STRIP = 5,
-  TRIANGLE_FAN = 6
+export interface MeshConfig {
+  /**
+   * The mode to draw the vertices. This can be one of the following:
+   *
+   * - gl.POINTS
+   * - gl.LINE_STRIP
+   * - gl.LINE_LOOP
+   * - gl.LINES
+   * - gl.TRIANGLE_STRIP
+   * - gl.TRIANGLE_FAN
+   * - gl.TRIANGLES
+   *
+   * Default = gl.TRIANGLES
+   */
+  mode?: number;
+
+  /**
+   * The camera to use for the mesh. This is required if you want to use
+   * the mesh in a scene.
+   */
+  camera: Camera;
+
+  /**
+   * The vertex shader for the program of the mesh
+   */
+  vertex?: string;
+
+  /**
+   * The fragment shader for the program of the mesh
+   */
+  fragment?: string;
+
+  /**
+   * Whether to transform coordinates and sizes from screen to clip space.
+   * This allows you to set pixel values as coordinates and sizes instead
+   * of clip space values. Useful if mapping to the DOM
+   *
+   * @default false
+   */
+  screen?: boolean;
+
+  /**
+   * The uniforms to pass to the shader program. This will be passed as
+   * a uniform with the name of the key. The value will be used as the
+   * value of the uniform.
+   *
+   * @default {}
+   */
+  uniforms?: Record<string, UniformValue>;
+
+  /**
+   * Hint for the autodection of the uniform type. This is useful if you
+   * want to pass a uniform that is ambiguous. This is  only needed if the
+   * uniforms type can't be detected or there's an overlap like mat2 (size = 4)
+   * and vec4 (size = 4). It will not force the type if the type has already
+   * been detected correctly. It will always fallback to the vector float type,
+   * since it's more commonly used
+   *
+   * @default {}
+   */
+  uniformTypes?: Record<string, UniformType>;
+
+  /**
+   * Whether to warn if a uniform is not found. This is useful if you
+   * want to pass uniforms to the shader program that are optional.
+   *
+   * @default {}
+   */
+  uniformOptionals?: Record<string, boolean>;
+
+  /**
+   * The texture to use for the mesh. This can be a single texture or
+   * an object with multiple textures. The key will be used as the
+   * uniform name and the value as the texture.
+   */
+  texture?: Texture | Record<string, Texture>;
+
+  /**
+   * Hide the mesh as long as e.g. a texture is loading
+   *
+   * @default true
+   */
+  hideOnLoad?: boolean;
+
+  /**
+   * The initial translated x-position
+   */
+  x?: number;
+
+  /**
+   * The initial translated y-position
+   */
+  y?: number;
+
+  /**
+   * The initial translated z-position
+   */
+  z?: number;
 }
 
-export enum GLMeshEvent {
-  BEFORE_RECALC = 'beforerecalc',
-  BEFORE_DRAW = 'beforedraw',
-  AFTER_DRAW = 'afterdraw'
-}
+export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
+  private static defaultViewProj = mat4();
+  private disables = new Set<string>();
+  protected rawPosition: Coordinate = { x: 0, y: 0 };
+  protected program: Program;
 
-export interface GLMeshConfig {
-  drawMode?: GLMeshDrawMode;
-  container?: string;
-  uniforms?: { [name: string]: Uniform };
-}
-
-export class GLMesh extends EventEmitter {
-  private animating = false;
-  public disabled = false;
-  protected created = new Resolver();
-  protected program!: Program;
-  protected _buffers: { [name: string]: Buffer } = {};
-  protected _uniforms: { [name: string]: Uniform } = {};
-  public readonly model = mat4();
-
-  public constructor(
-    protected viewport: Viewport,
-    protected config: GLMeshConfig = {}
+  constructor(
+    protected gl: WebGLRenderingContext,
+    protected config: C
   ) {
     super();
 
-    this._uniforms.time = { type: UniformType.FLOAT, value: 0 };
-    this._uniforms.modelViewMatrix = {
-      type: UniformType.MAT4,
-      value: this.model
-    };
-
-    if (config.uniforms) {
-      this._uniforms = Object.assign(this._uniforms, config.uniforms);
+    if ( ! config.vertex || ! config.fragment) {
+      throw new Error('vertex and fragment shader required');
     }
+
+    this.program = new Program(gl, config.vertex, config.fragment);
+
+    this.initTextures();
   }
 
-  public render(time = 0) {
-    if (this.disabled) {
-      return;
-    }
+  private initTextures() {
+    const texture = this.config.texture;
 
-    if (this.animating) {
-      let verticesCount = 0;
+    if (texture) {
+      if (this.config.hideOnLoad !== false) {
+        this.disable('texture');
+      }
 
-      this.program.use();
+      const uploads: Promise<boolean>[] = [];
 
-      // update buffers
-      for (const name in this._buffers) {
-        if (Object.prototype.hasOwnProperty.call(this._buffers, name)) {
-          const buffer = this._buffers[name];
+      if (texture instanceof Texture) {
+        texture.location = this.program.uniform('u_texture');
 
-          if (buffer instanceof Buffer) {
-            verticesCount += this.program.updateAttrib(name, buffer);
-          }
+        uploads.push(texture.uploaded);
+      } else {
+        let slot = 0;
+
+        for (const [k, tex] of Object.entries(texture)) {
+          const key = k.charAt(0).toUpperCase() + k.slice(1);
+          const apx = k.toLowerCase() !== 'default' ? `${key}` : '';
+          const name = `u_texture${apx}`;
+
+          tex.slot = slot++;
+          tex.location = this.program.uniform(name);
+
+          uploads.push(tex.uploaded);
         }
       }
 
-      // update uniforms
-      for (const name in this._uniforms) {
-        if (Object.prototype.hasOwnProperty.call(this._uniforms, name)) {
-          const uniform = this._uniforms[name];
+      if (this.config.hideOnLoad !== false) {
+        Promise.all(uploads).then(() => this.enable('texture'));
+      }
+    }
+  }
 
-          if (name === 'time') {
-            uniform.value = time / 1000;
-          }
+  get disabled() {
+    return this.disables.size > 0;
+  }
 
-          this.program.updateUniform(name, uniform);
+  get mode() {
+    return this.config.mode || this.gl.TRIANGLES;
+  }
+
+  get uniforms() {
+    return this.config.uniforms || {};
+  }
+
+  get camera() {
+    return this.config.camera;
+  }
+
+  get centerX() { return 0; }
+  get centerY() { return 0; }
+  protected screenX(x = 0) { return this.camera.cx(this.centerX + x); }
+  protected screenY(y = 0) { return this.camera.cy(this.centerY + y); }
+
+  set y(y: number) {
+    this.rawPosition.y = y;
+    this.position.y = this.config.screen ? this.screenY(y) : y;
+  }
+
+  get y() { return this.rawPosition.y; }
+
+  set x(x: number) {
+    this.rawPosition.x = x;
+    this.position.x = this.config.screen ? this.screenX(x) : x;
+  }
+
+  get x() { return this.rawPosition.x; }
+
+  updateGeometry() {
+    this.x = this.config.x || 0;
+    this.y = this.config.y || 0;
+    this.z = this.config.z || 0;
+  }
+
+  bind() {
+    this.program.bind();
+  }
+
+  draw(time = 0) {
+    this.updateModel();
+
+    const program = this.program;
+    const camera = this.config.camera;
+    const view = camera?.model || Mesh.defaultViewProj;
+    const proj = camera?.projection || Mesh.defaultViewProj;
+
+    // apply built-in uniforms
+    program.uniform('u_time', time, 'f', false);
+    program.uniform('u_screen', [0, 0], 'v2', false);
+    program.uniform('u_proj', proj, 'm4', false);
+    program.uniform('u_view', view, 'm4', false);
+    program.uniform('u_model', this.model, 'm4', false);
+
+    // apply uniforms defined from outside
+    if (this.config.uniforms) {
+      const uniformTypes = this.config.uniformTypes || {};
+      const uniformOptionals = this.config.uniformOptionals || {};
+
+      for (const [name, value] of Object.entries(this.config.uniforms)) {
+        const type = uniformTypes[name];
+        const warn = !uniformOptionals[name];
+
+        program.uniform(name, value, type, warn);
+      }
+    }
+
+    // bind textures
+    const texture = this.config.texture;
+
+    if (texture) {
+      if (texture instanceof Texture) {
+        texture.bind();
+      } else {
+        for (const tex of Object.values(texture)) {
+          tex.bind();
         }
       }
-
-      const mode = typeof this.config.drawMode !== 'undefined'
-        ? this.config.drawMode
-        : GLMeshDrawMode.TRIANGLES;
-
-      this.beforeDraw();
-      this.emit(GLMeshEvent.BEFORE_DRAW);
-
-      const gl = this.viewport.gl;
-
-      gl.drawArrays(mode, 0, verticesCount);
-
-      this.afterDraw();
-      this.emit(GLMeshEvent.AFTER_DRAW);
-    }
-  }
-
-  async recalc() {
-    this.emit(GLMeshEvent.BEFORE_RECALC);
-
-    for (const name in this._buffers) {
-      if (Object.prototype.hasOwnProperty.call(this._buffers, name)) {
-        this._buffers[name].update();
-      }
-    }
-  }
-
-  public get uniforms() {
-    return this._uniforms;
-  }
-
-  public get buffers() {
-    return this._buffers;
-  }
-
-  public isInsideContainer(name: string) {
-    return this.config.container === name;
-  }
-
-  public updateProjection() {
-    const projection = this.config.container
-      ? this.viewport.getContainerProjection(this.config.container)
-      : this.viewport.projection;
-
-    this._uniforms.projectionMatrix = {
-      type: UniformType.MAT4,
-      value: projection || this.viewport.projection
-    };
-  }
-
-  public create() {
-    this.updateProjection();
-    this.program.create();
-
-    for (const name in this._buffers) {
-      if (Object.prototype.hasOwnProperty.call(this._buffers, name)) {
-        this._buffers[name].create(this.viewport.gl);
-      }
     }
 
-    this.recalc();
-    this.onCreate();
-    this.created.resolve();
-
-    this.animating = true;
-
-    return this;
-  }
-
-  public destroy(viewport: Viewport) {
-    this.animating = false;
-
-    delete this._uniforms.projectionMatrix;
-
-    this.program.destroy(viewport.gl);
-
-    for (const name in this._buffers) {
-      if (Object.prototype.hasOwnProperty.call(this._buffers, name)) {
-        this._buffers[name].destroy(viewport.gl);
-      }
-    }
-
-    this.onDestroy();
-  }
-
-  public uniform(
-    nameOrValues: string | { [name: string]: number[] | number },
-    value?: number[] | number
-  ) {
-    if (typeof nameOrValues === 'object') {
-      for (const name in nameOrValues) {
-        if (Object.prototype.hasOwnProperty.call(nameOrValues, name)) {
-          this.uniform(name, nameOrValues[name]);
-        }
-      }
-
-      return this;
-    }
-
-    let type = UniformType.FLOAT;
-
-    if (value instanceof Array) {
-      switch (value.length) {
-        case 2: type = UniformType.VEC2; break;
-        case 3: type = UniformType.VEC3; break;
-        case 4: type = UniformType.VEC4; break;
-      }
-    }
-
-    this._uniforms[nameOrValues] = { type, value };
-
-    return this;
+    // draw all vertices
+    this.beforeDraw();
+    this.gl.drawArrays(this.mode, 0, this.program.enableAttribs());
+    this.afterDraw();
   }
 
   protected beforeDraw() {}
   protected afterDraw() {}
-  public onCreate() {}
-  public onDestroy() {}
+
+  unbind() {
+    this.program.unbind();
+  }
+
+  disable(ref = '_') {
+    this.disables.add(ref);
+  }
+
+  enable(ref = '_') {
+    this.disables.delete(ref);
+  }
+
+  destroy() {
+    this.program.destroy();
+  }
 }

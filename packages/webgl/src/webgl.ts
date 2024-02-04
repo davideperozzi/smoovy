@@ -2,16 +2,18 @@ import { EventEmitter } from '@smoovy/emitter';
 import { Unlisten } from '@smoovy/listener';
 import { Observable, observe } from '@smoovy/observer';
 import { Ticker, TickerTask } from '@smoovy/ticker';
-import { Coordinate } from '@smoovy/utils';
+import { Size } from '@smoovy/utils';
 
-import { GLMesh } from './mesh';
-import { GLImage, GLImageConfig } from './meshes/image';
-import { GLPlane, GLPlaneConfig } from './meshes/plane';
-import { GLVideo, GLVideoConfig } from './meshes/video';
-import { Viewport, ViewportConfig, ViewportEvent } from './viewport';
-import { Container, ContainerConfig } from './container';
+import { Camera, CameraConfig } from './camera';
+import { Plane, PlaneConfig } from './geometry/plane';
+import { Mesh } from './mesh';
+import { Renderer } from './renderer';
+import {
+  ImageTexture, ImageTextureConfig, VideoTexture, VideoTextureConfig,
+} from './texture';
+import { createCanvas } from './utils';
 
-export interface WebGLConfig extends Partial<ViewportConfig> {
+export interface WebGLConfig extends WebGLContextAttributes {
   /**
    * The canvas element you want to use. If you don't provide the config
    * with an element or selector a new canvas elemnt will be created and
@@ -28,27 +30,52 @@ export interface WebGLConfig extends Partial<ViewportConfig> {
   /**
    * The order of the the ticker task. This is useful if you want to
    * control the order of the tasks. So if you have some values that
-   * need to be calculated in the same frame before the webgl renders
+   * need to be calculated in the same frame before webgl renders
    *
-   * Default = 100
+   * @default 100
    */
   taskOrder?: number;
-
-  /**
-   * Automatically init WebGL on creation. If you disable this, you need
-   * to call `.init()` manually.
-   *
-   * Default = true
-   */
-  autoCreate?: boolean;
 
   /**
    * This will position the canvas element as fixed and always sets its size
    * to the users screen size.
    *
-   * Default = true
+   * @default true
    */
-  fullscreen?: boolean;
+  autoSize?: boolean;
+
+  /**
+   * Global uniforms that will be passed to all meshes. This is useful if
+   * you want to pass some values to all meshes without setting them
+   * manually. You can still override them on each mesh. The values will
+   * be passed to the shader as a uniform with the name of the key.
+   *
+   * @default {}
+   */
+  uniforms?: Record<string, any>;
+
+  /**
+   * The pixel ratio of the canvas. This will be multiplied with the
+   * width and height of the canvas.
+   *
+   * @default 1
+   */
+  dpr?: number;
+
+  /**
+   * The clear color of the canvas. This will be set on the first render
+   * call.
+   *
+   * @default [0, 0, 0]
+   */
+  color?: [number, number, number];
+
+  /**
+   * Config for the main camera
+   *
+   * @default { posZ: -3, fov: 45, near: 0.1, far: 100  }
+   */
+  camera?: Partial<CameraConfig>;
 }
 
 export enum WebGLEvent {
@@ -57,35 +84,62 @@ export enum WebGLEvent {
 }
 
 export class WebGL extends EventEmitter {
-  public ticking = true;
-  protected meshes: GLMesh[] = [];
-  protected viewport: Viewport;
+  readonly renderer: Renderer;
+  protected readonly meshes: Mesh[] = [];
+  protected canvas: HTMLCanvasElement;
   protected observable: Observable<Window>;
   protected ticker: Ticker;
   protected task?: TickerTask;
-  private unlistenResize?: Unlisten;
-  private paused = false;
-  private startTime = 0;
-  private pauseTime = 0;
-  private pauseStart = 0;
+  private config: WebGLConfig;
+  private context: WebGLRenderingContext;
+  private unlisten?: Unlisten;
+  private lastSize: Size = { width: 0, height: 0 };
 
-  constructor(
-    protected config: WebGLConfig = {}
-  ) {
+  constructor(config: WebGLConfig = {}) {
     super();
 
-    this.ticker = config.ticker || Ticker.main;
-    this.viewport = new Viewport(this.initCanvas(config.canvas), config);
-    this.observable = observe(window, { resizeDetection: true });
+    this.config = {
+      color: [ 0, 0, 0 ],
+      alpha: true,
+      antialias: true,
+      premultipliedAlpha: true,
+      dpr: 1,
+      depth: true,
+      ...config
+    } as WebGLConfig;
 
-    if (config.autoCreate !== false) {
-      this.create();
-    }
+    this.ticker = config.ticker || Ticker.main;
+    this.canvas = createCanvas(config.canvas);
+    this.observable = observe(window, { resizeDetection: true });
+    this.context = (
+      this.canvas.getContext('webgl2', config) ||
+      this.canvas.getContext('webgl', config) ||
+      this.canvas.getContext('webgl-experimental', config)
+    ) as WebGLRenderingContext;
+    this.renderer = new Renderer(
+      this.context,
+      this.meshes,
+      this.config.ticker,
+      this.config.taskOrder,
+      this.config.camera,
+      this.observable.size
+    );
+
+    this.init();
+    this.start();
   }
 
-  create() {
-    if (this.config.fullscreen !== false) {
-      const style = this.viewport.element.style;
+  get uniforms() {
+    return this.config.uniforms || {};
+  }
+
+  get ctx() {
+    return this.context;
+  }
+
+  init() {
+    if (this.config.autoSize !== false) {
+      const style = this.canvas.style;
       const size = this.observable.size;
 
       style.pointerEvents = 'none';
@@ -95,183 +149,88 @@ export class WebGL extends EventEmitter {
 
       this.setSize(size.width, size.height);
 
-      this.unlistenResize = this.observable.onChange(state => {
+      this.unlisten = this.observable.onChange(state => {
         this.setSize(state.width, state.height);
       });
     }
+  }
 
-    this.viewport.on(ViewportEvent.RESIZE, () => this.recalc());
-    this.viewport.attach();
+  start() {
+    const gl = this.context;
+    const color = this.config.color || [0, 0, 0];
+    const alpha = this.config.alpha;
 
-    const taskOrder = this.config.taskOrder !== undefined
-      ? this.config.taskOrder
-      : 100;
+    gl.enable(gl.BLEND);
+    gl.enable(gl.CULL_FACE);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.clearColor(color[0], color[1], color[2], alpha ? 0 : 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
-    this.startTime = Ticker.now();
-    this.task = this.ticker.add((delta, time) => {
-      if (this.ticking) {
-        this.render(time);
-      }
-    }, taskOrder);
+    this.renderer.start();
+  }
+
+  setSize(width: number, height: number) {
+    if (this.lastSize.width === width && this.lastSize.height === height) {
+      return;
+    }
+
+    this.canvas.style.width = `${width}px`;
+    this.canvas.style.height = `${height}px`;
+    this.lastSize.width = width;
+    this.lastSize.height = height;
+
+    this.renderer.resize(width, height, this.config.dpr || 1);
+  }
+
+  remove(mesh: Mesh) {
+    const index = this.meshes.indexOf(mesh);
+
+    if (index > -1) {
+      this.meshes.splice(index, 1).forEach(m => m.destroy());
+    }
+
+    return this;
+  }
+
+  plane(config: Partial<PlaneConfig> = {}) {
+    const plane = new Plane(this.context, {
+      camera: this.renderer.camera,
+      ...config
+    });
+
+    this.meshes.push(plane);
+
+    return plane;
+  }
+
+  camera(name: string, config?: Partial<CameraConfig>) {
+    if ( ! config) {
+      return this.renderer.getCamera(name);
+    }
+
+    return this.renderer.addCamera(
+      name,
+      new Camera(config, this.observable.size)
+    );
+  }
+
+  image(config: ImageTextureConfig) {
+    return new ImageTexture(this.context, config);
+  }
+
+  video(config: VideoTextureConfig) {
+    return new VideoTexture(this.context, config);
   }
 
   destroy() {
-    if (this.unlistenResize) {
-      this.unlistenResize();
-      delete this.unlistenResize;
+    if (this.unlisten) {
+      this.unlisten();
+      delete this.unlisten;
     }
 
     if (this.task) {
       this.task.kill();
       delete this.task;
     }
-  }
-
-  private initCanvas(canvas?: HTMLCanvasElement | string) {
-    if (canvas instanceof HTMLCanvasElement) {
-      return canvas;
-    }
-
-    if (typeof canvas === 'string') {
-      return document.querySelector(canvas) as HTMLCanvasElement;
-    }
-
-    const newCanvas = document.createElement('canvas');
-
-    document.body.prepend(newCanvas);
-
-    return newCanvas;
-  }
-
-  get vp() {
-    return this.viewport;
-  }
-
-  get gl() {
-    return this.viewport.gl;
-  }
-
-  setSize(width: number, height: number) {
-    this.viewport.setSize(width, height);
-  }
-
-  clipSpaceX(x: number) {
-    return this.viewport.getClipSpaceX(x);
-  }
-
-  clipSpaceY(y: number) {
-    return this.viewport.getClipSpaceY(y);
-  }
-
-  clipSpaceW(width: number) {
-    return this.viewport.getClipSpaceWidth(width);
-  }
-
-  clipSpaceH(height: number) {
-    return this.viewport.getClipSpaceHeight(height);
-  }
-
-  scrollTo(pos: Partial<Coordinate>) {
-    this.viewport.scrollTo(pos);
-  }
-
-  recalc() {
-    for (let i = 0, len = this.meshes.length; i < len; i++) {
-      this.meshes[i].recalc();
-    }
-  }
-
-  pause(paused = true, track = true) {
-    if (paused === this.paused) {
-      return;
-    }
-
-    this.paused = paused;
-
-    if (track) {
-      if (paused) {
-        this.pauseStart = Ticker.now();
-      } else if (this.pauseStart > 0) {
-        this.pauseTime += Ticker.now() - this.pauseStart;
-        this.pauseStart = 0;
-      }
-    }
-  }
-
-  add(...meshes: GLMesh[]) {
-    meshes.forEach(mesh => this.meshes.push(mesh.create()));
-
-    return this;
-  }
-
-  remove(mesh: GLMesh) {
-    const index = this.meshes.indexOf(mesh);
-
-    if (index > -1) {
-      this.meshes.splice(index, 1).forEach(m => m.destroy(this.viewport));
-    }
-
-    return this;
-  }
-
-  render(now = Ticker.now()) {
-    const time = now - this.pauseTime - this.startTime;
-
-    if (this.paused) {
-      return;
-    }
-
-    this.meshes = this.meshes.sort((a, b) => b.model[14] - a.model[14]);
-
-    const enabledMeshes = this.meshes.filter(mesh => !mesh.disabled);
-
-    if (enabledMeshes.length > 0) {
-      this.emit(WebGLEvent.BEFORE_RENDER, time);
-      this.viewport.render();
-
-      for (let i = 0, len = enabledMeshes.length; i < len; i++) {
-        enabledMeshes[i].render(time);
-      }
-
-      this.emit(WebGLEvent.AFTER_RENDER, time);
-    }
-  }
-
-  private createMesh<T, C>(Clazz: any, config: C, cb?: (mesh: T) => void): T {
-    const mesh = new Clazz(this.viewport, config);
-
-    if (typeof cb === 'function') {
-      cb(mesh);
-    }
-
-    this.add(mesh);
-
-    return mesh;
-  }
-
-  plane(config: GLPlaneConfig, cb?: (plane: GLPlane) => void) {
-    return this.createMesh(GLPlane, config, cb);
-  }
-
-  video(config: GLVideoConfig, cb?: (video: GLVideo) => void) {
-    return this.createMesh(GLVideo, config, cb);
-  }
-
-  image(config: GLImageConfig, cb?: (image: GLImage) => void) {
-    return this.createMesh(GLImage, config, cb);
-  }
-
-  container(config: Partial<ContainerConfig> & { name: string }) {
-    const container = this.viewport.createContainer(config);
-
-    this.meshes.filter(m => m.isInsideContainer(config.name)).forEach(m => {
-      m.updateProjection();
-    });
-
-    return container;
-  }
-
-  getContainer(name: string) {
-    return this.viewport.getContainer(name);
   }
 }

@@ -2,11 +2,11 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "./src",
+    "rootDir": "old_src",
     "composite": true
   },
   "include": [
-    "src/**/*"
+    "old_src/**/*"
   ],
   "references": [
     { "path": "../emitter" },

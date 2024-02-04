@@ -15,6 +15,7 @@
     "no-use-before-define": "off",
     "no-useless-constructor": "off",
     "n/no-callback-literal": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-empty-function": "off"
   },
   "plugins": ["@typescript-eslint"],
