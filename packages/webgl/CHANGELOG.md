@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.2.3
+
+### Patch Changes
+
+- fix(webgl): useless deps
+
 ## 1.2.2
 
 ### Patch Changes
