@@ -1,5 +1,17 @@
 # @smoovy/webgl
 
+## 1.2.1
+
+### Patch Changes
+
+- update build
+
+## 1.2.0
+
+### Minor Changes
+
+- feat(webgl): refactor -> simplified
+
 ## 1.1.17
 
 ### Patch Changes
