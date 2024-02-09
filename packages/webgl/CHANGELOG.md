@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.2.2
+
+### Patch Changes
+
+- feat(webgl): fixed typescript definitions
+
 ## 1.2.1
 
 ### Patch Changes
