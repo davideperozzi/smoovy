@@ -1,4 +1,4 @@
-import type { Coordinate } from '@smoovy/utils';
+import { Coordinate, mapRange } from '@smoovy/utils';
 
 import { Mesh, MeshConfig } from '../mesh';
 import colorShader from '../shaders/color.glsl';
@@ -18,15 +18,16 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
     protected gl: WebGLRenderingContext,
     config: C
   ) {
+    const uniforms = config.uniforms || {};
+
+    uniforms.u_color = [ 1, 0, 0, 1 ];
+    uniforms.u_alpha = 1;
+
     super(gl, {
       vertex: config.texture ? textureShader.vertex : colorShader.vertex,
       fragment: config.texture ? textureShader.fragment : colorShader.fragment,
       ...config,
-      uniforms: {
-        u_color: [ 1, 0, 0, 1 ],
-        u_alpha: 1,
-        ...(config.uniforms || {}),
-      },
+      uniforms,
       uniformOptionals: {
         u_color: true,
         u_alpha: true,
@@ -58,11 +59,18 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   }
 
   get centerX() {
-    return (this.config.width || 0) * this.originX;
+    const { screen, width } = this.config;
+    let origin = mapRange(this.originX, 0, 1, -0.5, 0.5);
+
+    if (screen) {
+      origin *= -1;
+    }
+
+    return (width || 0) * origin;
   }
 
   get centerY() {
-    return (this.config.height || 0) * this.originY;
+    return (this.config.height || 0) * mapRange(this.originY, 0, 1, 0.5, -0.5);
   }
 
   get density() {
@@ -74,9 +82,11 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   }
 
   set width(width: number) {
-    this.config.width = width;
+    if (this.config.width !== width) {
+      this.config.width = width;
 
-    this.updateGeometry();
+      this.updateGeometry();
+    }
   }
 
   get width() {
@@ -90,9 +100,11 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   }
 
   set height(height: number) {
-    this.config.height = height;
+    if (this.config.height !== height) {
+      this.config.height = height;
 
-    this.updateGeometry();
+      this.updateGeometry();
+    }
   }
 
   get height() {
@@ -106,13 +118,26 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   }
 
   private scaleVertices(verts: Float32Array, width: number, height: number) {
-    for (let i = 0, len = verts.length; i < len; i += 12) {
+    for (let i = 0, len = verts.length; i < len; i += 18) {
       verts[i] *= width; verts[i + 1] *= height;
-      verts[i + 2] *= width; verts[i + 3] *= height;
-      verts[i + 4] *= width; verts[i + 5] *= height;
+      verts[i + 3] *= width; verts[i + 4] *= height;
       verts[i + 6] *= width; verts[i + 7] *= height;
-      verts[i + 8] *= width; verts[i + 9] *= height;
-      verts[i + 10] *= width; verts[i + 11] *= height;
+      verts[i + 9] *= width; verts[i + 10] *= height;
+      verts[i + 12] *= width; verts[i + 13] *= height;
+      verts[i + 15] *= width; verts[i + 16] *= height;
+    }
+
+    return verts;
+  }
+
+  private parseNormals(verts: Float32Array) {
+    for (let i = 0, len = verts.length; i < len; i += 18) {
+      verts[i] = 0; verts[i + 1] = 0; verts[i + 2] = 1;
+      verts[i + 3] = 0; verts[i + 4] = 0; verts[i + 5] = 1;
+      verts[i + 6] = 0; verts[i + 7] = 0; verts[i + 8] = 1;
+      verts[i + 9] = 0; verts[i + 10] = 0; verts[i + 11] = 1;
+      verts[i + 12] = 0; verts[i + 13] = 0; verts[i + 14] = 1;
+      verts[i + 15] = 0; verts[i + 16] = 0; verts[i + 17] = 1;
     }
 
     return verts;
@@ -121,19 +146,16 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   updateGeometry() {
     super.updateGeometry();
 
-    this.program.attribute(
-      'a_position',
-      this.scaleVertices(triangulate(this.density), this.width, this.height),
-      2
-    );
+    const program = this.program;
+    const vertices = triangulate(this.density);
+    const positions = this.scaleVertices(vertices, this.width, this.height);
+    const normals = this.parseNormals(new Float32Array(vertices));
+
+    program.attribute('a_position', positions, 3);
+    program.attribute('a_normal', normals, 3, 0);
 
     if (this.config.texture) {
-      this.program.attribute(
-        'a_texcoord',
-        triangulate(this.density, false),
-        2,
-        0
-      );
+      program.attribute('a_texcoord', triangulate(this.density, false), 3, 0);
     }
   }
 

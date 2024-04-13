@@ -1,7 +1,6 @@
-import { Coordinate } from '@smoovy/utils';
-
+import { isNum } from '@smoovy/utils/dist';
 import { Camera } from './camera';
-import { mat4 } from './math';
+import { mat4, Vec2 } from './math';
 import { Model } from './model';
 import { Program } from './program';
 import { Texture } from './texture';
@@ -110,7 +109,8 @@ export interface MeshConfig {
 export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
   private static defaultViewProj = mat4();
   private disables = new Set<string>();
-  protected rawPosition: Coordinate = { x: 0, y: 0 };
+  private screenPosition: Partial<Vec2> = {};
+  protected rawPosition: Vec2 = { x: 0, y: 0 };
   protected program: Program;
 
   constructor(
@@ -123,6 +123,9 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
       throw new Error('vertex and fragment shader required');
     }
 
+    this.x = config.x || 0;
+    this.y = config.y || 0;
+    this.z = config.z || 0;
     this.program = new Program(gl, config.vertex, config.fragment);
 
     this.initTextures();
@@ -181,31 +184,75 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
 
   get centerX() { return 0; }
   get centerY() { return 0; }
-  protected screenX(x = 0) { return this.camera.cx(this.centerX + x); }
-  protected screenY(y = 0) { return this.camera.cy(this.centerY + y); }
+
+  protected screenX(x = 0) {
+    return this.camera.cx(x, this.z) + this.camera.cw(this.centerX);
+  }
+
+  protected screenY(y = 0) {
+    return this.camera.cy(y, this.z) - this.camera.ch(this.centerY);
+  }
 
   set y(y: number) {
     this.rawPosition.y = y;
-    this.position.y = this.config.screen ? this.screenY(y) : y;
+
+    if (this.config.screen) {
+      this.screenPosition.y = y;
+      this.config.y = y;
+    } else {
+      this.position.y = y - this.centerY;
+      this.config.y = y - this.centerY;
+    }
   }
 
   get y() { return this.rawPosition.y; }
 
   set x(x: number) {
     this.rawPosition.x = x;
-    this.position.x = this.config.screen ? this.screenX(x) : x;
+
+    if (this.config.screen) {
+      this.screenPosition.x = x;
+      this.config.x = x;
+    } else {
+      this.position.x = x - this.centerX;
+      this.config.x = this.position.x;
+    }
   }
 
   get x() { return this.rawPosition.x; }
 
-  updateGeometry() {
-    this.x = this.config.x || 0;
-    this.y = this.config.y || 0;
-    this.z = this.config.z || 0;
-  }
+  updateGeometry() {}
 
   bind() {
     this.program.bind();
+  }
+
+  updateModel() {
+    // In order to save performance, we're updating the screen position with a delay.
+    // This allows us to control when the screen position gets calculated.
+    //
+    // Since the calculation of `screenX` or `screenY` depend on the z position,
+    // we're "postponing" the calculation, so the user doesn't have to care about
+    // the order he's setting the position.
+    //
+    // Downside: The position is then synced to the render queue
+    if (this.config.screen) {
+      const { x, y } = this.screenPosition;
+
+      if (isNum(x)) {
+        this.position.x = this.screenX(x);
+
+        delete this.screenPosition.x;
+      }
+
+      if (isNum(y)) {
+        this.position.y = this.screenY(y);
+
+        delete this.screenPosition.y;
+      }
+    }
+
+    super.updateModel();
   }
 
   draw(time = 0) {
@@ -218,7 +265,7 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
 
     // apply built-in uniforms
     program.uniform('u_time', time, 'f', false);
-    program.uniform('u_screen', [0, 0], 'v2', false);
+    program.uniform('u_res', camera.view, 'v2', false);
     program.uniform('u_proj', proj, 'm4', false);
     program.uniform('u_view', view, 'm4', false);
     program.uniform('u_model', this.model, 'm4', false);
@@ -263,11 +310,17 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
   }
 
   disable(ref = '_') {
-    this.disables.add(ref);
+    if ( ! this.disables.has(ref)) {
+      this.disables.add(ref);
+    }
   }
 
-  enable(ref = '_') {
-    this.disables.delete(ref);
+  enable(ref = '_', enabled = true) {
+    if (enabled) {
+      this.disables.delete(ref);
+    } else {
+      this.disable(ref);
+    }
   }
 
   destroy() {

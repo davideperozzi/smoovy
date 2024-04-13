@@ -32,15 +32,19 @@ export class Camera extends Model {
   /** Transforms pixel coordianate to clip space coordinate */
   cw(width: number) { return (width / this.view.width) * this.size.width; }
   ch(height: number) { return (height / this.view.height) * this.size.height; }
-  cx(x: number) {
-    const width = this.size.width * .5;
+  cx(x: number, z = 0) {
+    const fov = this.config.fov * Math.PI / 180;
+    const aspect = this.view.width / this.view.height;
+    const height = 2 * Math.tan(fov / 2) * Math.abs(this.position.z + z);
+    const width = height * aspect * .5;
     const value = (x / this.view.width) * 2 - 1;
 
     return mapRange(value, -1, 1, -width, width);
   }
 
-  cy(y: number) {
-    const height = this.size.height * .5;
+  cy(y: number, z = 0) {
+    const fov = this.config.fov * Math.PI / 180;
+    const height = 2 * Math.tan(fov / 2) * Math.abs(this.position.z + z) * .5;
     const value = (y / this.view.height * -1) * 2 + 1;
 
     return mapRange(value, -1, 1, -height, height);

@@ -73,8 +73,8 @@ export class Renderer {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    for (const cmaera of Object.values(this.cameras)) {
-      cmaera.draw();
+    for (const camera of Object.values(this.cameras)) {
+      camera.draw();
     }
 
     for (const mesh of this.meshes.filter(m => !m.disabled)) {

@@ -1,6 +1,6 @@
 import { Coordinate, isObj } from '@smoovy/utils';
 
-import { Color, UniformType, UniformValue } from './uniform';
+import { Color, Size, UniformType, UniformValue } from './uniform';
 
 export function createCanvas(canvas?: HTMLCanvasElement | string) {
   if (canvas instanceof HTMLCanvasElement) {
@@ -61,6 +61,10 @@ export function uniformValue(value: UniformValue) {
       }
 
       return newValue;
+    } else if ('width' in value && 'height' in value) {
+      const oldValue = value as Size;
+
+      return [ oldValue.width, oldValue.height ];
     } else if ('r' in value && 'g' in value && 'b' in value) {
       const oldValue = value as Partial<Color>;
       const newValue = [ oldValue.r || 0, oldValue.g || 0, oldValue.b || 0 ];
@@ -116,7 +120,7 @@ export function triangulate(density: Coordinate, center = true, cache = true) {
   const pY = center ? -h * .5 : 0;
   const sX = w / density.x;
   const sY = h / density.y;
-  const vertices = new Float32Array(12 * density.x * density.y);
+  const vertices = new Float32Array(18 * density.x * density.y);
   let index = 0;
 
   for (let iY = 0; iY < density.y; iY++) {
@@ -127,16 +131,16 @@ export function triangulate(density: Coordinate, center = true, cache = true) {
 
       vertices.set([
         // top-left poly
-        x,       y + sY, // top-left corner     = 0, 1
-        x,       y,      // bottom-left corner  = 0, 0
-        x + sX,  y + sY, // top-right corner    = 1, 1
+        x,       y + sY, 0, // top-left corner     = 0, 1, 0
+        x,       y,      0, // bottom-left corner  = 0, 0, 0
+        x + sX,  y + sY, 0, // top-right corner    = 1, 1, 0
         // bottom-right poly
-        x + sX,  y,      // bottom-right corner = 1, 0
-        x + sX,  y + sY, // top-right corner    = 1, 1
-        x,       y,      // bottom-left corner  = 0, 0
+        x + sX,  y,      0, // bottom-right corner = 1, 0, 0
+        x + sX,  y + sY, 0, // top-right corner    = 1, 1, 0
+        x,       y,      0, // bottom-left corner  = 0, 0, 0
       ], index);
 
-      index += 12;
+      index += 18;
     }
   }
 

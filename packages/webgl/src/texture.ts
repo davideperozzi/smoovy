@@ -10,6 +10,7 @@ export interface TextureConfig {
 
 export interface ImageTextureConfig extends TextureConfig {
   src: string;
+  load?: boolean;
 }
 
 export interface VideoTextureConfig extends TextureConfig {
@@ -19,7 +20,7 @@ export interface VideoTextureConfig extends TextureConfig {
 export type FramebufferTextureConfig = TextureConfig;
 
 export class TextureMediaLoader {
-  private static images = new Map<string, Promise<HTMLImageElement>>();
+  static readonly images = new Map<string, Promise<HTMLImageElement>>();
 
   static load(source: string) {
     const cache = TextureMediaLoader.images;
@@ -101,7 +102,13 @@ export class ImageTexture extends Texture<ImageTextureConfig> {
   ) {
     super(gl, config);
 
-    TextureMediaLoader.load(config.src).then((image) => {
+    if (config.load !== false) {
+      this.load();
+    }
+  }
+
+  load() {
+    TextureMediaLoader.load(this.config.src).then((image) => {
       this.upload(image);
     });
   }

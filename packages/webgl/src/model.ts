@@ -4,8 +4,8 @@ export class Model {
   readonly position: Vec3 = Object.seal({ x: 0, y: 0, z: 0 });
   readonly rotation: Vec3 = Object.seal({ x: 0, y: 0, z: 0 });
   readonly scaling: Vec3 = Object.seal({ x: 1, y: 1, z: 1 });
-  protected _model: Mat4 = mat4();
   protected quaternion: Vec4 = Object.seal({ x: 0, y: 0, z: 0, w: 1 });
+  protected _model: Mat4 = mat4();
   protected state = 3;
 
   set x(x: number) { this.position.x = x; }
@@ -42,6 +42,8 @@ export class Model {
     this.updateModelState();
 
     if (prevState !== this.state) {
+      this.modelWillUpdate();
+
       mat4srqt(
         this._model,
         this.scaling,
@@ -50,4 +52,6 @@ export class Model {
       );
     }
   }
+
+  protected modelWillUpdate() {}
 }
