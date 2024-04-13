@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.2.5
+
+### Patch Changes
+
+- fix(webgl): invalid import
+
 ## 1.2.4
 
 ### Patch Changes
