@@ -1,4 +1,4 @@
-import { isNum } from '@smoovy/utils/dist';
+import { isNum } from '@smoovy/utils';
 import { Camera } from './camera';
 import { mat4, Vec2 } from './math';
 import { Model } from './model';

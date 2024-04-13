@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.2.4
+
+### Patch Changes
+
+- feat(webgl): improved uniform handling
+
 ## 1.2.3
 
 ### Patch Changes
