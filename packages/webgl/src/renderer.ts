@@ -3,6 +3,7 @@ import { Size } from '@smoovy/utils';
 
 import { Camera, CameraConfig } from './camera';
 import { Mesh } from './mesh';
+import { UniformValue } from './uniform';
 
 export class Renderer {
   private _resize?: Size;
@@ -14,7 +15,8 @@ export class Renderer {
     private ticker = Ticker.main,
     private order = 100,
     camera?: Partial<CameraConfig>,
-    initialSize: Size = { width: 0, height: 0 }
+    initialSize: Size = { width: 0, height: 0 },
+    private uniforms?: Record<string, UniformValue>
   ) {
     this.cameras.main = new Camera(camera, initialSize);
   }
@@ -79,7 +81,7 @@ export class Renderer {
 
     for (const mesh of this.meshes.filter(m => !m.disabled)) {
       mesh.bind();
-      mesh.draw(time);
+      mesh.draw(time, this.uniforms);
       mesh.unbind();
     }
   }

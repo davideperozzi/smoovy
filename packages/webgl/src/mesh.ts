@@ -1,4 +1,5 @@
 import { isNum } from '@smoovy/utils';
+import { unwatchFile } from 'fs';
 import { Camera } from './camera';
 import { mat4, Vec2 } from './math';
 import { Model } from './model';
@@ -255,7 +256,7 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     super.updateModel();
   }
 
-  draw(time = 0) {
+  draw(time = 0, uniforms: Record<string, UniformValue> = {}) {
     this.updateModel();
 
     const program = this.program;
@@ -271,11 +272,13 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     program.uniform('u_model', this.model, 'm4', false);
 
     // apply uniforms defined from outside
-    if (this.config.uniforms) {
+    uniforms = { ...uniforms, ...this.config.uniforms };
+
+    if (uniforms) {
       const uniformTypes = this.config.uniformTypes || {};
       const uniformOptionals = this.config.uniformOptionals || {};
 
-      for (const [name, value] of Object.entries(this.config.uniforms)) {
+      for (const [name, value] of Object.entries(uniforms)) {
         const type = uniformTypes[name];
         const warn = !uniformOptionals[name];
 

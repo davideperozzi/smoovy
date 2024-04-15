@@ -122,7 +122,8 @@ export class WebGL extends EventEmitter {
       this.config.ticker,
       this.config.taskOrder,
       this.config.camera,
-      this.observable.size
+      this.observable.size,
+      this.config.uniforms
     );
 
     this.init();

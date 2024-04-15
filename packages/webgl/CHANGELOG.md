@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.2.6
+
+### Patch Changes
+
+- feat(webgl): added global uniforms
+
 ## 1.2.5
 
 ### Patch Changes

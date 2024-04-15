@@ -1,10 +1,10 @@
-import { WebGL } from '../src';
+import { WebGL } from '../src/index';
 import { mapRange } from '../../utils/src/math.ts';
 import lightVertex from './shaders/light.vert.glsl';
 import lightFragment from './shaders/light.frag.glsl';
 
 const src = '/1000x1000.jpg';
-const gl = new WebGL();
+const gl = new WebGL({ uniforms: { u_color1: [0, 1, 0, 1] }  });
 const camera = gl.renderer.camera;
 
 gl.ctx.disable(gl.ctx.CULL_FACE);

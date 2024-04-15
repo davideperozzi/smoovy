@@ -1,12 +1,8 @@
 {
   "name": "@smoovy/webgl",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Easier WebGL animations for websites",
-  "main": "dist/bundles/index.js",
-  "module": "dist/bundles/index.esm.js",
-  "unpkg": "dist/bundles/index.umd.js",
-  "source": "src/index.ts",
-  "types": "dist/typings/index.d.ts",
+  "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
   "repository": "https://github.com/davideperozzi/smoovy",
   "publishConfig": {

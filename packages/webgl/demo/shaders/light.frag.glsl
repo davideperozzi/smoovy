@@ -4,6 +4,7 @@ precision mediump float;
 in vec3 v_normal;
 out vec4 fragColor;
 uniform vec4 u_color;
+uniform vec4 u_color1;
 uniform vec3 u_light;
 
 void main() {
@@ -11,6 +12,6 @@ void main() {
   vec3 light = normalize(u_light);
   float intensity = dot(normal, light);
 
-  fragColor = u_color;
+  fragColor = u_color1;
   fragColor.rgb *= intensity;
 }
