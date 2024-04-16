@@ -34,6 +34,8 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
         ...(config.uniformOptionals || {}),
       }
     });
+
+    this.updateGeometry();
   }
 
   set originX(origin: number) {

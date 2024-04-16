@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.2.8
+
+### Patch Changes
+
+- feat(webgl): simplified texture binding
+
 ## 1.2.7
 
 ### Patch Changes

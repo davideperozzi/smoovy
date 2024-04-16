@@ -46,8 +46,6 @@ export class TextureMediaLoader {
 }
 
 export class Texture<C extends TextureConfig = TextureConfig> {
-  slot = 0;
-  location?: WebGLUniformLocation;
   protected texture: WebGLTexture;
   protected resolver = new Resolver<boolean>();
 
@@ -58,14 +56,22 @@ export class Texture<C extends TextureConfig = TextureConfig> {
     this.texture = gl.createTexture()!;
   }
 
-  bind() {
+  bind(slot = 0, location?: WebGLUniformLocation) {
     const gl = this.gl;
 
-    if (this.location) {
-      gl.activeTexture(gl.TEXTURE0 + this.slot);
-      gl.bindTexture(gl.TEXTURE_2D, this.texture);
-      gl.uniform1i(this.location, this.slot);
+    gl.activeTexture(gl.TEXTURE0 + slot);
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+    if (location) {
+      gl.uniform1i(location, slot);
     }
+  }
+
+  unbind(slot = 0) {
+     const gl = this.gl;
+
+    gl.activeTexture(gl.TEXTURE0 + slot);
+    gl.bindTexture(gl.TEXTURE_2D, null);
   }
 
   upload(data: any) {

@@ -111,6 +111,7 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
   private static defaultViewProj = mat4();
   private disables = new Set<string>();
   private screenPosition: Partial<Vec2> = {};
+  private textures = new Map<Texture, [WebGLUniformLocation, number]>();
   protected rawPosition: Vec2 = { x: 0, y: 0 };
   protected program: Program;
 
@@ -143,8 +144,8 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
       const uploads: Promise<boolean>[] = [];
 
       if (texture instanceof Texture) {
-        texture.location = this.program.uniform('u_texture');
-
+        //texture.location = this.program.uniform('u_texture');
+        this.textures.set(texture, [this.program.uniform('u_texture'), 0]);
         uploads.push(texture.uploaded);
       } else {
         let slot = 0;
@@ -154,9 +155,10 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
           const apx = k.toLowerCase() !== 'default' ? `${key}` : '';
           const name = `u_texture${apx}`;
 
-          tex.slot = slot++;
-          tex.location = this.program.uniform(name);
+          //tex.slot = slot++;
+          //tex.location = this.program.uniform(name);
 
+          this.textures.set(tex, [this.program.uniform(name), slot++]);
           uploads.push(tex.uploaded);
         }
       }
@@ -287,16 +289,8 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     }
 
     // bind textures
-    const texture = this.config.texture;
-
-    if (texture) {
-      if (texture instanceof Texture) {
-        texture.bind();
-      } else {
-        for (const tex of Object.values(texture)) {
-          tex.bind();
-        }
-      }
+    for (const [texture, [ location, slot ]] of this.textures) {
+      texture.bind(slot, location);
     }
 
     // draw all vertices
