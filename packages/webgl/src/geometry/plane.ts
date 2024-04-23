@@ -20,8 +20,13 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   ) {
     const uniforms = config.uniforms || {};
 
-    uniforms.u_color = [ 1, 0, 0, 1 ];
-    uniforms.u_alpha = 1;
+    if (typeof uniforms.u_color === 'undefined') {
+      uniforms.u_color = [1, 0, 0, 1];
+    }
+
+    if (typeof uniforms.u_alpha === 'undefined') {
+      uniforms.u_alpha = 1;
+    }
 
     super(gl, {
       vertex: config.texture ? textureShader.vertex : colorShader.vertex,

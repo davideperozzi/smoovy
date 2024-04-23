@@ -135,6 +135,7 @@ export class VideoTexture extends Texture<VideoTextureConfig> {
       this.video = config.src;
     } else {
       this.video = document.createElement('video');
+      this.video.muted = true;
       this.video.src = config.src;
     }
 
@@ -143,6 +144,12 @@ export class VideoTexture extends Texture<VideoTextureConfig> {
 
     if (this.rvfcSupported) {
       this.video.requestVideoFrameCallback(() => this.updateVideoRVFC());
+      Ticker.main.add((delta, time, kill) => {
+        if (this.video.readyState >= this.video.HAVE_CURRENT_DATA) {
+          this.updateVideo();
+          kill();
+        }
+      });
     } else {
       let first = true;
 
