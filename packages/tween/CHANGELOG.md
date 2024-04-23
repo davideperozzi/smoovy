@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.24
+
+### Patch Changes
+
+- fix(webgl): video loading / fix(tween): unpause on start
+
 ## 1.1.23
 
 ### Patch Changes

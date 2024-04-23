@@ -138,8 +138,8 @@ export class TweenController<
     this._resolved = true;
   }
 
-  override() {
-    this._overridden = true;
+  override(overridden = true) {
+    this._overridden = overridden;
 
     return this;
   }
@@ -148,6 +148,8 @@ export class TweenController<
     if (this._overridden) {
       return this;
     }
+
+    this._paused = false;
 
     this.beforeStart();
 
@@ -165,7 +167,7 @@ export class TweenController<
   }
 
   resume() {
-    this.pause(false);
+    return this.pause(false);
   }
 
   pause(paused = true) {

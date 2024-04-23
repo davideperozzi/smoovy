@@ -4,7 +4,6 @@ const targets = document.querySelectorAll<HTMLElement>('.anim');
 const fromProps = { y: 0 };
 
 
-
 const values1 = { x: 0 };
 const values2 = { x: 0 };
 
