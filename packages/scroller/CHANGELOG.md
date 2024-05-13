@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.0.0
+
+### Major Changes
+
+- feat: simplified
+
 ## 1.0.9
 
 ### Patch Changes

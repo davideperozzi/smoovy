@@ -1,292 +1,437 @@
-import { EventEmitter, EventListenerCb } from '@smoovy/emitter';
-import { listenCompose, Unlisten } from '@smoovy/listener';
-import { Coordinate, isNum } from '@smoovy/utils';
+import { EventEmitter, EventListener } from "@smoovy/emitter";
+import { listen, listenCompose, Unlisten } from "@smoovy/listener";
+import { Ticker, TickerTask } from "@smoovy/ticker";
+import { Coordinate, cutDec, damp } from "@smoovy/utils";
+import { Inertia, InertiaEventType } from "./inertia";
 
-import { ScrollerDom, ScrollerDomConfig, ScrollerDomEvent } from './dom';
+export interface ScrollerConfig {
+  /**
+   * The damping value used to align
+   * the current position with the new
+   * position
+   *
+   * @default 0.1
+   */
+  damping: number;
 
-export type ScrollBehavior<C = any> = (config?: C) => ScrollBehaviorItem;
-export type ScrollBehaviorItemDetach = (() => void)|void;
-export type ScrollBehaviorItem<S extends Scroller = Scroller> =
-  (scroller: S) => ScrollBehaviorItemDetach;
+  /**
+   * Whether to start the ticker immediately
+   *
+   * @default true
+   */
+  autoStart: boolean;
 
-export interface ScrollerPosition {
-  virtual: Coordinate;
-  output: Coordinate;
+  /**
+   * The threshold being used in order to determine
+   * when the scroll animation has settled.
+   *
+   * @default 0.001
+   */
+  threshold: number;
+
+  /**
+   * The refresh rate that's being simulated in order
+   * to achieve frame-independent damping
+   *
+   * @default 60
+   */
+  frequency: number;
+
+  /**
+   * Whether to allow keyboard events to simulate the
+   * native behavior of the browser
+   *
+   * @default true
+   */
+  keyboardEvents: boolean;
+
+  /**
+   * The default line height of the browser used for
+   * legace delta calculations and the keyboard events.
+   * For most browsers this is 16.
+   *
+   * @default 16
+   */
+  lineHeight: number;
+
+  /**
+   * A multiplier for the wheel delta value. This makes
+   * the scrolling go faster. Changing this will make
+   * the scrolling feel less natural usually and can
+   * have unexpected results for different scrolling devices
+   *
+   * @default 1
+   */
+  wheelMultiplier: number;
+
+  /**
+   * Whether to allow the poibter to drag the content
+   * and simulate touch events with the mouse. This
+   * will also add a slight inertia effect, so you
+   * can "throw" the content like on the phone.
+   *
+   * @default false
+   */
+  pointerEvents: boolean;
+
+  /**
+   * The multiplier for the pointer drag effect.
+   * This value will be multiplied with the delta value.
+   * So if you change this the pivot point will change
+   * during the drag.
+   *
+   * @default 1
+   */
+  pointerMultiplier: number;
+
+  /**
+   * The multiplier for the pointer drag effect.
+   * This value will be multiplied with the velocity,
+   * before the user releases the button.
+   *
+   * @default 25
+   */
+  pointerVelocity: number;
+
+  /**
+   * The multiplier for the touch drag effect.
+   * This value will be multiplied with the delta value.
+   * So if you change this the pivot point will change
+   * during the drag.
+   *
+   * @default 1
+   */
+  touchMultiplier: number;
+
+  /**
+   * The multiplier for the touch drag effect.
+   * This value will be multiplied with the velocity,
+   * before the user removes his finger.
+   *
+   * @default 20
+   */
+  touchVelocity: number;
+
+  /**
+   * Whether to enable touch events and simulate the
+   * mobile touch experience
+   *
+   * @default true
+   */
+  touchEvents: boolean;
+
+  /**
+   * The target element or window used to track events
+   * for the inertia and touch simulation
+   *
+   * @default Window
+   */
+  inertiaTarget?: Window | HTMLElement;
+
+  /**
+   * The target element or window used to track events
+   * for the mouse wheel events
+   *
+   * @default Window
+   */
+  wheelTarget?: Window | HTMLElement;
 }
 
-export type DeltaTransformCallback = (delta: Coordinate) => Coordinate;
-export type VirtualTransformCallback = (pos: Coordinate) => Coordinate;
-export interface OutputTransformEvent {
-  pos: Coordinate;
-  step: (pos: Coordinate) => void;
-}
+type LocksMap = {
+  [K in keyof Scroller['locks']]: boolean;
+};
 
-export interface ScrollToEvent {
-  pos: Partial<Coordinate>;
-  immediate: boolean;
-}
-
-export enum ScrollerEvent {
-  LOCK = 'lock',
-  DELTA = 'delta',
-  OUTPUT = 'output',
+export enum ScrollerEventType {
+  SCROLL = 'scroll',
+  RESIZE = 'resize',
   VIRTUAL = 'virtual',
-  RECALC = 'recalc',
-  TWEEN_TO = 'tween_to',
-  SCROLL_TO = 'scroll_to',
-  TRANSFORM_DELTA = '~delta',
-  TRANSFORM_VIRTUAL = '~virtual',
-  TRANSFORM_OUTPUT = '~output'
+  LOCK = 'lock'
 }
 
-export type ScrollerDomType = HTMLElement | ScrollerDomConfig | ScrollerDom;
+export interface ScrollerScrollEvent extends Coordinate {}
+export interface ScrollerVirtualEvent extends Coordinate {}
+export interface ScrollerResizeEvent {}
+export interface ScrollerLockEvent {
+  locked: boolean;
+}
 
-export class Scroller extends EventEmitter {
-  private attached = false;
-  private locks: string[] = [];
-  private availableBehaviors = new Map<string, ScrollBehaviorItem>();
-  private attachedBehaviors = new Map<string, ScrollBehaviorItemDetach>();
+export interface ScrollerEventMap {
+  'scroll': ScrollerScrollEvent;
+  'virtual': ScrollerVirtualEvent;
+  'resize': ScrollerResizeEvent;
+  'lock': ScrollerLockEvent;
+}
+
+const keyspaces: Record<string, Partial<Coordinate>> = {
+  ' ': { y: 55.875 },
+  'ArrowLeft': { x: -2.5 },
+  'ArrowRight': { x: 2.5 },
+  'ArrowDown': { y: 2.5 },
+  'ArrowUp': { y: -2.5 },
+  'PageDown': { y: 55.875 },
+  'PageUp': { y: -55.875 },
+  'Home': { y: -Infinity },
+  'End': { y: Infinity }
+};
+
+export const defaults: ScrollerConfig = {
+  autoStart: true,
+  frequency: 60,
+  wheelMultiplier: 1,
+  pointerEvents: false,
+  pointerMultiplier: 1,
+  pointerVelocity: 25,
+  touchMultiplier: 1,
+  touchVelocity: 20,
+  keyboardEvents: true,
+  touchEvents: true,
+  threshold: 0.001,
+  lineHeight: 16,
+  damping: 0.1
+};
+
+export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEmitter<ScrollerEventMap> {
+  readonly virtual: Coordinate = { x: 0, y: 0 };
+  readonly output: Coordinate = { x: 0, y: 0 };
+  readonly config: C;
+  protected animating = false;
   private unlisten?: Unlisten;
-  public dom: ScrollerDom;
-  public position: ScrollerPosition = {
-    output: { x: 0, y: 0 },
-    virtual: { x: 0, y: 0 }
-  };
+  private ticker?: TickerTask;
+  private locks = { controls: new Set<string>(), position: new Set<string>() };
+  private inertia!: Inertia;
 
-  public constructor(
-    dom: ScrollerDomType,
-    behaviors: { [name: string]: ScrollBehaviorItem }
-  ) {
+  constructor(config: Partial<C> = {}, init = true) {
     super();
 
-    if (dom instanceof ScrollerDom) {
-      this.dom = dom;
-    } else {
-      this.dom = new ScrollerDom(
-        dom instanceof HTMLElement
-          ? { element: dom }
-          : dom
-      );
-    }
+    this.config = { ...defaults, ...config } as C;
 
-    for (const name in behaviors) {
-      if (Object.prototype.hasOwnProperty.call(behaviors, name)) {
-        this.setBehavior(name, behaviors[name]);
-      }
-    }
-
-    this.attach();
-  }
-
-  private attach() {
-    if ( ! this.attached) {
-      this.attached = true;
-      this.unlisten = listenCompose(
-        this.dom.on<Coordinate>(ScrollerDomEvent.RECALC, () => {
-          this.updateDelta({ x: 0, y: 0 });
-          requestAnimationFrame(() => this.emit(ScrollerEvent.RECALC));
-        }),
-        this.on<Coordinate>(ScrollerEvent.DELTA, (delta) => {
-          if ( ! this.isLocked()) {
-            this.updateDelta(delta);
-          }
-        })
-      );
-
-      this.dom.attach();
-      this.availableBehaviors.forEach((_behavior, key) => {
-        this.attachBehavior(key);
-      });
+    if (init) {
+      this.init();
     }
   }
 
-  public destroy() {
-    if (this.attached) {
-      this.attached = false;
+  init() {
+    this.update();
 
-      if (typeof this.unlisten === 'function') {
-        this.unlisten();
-        delete this.unlisten;
-      }
-
-      this.dom.detach();
-      this.attachedBehaviors.forEach(detach => {
-        if (typeof detach === 'function') {
-          detach.call(this);
-        }
-      });
+    if (this.config.autoStart) {
+      this.start();
     }
   }
 
-  public recalc(async = false) {
-    this.dom.recalc(async);
+  start() {
+    this.stop();
 
-    if (async) {
-      requestAnimationFrame(() => this.emit(ScrollerEvent.RECALC));
-    } else {
-      this.emit(ScrollerEvent.RECALC);
+    this.ticker = Ticker.main.add(delta => this.tick(delta));
+  }
+
+  onScroll(cb: EventListener<ScrollerEventMap[ScrollerEventType.SCROLL]>) {
+    return this.on(ScrollerEventType.SCROLL, cb);
+  }
+
+  onVirtual(cb: EventListener<ScrollerEventMap[ScrollerEventType.VIRTUAL]>) {
+    return this.on(ScrollerEventType.VIRTUAL, cb);
+  }
+
+  onLock(cb: EventListener<ScrollerEventMap[ScrollerEventType.LOCK]>) {
+    return this.on(ScrollerEventType.LOCK, cb);
+  }
+
+  stop() {
+    if (this.ticker) {
+      this.ticker.kill();
+      delete this.ticker;
     }
   }
 
-  public get behaviors() {
-    return this.availableBehaviors;
-  }
-
-  public setBehavior(
-    name: string,
-    behavior: ScrollBehaviorItem
-  ) {
-    this.availableBehaviors.set(name, behavior);
-  }
-
-  public deleteBehavior(name: string) {
-    if (this.attachedBehaviors.has(name)) {
-      this.detachBehavior(name);
+  update() {
+    if (this.unlisten) {
+      this.unlisten();
     }
 
-    return this.availableBehaviors.delete(name);
-  }
-
-  public attachBehavior(name: string) {
-    const behavior = this.availableBehaviors.get(name);
-
-    if (behavior && ! this.attachedBehaviors.get(name)) {
-      this.attachedBehaviors.set(name, behavior(this));
-
-      return true;
-    }
-
-    return false;
-  }
-
-  public detachBehavior(name: string) {
-    const detach = this.attachedBehaviors.get(name);
-
-    if (detach) {
-      detach.call(this);
-      this.attachedBehaviors.delete(name);
-
-      return true;
-    }
-
-    return false;
-  }
-
-  public updateDelta<T extends Partial<Coordinate>>(delta: T) {
-    const virtPos = this.position.virtual;
-
-    this.emit<T>(
-      ScrollerEvent.TRANSFORM_DELTA,
-      delta,
-      (newDelta) => {
-        delta.x = newDelta.x;
-        delta.y = newDelta.y;
-      }
-    );
-
-    this.updatePosition({
-      x: isNum(delta.x) ? virtPos.x - (delta.x as number) : undefined,
-      y: isNum(delta.y) ? virtPos.y - (delta.y as number) : undefined
+    this.inertia = new Inertia({
+      pointerEvents: this.config.pointerEvents,
+      pointerDeltaMultiplier: this.config.pointerMultiplier,
+      pointerVelocityMultiplier: this.config.pointerVelocity,
+      touchDeltaMultiplier: this.config.touchMultiplier,
+      touchVelocityMultiplier: this.config.touchVelocity,
+      ...(this.config.inertiaTarget
+        ? { eventTarget: this.config.inertiaTarget }
+        : {})
     });
+
+    this.unlisten = this.listen();
+
+    return this;
   }
 
-  protected updatePosition(virtPos?: Partial<Coordinate>) {
-    if (this.isLocked()) {
-      return;
-    }
+  protected get wheelTarget() {
+    return this.config.wheelTarget || window;
+  }
 
-    if (virtPos && isNum(virtPos.x)) {
-      this.position.virtual.x = virtPos.x as number;
-    }
+  protected get viewWidth() {
+    return this.config.lineHeight * 24;
+  }
 
-    if (virtPos && isNum(virtPos.y)) {
-      this.position.virtual.y = virtPos.y as number;
-    }
+  protected get viewHeight() {
+    return this.config.lineHeight * 24;
+  }
 
-    this.emit(ScrollerEvent.VIRTUAL, this.position.virtual);
-    this.emit<Coordinate>(
-      ScrollerEvent.TRANSFORM_VIRTUAL,
-      this.position.virtual,
-      (newPos) => {
-        this.position.virtual.x = newPos.x;
-        this.position.virtual.y = newPos.y;
-      }
+  protected listen() {
+    return listenCompose(
+      this.inertia.listen(),
+      this.inertia.on(InertiaEventType.DELTA, (delta: Coordinate) => this.handleInertia(delta)),
+      listen(this.wheelTarget, 'wheel', event => this.handleWheel(event), { passive: false }),
+      listen(window, 'keydown', event => this.handleKeyboard(event)),
     );
+  }
 
-    if (
-      this.isEventMuted(ScrollerEvent.TRANSFORM_OUTPUT) ||
-      ! this.hasEventListeners(ScrollerEvent.TRANSFORM_OUTPUT)
-    ) {
-      this.updateOutput(this.position.virtual);
-    } else {
-      this.emit<OutputTransformEvent>(
-        ScrollerEvent.TRANSFORM_OUTPUT,
-        {
-          pos: this.position.output,
-          step: (outPos) => this.updateOutput(outPos)
-        }
-      );
+  tick(delta = 1) {
+    const diffX = cutDec(Math.abs(this.virtual.x - this.output.x), 4);
+    const diffY = cutDec(Math.abs(this.virtual.y - this.output.y), 4);
+    const threshold = this.config.threshold;
+
+    this.animating = diffX > threshold || diffY > threshold;
+
+    if (this.animating) {
+      const damping = this.config.damping * this.config.frequency;
+
+      this.output.x = damp(this.output.x, this.virtual.x, damping, delta * 0.001);
+      this.output.y = damp(this.output.y, this.virtual.y, damping, delta * 0.001);
+
+      this.handleScroll(this.output);
     }
   }
 
-  protected updateOutput(pos: Coordinate) {
-    if (this.isLocked()) {
+  protected handleInertia(delta: Coordinate) {
+    this.addVirtual(delta.x, delta.y);
+  }
+
+  protected handleScroll(pos = this.output) {
+    this.emit(ScrollerEventType.SCROLL, pos);
+  }
+
+  protected handleKeyboard(event: KeyboardEvent) {
+    if (this.locks.controls.size > 0) {
       return;
     }
 
-    this.position.output.x = pos.x;
-    this.position.output.y = pos.y;
+    const mult = keyspaces[event.key];
 
-    this.emit(ScrollerEvent.OUTPUT, pos);
+    if ( ! mult) {
+      return;
+    }
+
+    const { lineHeight } = this.config;
+    const x = this.virtual.x + (mult.x ? lineHeight*mult.x : 0);
+    const y = this.virtual.y + (mult.y ? lineHeight*mult.y : 0);
+
+    this.setVirtual(x, y);
   }
 
-  public lock(name = 'default', enable = true) {
-    if ( ! this.locks.includes(name) && enable) {
-      this.locks.push(name);
-      this.emit(ScrollerEvent.LOCK, { name, enable });
-    } else if ( ! enable) {
-      this.unlock(name);
+  protected handleWheel(event: WheelEvent) {
+    if (event.ctrlKey) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (this.locks.controls.size > 0) {
+      return;
+    }
+
+    let { deltaX, deltaY, deltaMode } = event;
+    const { wheelMultiplier, lineHeight } = this.config;
+
+    if (deltaMode === 1) {
+      deltaX *= lineHeight;
+      deltaY *= lineHeight;
+    } else if (deltaMode === 2) {
+      deltaX *= this.viewWidth;
+      deltaY *= this.viewHeight;
+    }
+
+    deltaX *= wheelMultiplier;
+    deltaY *= wheelMultiplier;
+
+    this.addVirtual(deltaX, deltaY);
+  }
+
+  protected addVirtual(x = 0, y = 0) {
+    this.setVirtual(this.virtual.x + x, this.virtual.y + y);
+  }
+
+  protected setVirtual(x?: number, y?: number) {
+    if (this.locks.position.size > 0) {
+      return;
+    }
+
+    if (typeof x !== 'undefined') {
+      this.virtual.x = x;
+    }
+
+    if (typeof y !== 'undefined') {
+      this.virtual.y = y;
+    }
+
+    this.emit(ScrollerEventType.VIRTUAL, this.virtual);
+  }
+
+  scrollTo(pos: Partial<Coordinate>, jump = false) {
+    this.setVirtual(pos.x, pos.y);
+
+    if (jump) {
+      this.output.x = this.virtual.x;
+      this.output.y = this.virtual.y;
+
+      this.handleScroll();
     }
   }
 
-  public unlock(name = 'default') {
-    const index = this.locks.indexOf(name);
-
-    if (index > -1) {
-      this.locks.splice(index, 1);
-      this.emit(ScrollerEvent.LOCK, { name, enable: false });
-    }
-  }
-
-  public isLocked(name?: string) {
+  isLocked(name?: keyof LocksMap) {
     if (name) {
-      return this.locks.includes(name);
+      if (this.locks[name]) {
+        return this.locks[name].size > 0;
+      }
+
+      return false;
     }
 
-    return this.locks.length > 0;
+    return Object.values(this.locks)
+      .reduce((size, lock) => size + lock.size, 0) > 0;
   }
 
-  public scrollTo(
-    pos: Partial<Coordinate>,
-    immediate = false
-  ) {
-    if ( ! this.isLocked()) {
-      this.emit<ScrollToEvent>(
-        ScrollerEvent.SCROLL_TO,
-        { pos, immediate }
-      );
+  lock(locked: boolean | Partial<LocksMap> = true, name = '_') {
+    for (const lockName in this.locks) {
+      const key = lockName as keyof typeof this.locks;
+      const lock = this.locks[key];
+
+      if (typeof locked === 'boolean') {
+        if (locked) {
+          lock.add(name)
+        } else {
+          lock.delete(name);
+        }
+      } else {
+        if (locked[key] === true) {
+          lock.add(name);
+        } else if (locked[key] === false) {
+          lock.delete(name);
+        }
+      }
     }
+
+    this.emit(ScrollerEventType.LOCK, { locked: this.isLocked() });
   }
 
-  public onVirtual(cb: EventListenerCb<Coordinate>) {
-    return this.on(ScrollerEvent.VIRTUAL, cb);
-  }
+  destroy() {
+    if (this.unlisten) {
+      this.unlisten();
+      delete this.unlisten;
+    }
 
-  public onScroll(cb: EventListenerCb<Coordinate>) {
-    return this.on(ScrollerEvent.OUTPUT, cb);
-  }
-
-  public onDelta(cb: EventListenerCb<Coordinate>) {
-    return this.on(ScrollerEvent.DELTA, cb);
+    if (this.ticker) {
+      this.ticker.kill();
+    }
   }
 }

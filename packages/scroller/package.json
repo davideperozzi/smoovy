@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller",
-  "version": "1.0.9",
+  "version": "2.0.0",
   "description": "smooth scrolling for the world",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
@@ -16,7 +16,6 @@
   },
   "keywords": [
     "smoovy",
-    "tween",
     "parallax",
     "scroller",
     "smooth",

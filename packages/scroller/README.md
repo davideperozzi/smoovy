@@ -3,236 +3,204 @@
 
 ## Installation
 ```sh
-yarn add @smoovy/scroller
-```
-or
-```sh
-npm install --save @smoovy/scroller
+npm i @smoovy/scroller
 ```
 
-## Examples
-* [huecryagency.com](https://huecryagency.com/)
-* [rootsandfriends.com](https://rootsandfriends.com/)
-* [davideperozzi.com](https://davideperozzi.com/)
-* [jobs.dorfjungs.com](https://jobs.dorfjungs.com/)
+## Usage
+Smooth scrolling is split up into two different approaches: native and default. With "native", you get the best accessibility, since it just animates the scroll position of the window or container.
 
-## Basic usage
-You can simply start by importing the most basic scroller composition called `smoothScroll`:
-```js
-import { smoothScroll } from '@smoovy/scroller';
+If you want to have more control and use a CSS transform-based scrolling, you can use the `DefaultScroller`. It'll create necessary DOM elements (container and wrapper) and use those to move the content.
+
+In order to use the native or default scroller you can just import it from the package and create a new instance. Here's how you can create both types:
+
+
+### Using the native scroller
+
+```ts
+import { NativeScroller } from '@smoovy/scroller/native';
+
+const scroller = new NativeScroller();
+
+// enable mouse pointer events for drag (all options at the bottom)
+const scroller = new NativeScroller({
+  pointerEvents: true
+});
 ```
+> Configuration is optional. If the config is omitted, the window will be used as a container.
 
-Lets say we have the following DOM on which we want to apply our scrolling:
-```html
-<main>
-  <section>Section 1</section>
-  <section>Section 2</section>
-  <section>Section 3</section>
-  <section>Section 4</section>
-</main>
+
+### Using the default scroller
+```ts
+import { DefaultScroller } from '@smoovy/scroller/default';
+
+const scroller = new DefaultScroller();
+
+// make it slower (all options at the bottom)
+const scroller = new DefaultScroller({
+  damping: 0.08
+});
 ```
+> Configuration is optional. If the config is omitted, the body will be used as a container.
 
-In order to activate the smooth scrolling for the `main` element, we need to create a new instance like this:
-```js
-const mainEl = document.querySelector('main');
-const scroller = smoothScroll({ element: mainEl });
+### Using just the virtual scroller
+Sometimes you just want to have the controls for scrolling. For that you can just create the a core scroller.
+This will give you the ability to customize the scrolling experience from scratch with all the controls taken care of (touch, wheel events, locking etc.).
+
+```ts
+import { Scroller } from '@smoovy/scroller/core';
+
+const scroller = new Scroller();
 ```
-> This is the most basic setup. You can configure it down to the smallest detail
+> Note: DefaultScroller and NativeScroller are just variations of the Scroller.
 
-After you created the scroller the DOM should automatically transform to this (with default settings):
-```html
-<main>
-  <div
-    class="smoovy-container"
-    style="width: 100%; height: 100%; overflow: hidden;"
-  >
-    <div class="smoovy-wrapper">
-      <!-- Section 1, 2, ... -->
-    </div>
-  </div>
-</main>
+### Listening to events
+There are two types of scroll positions: `output` and `virtual`. The output position is the current *animated position*. The virtual position is the *animated position* the output is animating towards. So the virtual is always in sync with the "native" scroll position, while output is where the animation is currently at. You can listen to both:
+
+```ts
+scroller.onScroll(({ x, y }) => {
+  console.log('scrolled to', x, y);
+});
+
+scroller.onVirtual(({ x, y }) => {
+  console.log('will scroll to', x, y);
+});
+
 ```
-### Defining the correct dimensions
-As you can see the `smoovy-container` tries to adjust its size to the parent element `main`. Since multiple scrollers can be nested inside each other we need to make the scroller aware of its dimensions. In order to do that, we can either configure the styles directly **by config** or use the default styles that come with the scroller and **adjust our styling around the root element**.
-
-Defining the dimesions on the parent (recommended):
-```css
-main { width: 100%; height: 100vh; }
-```
-
-Defining the dimensions by config:
-```js
-smoothScroll({ element }, {
-  styles: {
-    height: '100vh'
-  }
+If you want to listen to resize events you simply attach this listener:
+```ts
+scroller.onResize(() => {
+  console.log('content has changed size or window resized');
 });
 ```
 
-### Configuring the behaviors
-Each behavior can be configured individually. In order to configure the `smoothScroll`er, you can simply pass them into the second argument. Lets say we want to adjust the damping of the `lerpContent` behavior:
 
-```js
-smoothScroll({ element }, {
-  lerp: {
-    damping: 0.2
-  }
-});
-```
+### Locking the scroller
+All variations come with a locking mechanism, that allows for multiple contexts to lock the scroller.
+This is done to ensure that, on your website, you can allow multiple components to lock the same scroller and ensure it's locked as long as the component requests it.
 
-### Adding additional behaviors
-If you want to add new beahviors to an existing composition, you can add the to the `behaviors` object inside the configuration:
-
-```js
-smoothScroll({ element }, {
-  behaviors: {
-    yourBehavior: beahviorX(),
-    // You can also override default behaviors:
-    lerp: yourLerpBehavior({
-      customConfig: 1
-    })
-  }
-});
-```
-
-### Removing behaviors
-If you want to remove a bevhaior, you simply override it with undefined in the configuration like this:
-
-```js
-smoothScroll({ element }, {
-  behaviors: {
-    lerp: undefined
-  }
-});
-```
-
-You can take a look at all available configurations by accessing the `Config` interface of all the behaviors inside [this folder](./src/behaviors).
-
-### Listening for scroll events
-You have to positions you can listen to. The output and virutal position. Read more about these to positions [here](#the-core). Most of the time you want to listen to the output position:
-```js
-scroller.onScroll(position => {
-  // Do something with position.x or position.y
-});
-```
-
-If you wan to get the virtual position you can use this listener:
-
-```js
-scroller.onVirtual(position => {
-  // Do something with position.x or position.y
-});
-```
-> The virtual position syncs with the delta value immediately
-
-### Scroll & tween to positions
-You have to options when you want to scroll programmatically. You can either scroll directly to a position or tween to a position. When you're using `scrollTo` the position simply gets updated with a matching delta value *once*. If you want to customize the animation you can use `tweenTo`. This allows you to control the speed, easing and auto kill mechanism.
-
-```js
-scroller.scrollTo({ y: 500 });
-```
-
-Of course when the delta value changes the event goes through the registered behaviors. So if you have, lets say a lerp behavior, which interpolates the position it'll do that with the delta value from `scrollTo` as well. You can disable this by adding the `skipOutputTransform` to the `scrollTo` method:
-
-```js
-scroller.scrollTo({ y: 500 }, true);
-```
-> Now, if the behaviors are configured correctly, it should jump directly to the requested position without animations.
-
-You can also tween to a position like this:
-```js
-import { easings } from '@smoovy/tween';
-
-scroller.tweenTo({ y: 500 }, {
-  duration: 800,
-  easing: easings.Expo.out,
-  // The `force` allows to ignore userinteraction while animating.
-  // Default: false
-  force: true
-});
-```
-
-### Updating the scroller
-It will happen that you're going to make changes to the DOM while the scroller is active. For example a simple router driven by ajax could influence the dimensions on your application. In order to tell the scroller to update itself you would call the `recalc` method:
-```js
-scroller.recalc();
-// or async
-scroller.recalc(true);
-```
-> This will notify the dom and behaviors about a recalc, so they can react accordingly
-
-### Locking & unlocking the scroller
-The scroller can be locked in many different contexts in order to be sure that the scroller is locked as long a entity wants it to be locked. If you simply want to (un)lock the scroller you may access these methods:
-
-```js
-// Lock scroller
+```ts
+// lock a scroller completely
 scroller.lock();
 
-// Unlock again
-scroller.unlock();
+// unlock a scroller
+scroller.lock(false);
 
-// Check if locked
-scroller.isLocked();
-```
-> A lock will suppress the delta events coming from registered behaviors
+// lock the scroller with context
+scroller.lock(true, 'menu');
+scroller.lock(true, 'other-component');
 
-A more advanced use-case is a simple menu, that locks the scroller if it's active. So you want to give the lock a context, so you can be sure it stays locked as long as the menu is enabled. You can achieve this by using named locks like this:
-```js
-// The menu gets enabled:
-scroller.lock('menu');
+scroller.lock(false, 'menu') // still locked because of other-component
+scroller.lock(false, 'other-component'); // full unlocked now
 
-// Another component locks the scroller too:
-scroller.lock('something');
-
-// The menu gets disabled:
-scroller.unlock('menu');
-
-// Scroller is still locked
-// The other component unlocks as well:
-scroller.unlock('something');
-
-// The scroller is now fully unlocked again
-scroller.isLocked('menu'); // false
-scroller.isLocked('something'); // false
+// listening for locks
+scroller.onLock(({ locked }) => {
+  console.log('scroller has been ' + (locked ? 'locked' : 'unlocked'));
+});
 ```
 
-### Destroying the scroller
-To say goodbye to your scroller, you can simply call the destroy method:
-```js
-scroller.destroy();
-```
-> This will also put the DOM to the previous state
+It's also possible to only lock certain functionalities of the scroller.
+Sometimes you want to disable user interaction, but still be able to control the scroller programmatically.
 
-## The architecture
-The whole structure is very simple. The key components are the `core`, `dom` and `behaviors`. The core holds the dom and behaviors together and is responsible for the data beeing transmitted between these components:
+```ts
+// disable user controls (touch, wheel etc. only)
+scroller.lock({ controls: true }, 'menu');
 
-```
-+-------+                              +-----+ +-----------+
-| core  |                              | dom | | behavior  |
-+-------+                              +-----+ +-----------+
-    |                                     |          |
-    | Makes DOM accessible to behaviors   |          |
-    |------------------------------------>|          |
-    |                                     |          |
-    |              Notifies about changes |          |
-    |<------------------------------------|          |
-    |                                     |          |
-    | Notifies about changes              |          |
-    |----------------------------------------------->|
-    |                                     |          |
-    |                                Request changes |
-    |<-----------------------------------------------|
-    |                                     |          |
+// this still works
+scroller.scrollTo({ y: 100 });
+
+// enable user controls for the menu lock
+scroller.lock({ controls: false }, 'menu');
 ```
 
-### The core
-The core is responsible for maintaining a stable position which will be distributed among the registered behaviors. The position is split into two: `virutal` and `output`. The virtual position is the most up-to-date position which represents the position the user anticipates. The output position will sync with this position either instantly or by a registered behavior. So if you're calling `onScroll` you will get the output position. If you want the virtual position call `onVirtual`.
+### Scroll to and tween to
+Each scroller can be controlled programmatically with the `scrollTo` method.
+After the new position is set it will animate to that position. But you can also skip this animation and scroll to the position immediately.
 
-### The behavior
-A behavior is the part that tells the whole "organism" how to behave. Usually the behaviors are split into logical parts like: `mouseWheel`, `scrollTo`, `tweenTo`, etc. This allows us to disable, enable and configure components as we need them. Also it will reduce the file size and complexity in the end result (final bundle).
+```ts
+// scroll to the position 500
+scroller.scrollTo({ y: 500 });
 
-### The DOM
-The dom is responsible for rendering and managing the DOM elements needed for most scrollers. It watches for changes, resizes, etc. and notifies the core about them. The behavior can listen to them too. So it's a very simple component which will trigger the `RECALC` event on the scroller instance when needed.
+// jump to the position 500 immediately
+scroller.scrollTo({ y: 500 }, true);
+```
+
+There's no built-in tween engine or easing function for the animation. Since most of the time you're already using one. So in order to animate the position with a tween you could do the following.
+
+```ts
+tween.fromTo({ y: scroller.output.y }, { y: 500 }, {
+  onUpdate: (pos) => scroller.scrollTo(pos, true);
+})
+```
+
+## Configuration
+| Name              | Type                  | Default | Description                                                                                                             |
+|-------------------|-----------------------|---------|-------------------------------------------------------------------------------------------------------------------------|
+| damping           | number                | 0.1     | The damping value used to align the current position with the new position.                                             |
+| autoStart         | boolean               | true    | Whether to start the ticker immediately.                                                                                |
+| threshold         | number                | 0.001   | The threshold used to determine when the scroll animation has settled (ended).                                                  |
+| frequency         | number                | 60      | The refresh rate that's being simulated to achieve frame-independent damping.                                           |
+| keyboardEvents    | boolean               | true    | Whether to allow keyboard events to simulate the native behavior of the browser.                                        |
+| lineHeight        | number                | 16      | The default line height of the browser used for legacy delta calculations and keyboard events.                          |
+| wheelMultiplier   | number                | 1       | A multiplier for the wheel delta value to make scrolling go faster, usually resulting in less natural feeling.          |
+| pointerEvents     | boolean               | false   | Whether to allow the pointer to drag the content and simulate touch events with the mouse, including a slight inertia.  |
+| pointerMultiplier | number                | 1       | A multiplier for the pointer drag effect, altering the pivot point during drag.                                         |
+| pointerVelocity   | number                | 25      | A multiplier for the pointer drag effect on velocity before the user releases the button.                               |
+| touchMultiplier   | number                | 1       | A multiplier for the touch drag effect, altering the pivot point during drag.                                           |
+| touchVelocity     | number                | 20      | A multiplier for the touch drag effect on velocity before the user removes his finger.                                  |
+| touchEvents       | boolean               | true    | Whether to enable touch events and simulate the mobile touch experience.                                                |
+| inertiaTarget     | Window \| HTMLElement | Window  | The target element or window used to track events for the inertia and touch simulation. Optional.                       |
+| wheelTarget       | Window \| HTMLElement | Window  | The target element or window used to track events for the mouse wheel events. Optional.                                 |
+
+### Default scroller config
+| Name     | Type                       | Default                                          | Description                                                                                                             |
+|----------|----------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| container| HTMLElement                | document.body                                    | The container element used as a viewport for the scrollable area, containing the content. Optional.                      |
+| wrapper  | HTMLElement                | None                                             | The wrapper element that contains the content, defining the scroll limit. Transforms are set on this element. Optional.  |
+| focus    | boolean                    | true                                             | Whether to enable focus bypass, scrolling to the element that has been focused.                                         |
+| styles   | Partial<CSSStyleDeclaration>| { width: '100%', height: '100%', overflow: 'hidden' } | Styles set on the container element to define its appearance and behavior. Optional.                                    |
+> All core configurations apply to this too
+
+### Native scroller config
+| Name       | Type                      | Default         | Description                                                                                                               |
+|------------|---------------------------|-----------------|---------------------------------------------------------------------------------------------------------------------------|
+| container  | HTMLElement \| Window     | document.body   | The container element used as a viewport for the scrollable area, within which the content sits. Optional.                |
+| wrapper    | HTMLElement               | None            | The wrapper element that contains the content and defines the scroll limit. Transforms are set on this. Optional.         |
+| focus      | boolean                   | true            | Enables focus bypass, which scrolls to the focused element during scroll animation, preserving default behavior. Optional. |
+> All core configurations apply to this too
+
+
+## Accessibility breakdown
+You should always be aware of the limitations when using scrolljacking to not worsen the user experience. Especially when optimizing for a lot of different devices. Sometimes it's better to remove smooth scrolling alltogether (e.g. on mobile) to ensure the user gets the same scrolling expericence he's familiar with.
+
+| Function | Native | Default
+| -------- | ------ | -------
+| Scroll to focus element    |  ✅    | ✅
+| Keybard scroll controls | ✅ | ✅ 
+| Simulate touch events | ✅ | ✅
+| Pointer touch events | ✅ | ✅
+| Lock scroll position | ✅ | ✅
+| Scroll to search result | ✅ | ❌
+| Native scrollbar control | ✅ | ❌
+| Native sticky elements | ✅ | ❌
+| Native CSS scroll-snap | ❌ | ❌
+
+Also if you want to make sure to give the user the best experience, I suggest to use a detection for `prefers-reduced-motion` and disable smooth scrolling when the user prefers low-animated websites.
+
+```ts
+if ( ! window.matchMedia('(prefers-reduced-motion)').matches) {
+  // initialize smooth scrolling
+} else {
+  // use native scrolling
+}
+```
+
+
+## Experience it in action
+* [The Variable](https://thevariable.com/)
+* [Design Embraced](https://designembraced.com/)
+* [Selected](https://selectedbase.com/)
+* [rootsandfriends](https://rootsandfriends.com/)
+* [Passepartout](https://passepartout.undesigned.studio/)
 
 ## Development commands
 ```js
