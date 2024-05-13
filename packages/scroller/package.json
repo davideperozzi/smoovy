@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "smooth scrolling for the world",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
@@ -23,11 +23,11 @@
     "raf"
   ],
   "dependencies": {
-    "@smoovy/emitter": "^1.0.2",
-    "@smoovy/listener": "^1.0.1",
-    "@smoovy/observer": "^1.0.5",
+    "@smoovy/emitter": "^1.1.0",
+    "@smoovy/listener": "^1.0.2",
+    "@smoovy/observer": "^1.0.7",
     "@smoovy/ticker": "^1.0.2",
-    "@smoovy/utils": "^1.0.1"
+    "@smoovy/utils": "^1.0.3"
   },
   "author": "Davide Perozzi",
   "license": "MIT",

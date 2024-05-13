@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.0.1
+
+### Patch Changes
+
+- fix(scroller): deps versions
+
 ## 2.0.0
 
 ### Major Changes
