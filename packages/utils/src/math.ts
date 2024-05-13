@@ -8,20 +8,17 @@ export function mapRange(
   return outMin + (outMax - outMin) / (inEnd - inStart) * (value - inStart);
 }
 
-export function clamp(
-  value: number,
-  min: number,
-  max: number,
-) {
+export function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-export function lerp(
-  s: number,
-  e: number,
-  m: number
-) {
-  return s * (1 - m) + e * m;
+export function lerp(a: number, b: number, m: number) {
+  return a * (1 - m) + b * m;
+}
+
+// stolen from https://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
+export function damp(a: number, b: number, lambda: number, dt: number) {
+  return lerp(a, b, 1 - Math.exp(-lambda * dt));
 }
 
 export function between(num: number, a: number, b: number, inc = false) {
@@ -36,10 +33,8 @@ export function roundDec(value: number, precision: number) {
   );
 }
 
-export function cutDec(value: number, precision: number) {
-  const str = value.toString();
-
-  return parseFloat(str.substring(0, str.indexOf('.') + 1 + precision));
+export function cutDec(value: number, precision = 0) {
+  return parseFloat(value.toFixed(precision));
 }
 
 export function mod(x: number, n: number) {

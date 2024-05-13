@@ -1,5 +1,11 @@
 # @smoovy/utils
 
+## 1.0.3
+
+### Patch Changes
+
+- feat: added damp function
+
 ## 1.0.2
 
 ### Patch Changes
