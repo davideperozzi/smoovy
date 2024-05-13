@@ -1,130 +1,60 @@
 import { Unlisten } from '@smoovy/listener';
 
-export type EventListenerCb<T = any> = (data: T) => void;
-export type ListenerCallback<T = any> = (...args: T[]) => void;
+export type EventListener<T = any> = (event: T) => void;
 
-export class EventEmitter {
-  private listeners: { [name: string]: Set<EventListenerCb> } = {};
+export class EventEmitter<EventMap extends Record<string, any> = any> {
+  private listeners: Map<keyof EventMap, Set<EventListener>> = new Map();
   private emitters: EventEmitter[] = [];
-  private mutedEvents: string[] = [];
 
-  public emit<T = any, TC = T>(
-    eventsOrName: { [name: string]: T } | string,
-    dataOrCallback?: T | ListenerCallback<TC>,
-    callback?: ListenerCallback<TC>
-  ) {
-    const listenerCb = typeof dataOrCallback === 'function'
-      ? dataOrCallback as ListenerCallback<TC>
-      : callback;
+  emit<K extends keyof EventMap>(name: K, event?: EventMap[K]) {
+    const listeners = this.listeners.get(name);
 
-    if (typeof eventsOrName === 'string') {
-      const name = eventsOrName;
+    if (listeners) {
+      listeners.forEach(cb => cb(event));
+    }
 
-      if ( ! this.isEventMuted(name)) {
-        for (let i = 0, len = this.emitters.length; i < len; i++) {
-          this.emitters[i].emit(eventsOrName, dataOrCallback, callback);
-        }
-
-        if (this.hasListener(name)) {
-          this.listeners[name].forEach(cb => {
-            const result = cb(
-              dataOrCallback !== listenerCb ? dataOrCallback as T : undefined
-            ) as any;
-
-            if (listenerCb) {
-              listenerCb(result);
-            }
-          });
-        }
-      }
-    } else {
-      const events = eventsOrName;
-      const keys = Object.keys(events);
-
-      for (let k = 0, lenK = keys.length; k < lenK; k++) {
-        const name = keys[k];
-        const eventData = events[name];
-
-        if ( ! this.isEventMuted(name)) {
-          for (let i = 0, len = this.emitters.length; i < len; i++) {
-            this.emitters[i].emit(name, eventData, callback);
-          }
-
-          if (this.hasListener(name)) {
-            this.listeners[name].forEach(cb => {
-              const result = cb(eventData) as any;
-
-              if (listenerCb) {
-                listenerCb(result);
-              }
-            });
-          }
-        }
-      }
+    for (const emitter of this.emitters) {
+      emitter.emit(name, event);
     }
 
     return this;
   }
 
-  private hasListener(name: string) {
-    return Object.prototype.hasOwnProperty.call(this.listeners, name);
-  }
+  on<K extends keyof EventMap>(name: K, cb: EventListener<EventMap[K]>): Unlisten {
+    let listeners = this.listeners.get(name);
 
-  public on<T>(name: string, cb: EventListenerCb<T>): Unlisten {
-    if (this.hasListener(name)) {
-      this.listeners[name].add(cb);
-    } else {
-      this.listeners[name] = new Set([ cb ]);
+    if ( ! listeners) {
+      listeners = new Set();
+
+      this.listeners.set(name, listeners);
     }
+
+    listeners.add(cb);
 
     return () => this.off(name, cb);
   }
 
-  public off(name: string, cb: EventListenerCb) {
-    const listeners = this.listeners;
+  off<K extends keyof EventMap>(name: K, cb: EventListener<EventMap[K]>) {
+    const listeners = this.listeners.get(name);
 
-    if (this.hasListener(name)) {
-      return listeners[name].delete(cb);
+    if (listeners) {
+      return listeners.delete(cb);
     }
 
     return false;
   }
 
-  public hasEventListeners(name: string) {
-    return this.listeners[name] && this.listeners[name].size > 0;
+  hasEventListeners<K extends keyof EventMap>(name: K) {
+    const listeners = this.listeners.get(name);
+
+    return !!listeners && listeners.size > 0;
   }
 
-  public isEventMuted(event: string) {
-    return this.mutedEvents.includes(event);
-  }
-
-  public muteEvents(...events: (string|boolean)[]): Unlisten {
-    events.forEach(event => {
-      if (typeof event === 'string' && ! this.mutedEvents.includes(event)) {
-        this.mutedEvents.push(event);
-      }
-    });
-
-    return () => this.unmuteEvents(...events);
-  }
-
-  public unmuteEvents(...events: (string|boolean)[]) {
-    events.forEach(event => {
-      if (typeof event === 'string') {
-        const index = this.mutedEvents.indexOf(event);
-
-        if (index > -1) {
-          this.mutedEvents.splice(index, 1);
-        }
-      }
-    });
-  }
-
-  public reflectEvents(...emitters: EventEmitter[]) {
+  reflectEvents(...emitters: EventEmitter[]) {
     this.emitters = emitters;
   }
 
-  public unreflectEvents() {
+  unreflectEvents() {
     this.emitters = [];
   }
 }

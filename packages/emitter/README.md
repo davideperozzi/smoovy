@@ -79,45 +79,6 @@ unlisten();
 ```
 > `listenCompose` simply merges all "unsubscribe callbacks" into one
 
-### Intercepting/Transforming values from listeners
-This special functionality handles your listeners/emissions differently. You can simply pass a callback function to your emission in order to receive the corresponding return values from the listeners for the emitted event:
-
-```js
-emitter.on('eventName1', ({ x, y }) => {
-  return {
-    x: Math.max(x, 0),
-    y: Math.max(y, 0)
-  }
-});
-
-emitter.emit(
-  'eventName1',
-  { x: 10, y: -10 },
-  (data) => {
-    // This will be called everytime a listener was called
-    // The `data` will be: { x: 10, y: 0 }
-  }
-);
-```
-> This can be useful if you want to let a user make some transformations to the emitted data
-
-> **Attention:** This can get difficult to maintain and debug quickly, so use it wisely!
-
-### Mute/Unmute events
-You can simply mute events by telling the emitter:
-
-```js
-const unmute = emitter.muteEvents(
-  'eventName1',
-  'eventName2',
-  'eventName3'
-);
-
-emitter.emit('eventName1', 'Yo?') // Will be dismissed
-unmute();
-emitter.emit('eventName1', 'Yo!') // Goes through
-```
-
 ### Reflecting events
 Reflect events to a different emitter. Muted events will not be reflects:
 ```js

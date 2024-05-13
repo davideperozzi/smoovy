@@ -1,5 +1,11 @@
 # @smoovy/emitter
 
+## 1.1.0
+
+### Minor Changes
+
+- feat: simplified
+
 ## 1.0.2
 
 ### Patch Changes
