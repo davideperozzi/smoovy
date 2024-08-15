@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.11
+
+### Patch Changes
+
+- feat(router): added cloning
+
 ## 1.2.10
 
 ### Patch Changes

@@ -717,6 +717,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rollup/pluginutils@npm:^5.0.2":
+  version: 5.1.0
+  resolution: "@rollup/pluginutils@npm:5.1.0"
+  dependencies:
+    "@types/estree": "npm:^1.0.0"
+    estree-walker: "npm:^2.0.2"
+    picomatch: "npm:^2.3.1"
+  peerDependencies:
+    rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+  peerDependenciesMeta:
+    rollup:
+      optional: true
+  checksum: 3cc5a6d91452a6eabbfd1ae79b4dd1f1e809d2eecda6e175deb784e75b0911f47e9ecce73f8dd315d6a8b3f362582c91d3c0f66908b6ced69345b3cbe28f8ce8
+  languageName: node
+  linkType: hard
+
 "@sindresorhus/is@npm:^0.14.0":
   version: 0.14.0
   resolution: "@sindresorhus/is@npm:0.14.0"
@@ -732,7 +748,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smoovy/emitter@^1.0.2, @smoovy/emitter@workspace:packages/emitter":
+"@smoovy/emitter@^1.0.2, @smoovy/emitter@^1.1.0, @smoovy/emitter@workspace:packages/emitter":
   version: 0.0.0-use.local
   resolution: "@smoovy/emitter@workspace:packages/emitter"
   dependencies:
@@ -761,7 +777,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smoovy/observer@^1.0.2, @smoovy/observer@^1.0.5, @smoovy/observer@^1.0.7, @smoovy/observer@workspace:packages/observer":
+"@smoovy/observer@^1.0.2, @smoovy/observer@^1.0.7, @smoovy/observer@workspace:packages/observer":
   version: 0.0.0-use.local
   resolution: "@smoovy/observer@workspace:packages/observer"
   dependencies:
@@ -797,11 +813,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smoovy/scroller@workspace:packages/scroller"
   dependencies:
-    "@smoovy/emitter": ^1.0.2
-    "@smoovy/listener": ^1.0.1
-    "@smoovy/observer": ^1.0.5
+    "@smoovy/emitter": ^1.1.0
+    "@smoovy/listener": ^1.0.2
+    "@smoovy/observer": ^1.0.7
     "@smoovy/ticker": ^1.0.2
-    "@smoovy/utils": ^1.0.1
+    "@smoovy/utils": ^1.0.3
     "@types/dat.gui": ^0.7.7
     dat.gui: ^0.7.9
   languageName: unknown
@@ -824,7 +840,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smoovy/utils@^1.0.1, @smoovy/utils@^1.0.2, @smoovy/utils@workspace:packages/utils":
+"@smoovy/utils@^1.0.1, @smoovy/utils@^1.0.2, @smoovy/utils@^1.0.3, @smoovy/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@smoovy/utils@workspace:packages/utils"
   dependencies:
@@ -934,6 +950,13 @@ __metadata:
   version: 1.0.0
   resolution: "@types/estree@npm:1.0.0"
   checksum: 910d97fb7092c6738d30a7430ae4786a38542023c6302b95d46f49420b797f21619cdde11fa92b338366268795884111c2eb10356e4bd2c8ad5b92941e9e6443
+  languageName: node
+  linkType: hard
+
+"@types/estree@npm:^1.0.0":
+  version: 1.0.5
+  resolution: "@types/estree@npm:1.0.5"
+  checksum: dd8b5bed28e6213b7acd0fb665a84e693554d850b0df423ac8076cc3ad5823a6bc26b0251d080bdc545af83179ede51dd3f6fa78cad2c46ed1f29624ddf3e41a
   languageName: node
   linkType: hard
 
@@ -2858,6 +2881,13 @@ __metadata:
   version: 5.3.0
   resolution: "estraverse@npm:5.3.0"
   checksum: 072780882dc8416ad144f8fe199628d2b3e7bbc9989d9ed43795d2c90309a2047e6bc5979d7e2322a341163d22cfad9e21f4110597fe487519697389497e4e2b
+  languageName: node
+  linkType: hard
+
+"estree-walker@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "estree-walker@npm:2.0.2"
+  checksum: 6151e6f9828abe2259e57f5fd3761335bb0d2ebd76dc1a01048ccee22fabcfef3c0859300f6d83ff0d1927849368775ec5a6d265dde2f6de5a1be1721cd94efc
   languageName: node
   linkType: hard
 
@@ -5578,6 +5608,7 @@ __metadata:
     turbo: ^1.6.3
     typescript: ^4.9.4
     vite: ^3.2.4
+    vite-plugin-glsl: ^1.2.1
     vitest: ^0.25.3
   languageName: unknown
   linkType: soft
@@ -6354,6 +6385,17 @@ __metadata:
   dependencies:
     builtins: "npm:^1.0.3"
   checksum: ce4c68207abfb22c05eedb09ff97adbcedc80304a235a0844f5344f1fd5086aa80e4dbec5684d6094e26e35065277b765c1caef68bcea66b9056761eddb22967
+  languageName: node
+  linkType: hard
+
+"vite-plugin-glsl@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "vite-plugin-glsl@npm:1.2.1"
+  dependencies:
+    "@rollup/pluginutils": "npm:^5.0.2"
+  peerDependencies:
+    vite: ^3.0.0 || ^4.0.0 || ^5.0.0
+  checksum: e1f2aa0198be9c7a33081ec5e7236d62fa417e2fc51d243f774a29c6d0eeeb564095dd49dc07f44592b792bd7f7dbca452e2b54707790b7a14d3766117e50d17
   languageName: node
   linkType: hard
 

@@ -46,12 +46,36 @@ export interface RouterConfig {
   cache?: boolean;
 
   /**
+   * Whether to clone the views before they are rendered.
+   * This ensures that each view is reset to it's original state.
+   * Sometimes you want to keep the state in the cache and don't
+   * clone from the original node. You can disable this if you
+   * want to preserve the state for each view.
+   *
+   * Note: If you pre-render a route with `render`, the pre-rendered
+   * route in the DOM will be automatically used, even if this is `true`
+   *
+   * @default true
+   */
+  clone?: boolean;
+
+
+  /**
    * If set to true, the router will preload the view when
    * hovering over the trigger element.
    *
    * @default true
    */
   hoverPreload?: boolean;
+
+  /**
+   * If set to true, the router will force a trailing slash
+   * on the url. This is useful for static sites, where the
+   * server will redirect to the url with the trailing slash.
+   *
+   * @default false
+   */
+  forceTrailingSlash?: boolean;
 }
 
 export enum RouterNavResult {
@@ -130,6 +154,7 @@ export interface RouterRenderOptions {
 export enum RouterEventType {
   TRIGGER_CLICK = 'triggerclick',
   NAV_START = 'navstart',
+  NAV_SAME = 'navsame',
   NAV_END = 'navend',
   NAV_CANCEL = 'navcancel',
   NAV_SETTLED = 'navsettled',
@@ -151,12 +176,14 @@ export class Router extends EventEmitter {
   private abortController?: AbortController;
   private animations: RouterAnimation[] = [];
   private keepViews: HTMLElement[] = [];
+  private renderedRoutes: Route['id'][] = [];
   private _route: Route;
   private _outlet: HTMLElement;
   private _view: HTMLElement;
   private baseUrl: BrowserUrl;
   private trigger: Trigger;
   private unlisten: Unlisten;
+  private allowClone = true;
   private changeStates: RouterChangeState[] = [];
   private viewCache = new Map<string, Promise<ViewResult>>();
   private triggerSelector: string;
@@ -171,6 +198,7 @@ export class Router extends EventEmitter {
     this.outletSelector = config.outlet || 'main';
     this.viewSelector = config.view || '.router-view';
     this.triggerSelector = config.trigger || 'a[href]:not([data-no-route])';
+    this.allowClone = config.clone !== false;
     this.baseUrl = parseUrl(window.location.href);
     this._route = createRouteFromPath(this.baseUrl);
     this._outlet = queryEl(this.outletSelector);
@@ -236,6 +264,13 @@ export class Router extends EventEmitter {
   to(url: string, options?: RouteToOptions) {
     const route = createRouteFromPath(url);
     const method = options?.replace ? 'replaceState' : 'pushState';
+
+    if (this.config.forceTrailingSlash) {
+      const trailingSlash = route.url.endsWith('/') ? '' : '/';
+
+      route.url += trailingSlash;
+      route.load += trailingSlash;
+    }
 
     window.history[method](route, '', route.url + (route.hash || ''));
     this.navigate(route, { flags: options?.flags });
@@ -316,6 +351,8 @@ export class Router extends EventEmitter {
       route = createRouteFromPath(route);
     }
 
+    this.renderedRoutes.push(route.id);
+
     const { view } = await this.findView(route);
 
     if (view) {
@@ -353,13 +390,14 @@ export class Router extends EventEmitter {
     };
 
     if (routesMatch(this._route, to)) {
+      this.emit(RouterEventType.NAV_SAME);
+
       return RouterNavResult.SAME;
     }
 
     const fromElement = event.fromElement;
     const fromInDom = this._outlet.contains(fromElement);
     const changeState: RouterChangeState = { ...event, fromInDom };
-
     const animations = this.animations.filter(anim => {
       return anim.when ? anim.when(event) : true
     });
@@ -475,16 +513,34 @@ export class Router extends EventEmitter {
     return queryEl(this.viewSelector, outlet);
   }
 
+  private cloneResult(result: ViewResult) {
+    if (result.view) {
+      result.view = result.view.cloneNode(true) as HTMLElement;
+    }
+
+    return result;
+  }
+
   async findView(route: Route) {
     if (this.viewCache.has(route.id) && this.config.cache !== false) {
-      return await this.viewCache.get(route.id) as ViewResult;
+      const result = await this.viewCache.get(route.id) as ViewResult;
+
+      if (this.renderedRoutes.includes(route.id)) {
+        return result;
+      }
+
+      return this.allowClone
+        ? this.cloneResult(result)
+        : result;
     }
 
     const result = this.load(route);
 
     this.viewCache.set(route.id, result);
 
-    return await result;
+    return this.allowClone
+      ? this.cloneResult(await result)
+      : await result;
   }
 
   async load(route: Route) {

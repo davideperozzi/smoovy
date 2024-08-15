@@ -2,13 +2,13 @@ import { animations } from '@smoovy/router';
 
 import { Router } from '../src/router';
 
-const router = new Router();
+const router = new Router({ forceTrailingSlash: false });
 
 router.animate(animations.fade());
 
 setTimeout(() => {
   router.render('/', { style: { display: 'none' } });
-  router.render('/projects.html', { style: { display: 'none' } });
+  router.render('/projects/', { style: { display: 'none' } });
   router.render('/sample.html',  { style: { display: 'none' } });
 });
 
