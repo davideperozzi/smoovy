@@ -7,9 +7,9 @@ const router = new Router({ forceTrailingSlash: false });
 router.animate(animations.fade());
 
 setTimeout(() => {
-  router.render('/', { style: { display: 'none' } });
-  router.render('/projects/', { style: { display: 'none' } });
-  router.render('/sample.html',  { style: { display: 'none' } });
+  // router.render('/', { style: { display: 'none' } });
+  // router.render('/projects/', { style: { display: 'none' } });
+  // router.render('/sample.html',  { style: { display: 'none' } });
 });
 
 // router.on(RouterEventType.NAV_START, () => { console.log('nav-start') });

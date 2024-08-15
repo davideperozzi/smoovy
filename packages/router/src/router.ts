@@ -177,6 +177,7 @@ export class Router extends EventEmitter {
   private animations: RouterAnimation[] = [];
   private keepViews: HTMLElement[] = [];
   private renderedRoutes: Route['id'][] = [];
+  private attachedViews = new Map<string, HTMLElement>();
   private _route: Route;
   private _outlet: HTMLElement;
   private _view: HTMLElement;
@@ -213,11 +214,20 @@ export class Router extends EventEmitter {
       }
     });
 
-    this.viewCache.set(this._route.id, Promise.resolve({
+    const result: ViewResult = {
       title: document.title,
       outlet: this._outlet,
       view: this._view
-    }));
+    };
+
+    this.viewCache.set(
+      this._route.id,
+      Promise.resolve(this.allowClone ? this.cloneResult(result) : result)
+    );
+
+    if (this._view) {
+      this.attachedViews.set(this._route.id, this._view);
+    }
 
     window.history.replaceState(
       this._route,
@@ -285,7 +295,7 @@ export class Router extends EventEmitter {
 
     this.animateHook(event, 'append', timeline, animations);
 
-    timeline.call(() => this._outlet.append(event.toElement));
+    timeline.call(() => this.attachView(event.toElement, event.toRoute));
 
     this.animateHook(event, 'enter', timeline, animations);
 
@@ -297,7 +307,7 @@ export class Router extends EventEmitter {
     this.animateHook(event, 'leave', timeline, animations);
 
     timeline.call(() => {
-      this.detachView(event.fromElement);
+      this.detachView(event.fromElement, event.fromRoute);
       this.emit(RouterEventType.AFTER_LEAVE, event);
     });
   }
@@ -366,7 +376,7 @@ export class Router extends EventEmitter {
         }
       }
 
-      this._outlet.append(view);
+      this.attachView(view, route);
 
       return true;
     }
@@ -482,29 +492,43 @@ export class Router extends EventEmitter {
     timeline.call(() => this.emit(RouterEventType.NAV_END, event));
     timeline.start();
 
-    this.clearChangeStates([ fromElement, toElement ]);
+    this.clearChangeStates([ fromElement, toElement ], to);
 
     return RouterNavResult.SUCESS;
   }
 
-  private detachView(view?: HTMLElement) {
+  private attachView(view?: HTMLElement, route?: Route) {
+    if (view) {
+      this._outlet.append(view);
+
+      if (route) {
+        this.attachedViews.set(route.id, view);
+      }
+    }
+  }
+
+  private detachView(view?: HTMLElement, route?: Route) {
     if (view) {
       if ( ! this.keepViews.includes(view)) {
         view.remove();
       } else {
         view.style.display = 'none';
       }
+
+      if (route) {
+        this.attachedViews.delete(route.id);
+      }
     }
   }
 
-  private clearChangeStates(activeElements: HTMLElement[]) {
+  private clearChangeStates(activeElements: HTMLElement[], route?: Route) {
     for (const changeState of this.changeStates) {
       if ( ! activeElements.includes(changeState.fromElement as HTMLElement)) {
-        this.detachView(changeState.fromElement);
+        this.detachView(changeState.fromElement, route);
       }
 
       if ( ! activeElements.includes(changeState.toElement as HTMLElement)) {
-        this.detachView(changeState.toElement);
+        this.detachView(changeState.toElement, route);
       }
     }
   }
@@ -514,11 +538,13 @@ export class Router extends EventEmitter {
   }
 
   private cloneResult(result: ViewResult) {
-    if (result.view) {
-      result.view = result.view.cloneNode(true) as HTMLElement;
+    const cloned = { ...result };
+
+    if (cloned.view) {
+      cloned.view = cloned.view.cloneNode(true) as HTMLElement;
     }
 
-    return result;
+    return cloned;
   }
 
   async findView(route: Route) {
@@ -529,6 +555,14 @@ export class Router extends EventEmitter {
         return result;
       }
 
+      if (this.attachedViews.has(route.id)) {
+        return {
+          title: result.title,
+          outlet: result.outlet,
+          view: this.attachedViews.get(route.id)
+        } as ViewResult;
+      }
+
       return this.allowClone
         ? this.cloneResult(result)
         : result;
@@ -537,6 +571,14 @@ export class Router extends EventEmitter {
     const result = this.load(route);
 
     this.viewCache.set(route.id, result);
+
+    if (this.attachedViews.has(route.id)) {
+      return result.then(res => ({
+        title: res.title,
+        outlet: res.outlet,
+        view: this.attachedViews.get(route.id)
+      } as ViewResult));
+    }
 
     return this.allowClone
       ? this.cloneResult(await result)
