@@ -135,6 +135,14 @@ export interface ScrollerConfig {
    * @default Window
    */
   wheelTarget?: Window | HTMLElement;
+
+  /**
+   * Whether to lock one axis compleley forcing
+   * the position to always be 0
+   *
+   * @default false
+   */
+  lockAxis?: 'x' | 'y' | false;
 }
 
 type LocksMap = {
@@ -186,8 +194,9 @@ export const defaults: ScrollerConfig = {
   keyboardEvents: true,
   touchEvents: true,
   threshold: 0.001,
+  lockAxis: false,
   lineHeight: 16,
-  damping: 0.1
+  damping: 0.1,
 };
 
 export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEmitter<ScrollerEventMap> {
@@ -285,9 +294,19 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
     );
   }
 
+  get xAxisLocked() {
+    return this.config.lockAxis === 'x';
+  }
+
+  get yAxisLocked() {
+    return this.config.lockAxis === 'y';
+  }
+
   tick(delta = 1) {
-    const diffX = cutDec(Math.abs(this.virtual.x - this.output.x), 4);
-    const diffY = cutDec(Math.abs(this.virtual.y - this.output.y), 4);
+    const lockX = this.xAxisLocked;
+    const lockY = this.yAxisLocked;
+    const diffX = lockX ? 0 : cutDec(Math.abs(this.virtual.x - this.output.x), 4);
+    const diffY = lockY ? 0 : cutDec(Math.abs(this.virtual.y - this.output.y), 4);
     const threshold = this.config.threshold;
 
     this.animating = diffX > threshold || diffY > threshold;
@@ -295,8 +314,13 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
     if (this.animating) {
       const damping = this.config.damping * this.config.frequency;
 
-      this.output.x = damp(this.output.x, this.virtual.x, damping, delta * 0.001);
-      this.output.y = damp(this.output.y, this.virtual.y, damping, delta * 0.001);
+      if (!lockX) {
+        this.output.x = damp(this.output.x, this.virtual.x, damping, delta * 0.001);
+      }
+
+      if (!lockY) {
+        this.output.y = damp(this.output.y, this.virtual.y, damping, delta * 0.001);
+      }
 
       this.handleScroll(this.output);
     }
@@ -366,11 +390,11 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
       return;
     }
 
-    if (typeof x !== 'undefined') {
+    if (typeof x !== 'undefined' && !this.xAxisLocked) {
       this.virtual.x = x;
     }
 
-    if (typeof y !== 'undefined') {
+    if (typeof y !== 'undefined' && !this.yAxisLocked) {
       this.virtual.y = y;
     }
 
