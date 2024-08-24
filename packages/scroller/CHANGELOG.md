@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.0.2
+
+### Patch Changes
+
+- feat(scroller): added lockAxis
+
 ## 2.0.1
 
 ### Patch Changes
