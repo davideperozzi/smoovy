@@ -106,7 +106,13 @@ export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfi
       this.config.inertiaTarget = this.container.ref;
     }
 
-    return super.update();
+    const unlisten = super.update();
+
+    if (this.config.bypass) {
+      this.detachInertia();
+    }
+
+    return unlisten;
   }
 
   listen() {

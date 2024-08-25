@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/scroller",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "smooth scrolling for the world",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",

@@ -216,6 +216,7 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   readonly output: Coordinate = { x: 0, y: 0 };
   readonly config: C;
   protected animating = false;
+  protected unlistenInertia?: Unlisten;
   private unlisten?: Unlisten;
   private ticker?: TickerTask;
   private locks = { controls: new Set<string>(), position: new Set<string>() };
@@ -297,10 +298,24 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
     return this.config.lineHeight * 24;
   }
 
-  protected listen() {
-    return listenCompose(
+  protected attachInertia() {
+    this.unlistenInertia = listenCompose(
       this.inertia.listen(),
       this.inertia.on(InertiaEventType.DELTA, (delta: Coordinate) => this.handleInertia(delta)),
+    );
+  }
+
+  protected detachInertia() {
+    if (this.unlistenInertia) {
+      this.unlistenInertia();
+      delete this.unlistenInertia;
+    }
+  }
+
+  protected listen() {
+    this.attachInertia();
+
+    return listenCompose(
       listen(this.wheelTarget, 'wheel', event => this.handleWheel(event), { passive: false }),
       listen(window, 'keydown', event => this.handleKeyboard(event)),
     );
@@ -468,6 +483,8 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   }
 
   destroy() {
+    this.detachInertia();
+
     if (this.unlisten) {
       this.unlisten();
       delete this.unlisten;
