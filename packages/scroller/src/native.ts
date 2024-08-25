@@ -1,6 +1,6 @@
 import { listen, listenCompose } from "@smoovy/listener";
 import { Observable, observe, unobserve } from "@smoovy/observer";
-import { clamp, Size } from "@smoovy/utils";
+import { clamp, Coordinate, Size } from "@smoovy/utils";
 import { defaults as coreDefaults, Scroller, ScrollerConfig, ScrollerEventType } from "./core";
 import { DefaultScrollerConfig } from "./default";
 import { getFocusPosition } from "./utils";
@@ -33,11 +33,26 @@ export interface NativeScrollerConfig extends ScrollerConfig {
    * @default true
    */
   focus?: boolean;
+
+  /**
+   * If this is enabled, it will just redirect the native scroll events
+   * without any smoothing. This makes it easy to disable for mobile,
+   * without having too many checks or stuff like:
+   *
+   * `isMobile() ? window.scrollTo(...) : scroller.scrollTo()`
+   *
+   * So you can use the same API, which just passes the native
+   * events thorugh
+   *
+   * @default false
+   */
+  bypass?: boolean;
 }
 
-const defaults: DefaultScrollerConfig = {
+const defaults: NativeScrollerConfig = {
   ...coreDefaults,
   focus: true,
+  bypass: false
 };
 
 export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfig> extends Scroller<C> {
@@ -50,6 +65,10 @@ export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfi
 
     if (init) {
       this.init();
+    }
+
+    if (this.config.bypass) {
+      this.stop();
     }
   }
 
@@ -70,19 +89,21 @@ export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfi
 
     this.handleResize();
 
-    if (this.container.ref instanceof Window) {
-      this.scrollTo({
-        x: this.container.ref.scrollX,
-        y: this.container.ref.scrollY
-      }, true);
-    } else {
-      this.scrollTo({
-        x: this.container.ref.scrollLeft,
-        y: this.container.ref.scrollTop
-      }, true);
+    if (!this.config.bypass) {
+      if (this.container.ref instanceof Window) {
+        this.scrollTo({
+          x: this.container.ref.scrollX,
+          y: this.container.ref.scrollY
+        }, true);
+      } else {
+        this.scrollTo({
+          x: this.container.ref.scrollLeft,
+          y: this.container.ref.scrollTop
+        }, true);
+      }
     }
 
-    if ( ! this.config.inertiaTarget) {
+    if (!this.config.inertiaTarget) {
       this.config.inertiaTarget = this.container.ref;
     }
 
@@ -127,20 +148,28 @@ export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfi
   }
 
   protected handleNativeScroll() {
-    if ( ! this.animating) {
+    const bypass = this.config.bypass;
+
+    if (!this.animating || bypass) {
       const container = this.container.ref;
       const isWindow = container instanceof Window;
+      const posX = isWindow ? container.scrollX : container.scrollLeft;
+      const posY = isWindow ? container.scrollY : container.scrollTop;
 
-      this.virtual.x = this.output.x = isWindow
-        ? container.scrollX
-        : container.scrollLeft;
-      this.virtual.y = this.output.y = isWindow
-        ? container.scrollY
-        : container.scrollTop;
+      if (bypass) {
+        this.setVirtual(posX, posY);
+      } else {
+        this.virtual.x = this.output.x = posX;
+        this.virtual.y = this.output.y = posY;
+      }
     }
   }
 
   protected async handleFocus(event: FocusEvent) {
+    if (this.config.bypass) {
+      return;
+    }
+
     // in order to get the correct bounding rect, we need to wait for the next frame
     // because when the browser pulls an element into focus it'll try to scroll the
     // container accordinlgy and change the scrollTop/scrollY value. We're resetting
@@ -164,8 +193,8 @@ export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfi
   }
 
   protected handleResize() {
-    this.limit.width = this.wrapper.scrollWidth - this.container.width;
-    this.limit.height = this.wrapper.scrollHeight - this.container.height;
+    this.limit.width = Math.max(this.wrapper.scrollWidth - this.container.width, 0);
+    this.limit.height = Math.max(this.wrapper.scrollHeight - this.container.height, 0);
 
     this.emit(ScrollerEventType.RESIZE);
   }
@@ -173,7 +202,9 @@ export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfi
   protected handleScroll(pos = this.output) {
     super.handleScroll(pos);
 
-    this.container.ref.scrollTo(this.output.x, this.output.y);
+    if (!this.config.bypass) {
+      this.container.ref.scrollTo(this.output.x, this.output.y);
+    }
   }
 
   protected setVirtual(x?: number, y?: number) {
@@ -181,5 +212,33 @@ export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfi
 
     this.virtual.x = clamp(this.virtual.x, 0, this.limit.width);
     this.virtual.y = clamp(this.virtual.y, 0, this.limit.height);
+
+    if (this.config.bypass) {
+      this.output.x = this.virtual.x;
+      this.output.y = this.virtual.y;
+
+      this.handleScroll();
+    }
+  }
+
+  protected handleWheel(event: WheelEvent) {
+    if (this.config.bypass) {
+      return;
+    }
+
+    super.handleWheel(event);
+  }
+
+  scrollTo(pos: Partial<Coordinate>, jump = false) {
+    if (this.config.bypass) {
+      this.container.ref.scrollTo(
+        typeof pos.x === 'undefined' ? this.output.x : pos.x,
+        typeof pos.y === 'undefined' ? this.output.y : pos.y
+      );
+
+      return;
+    }
+
+    super.scrollTo(pos, jump);
   }
 }

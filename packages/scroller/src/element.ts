@@ -4,7 +4,7 @@ import { clamp, Size } from '@smoovy/utils';
 import { Scroller, ScrollerConfig, defaults as coreDefaults, ScrollerEventType } from './core';
 import { getFocusPosition } from './utils';
 
-export interface DefaultScrollerConfig extends ScrollerConfig {
+export interface ElementScrollerConfig extends ScrollerConfig {
   /**
    * The container element used as a container.
    * This represents the viewport of the scrollable area.
@@ -38,7 +38,7 @@ export interface DefaultScrollerConfig extends ScrollerConfig {
   styles?: Partial<CSSStyleDeclaration>;
 }
 
-const defaults: DefaultScrollerConfig = {
+const defaults: ElementScrollerConfig = {
   ...coreDefaults,
   focus: true,
   styles: {
@@ -48,12 +48,12 @@ const defaults: DefaultScrollerConfig = {
   }
 };
 
-export class DefaultScroller<C extends DefaultScrollerConfig = DefaultScrollerConfig> extends Scroller<C> {
+export class ElementScroller<C extends ElementScrollerConfig = ElementScrollerConfig> extends Scroller<C> {
   readonly limit: Size = { width: 0, height: 0 };
   private container!: Observable<HTMLElement>;
   private wrapper!: Observable<HTMLElement>;
 
-  constructor(config: Partial<C>, init = true) {
+  constructor(config: Partial<C> = {}, init = true) {
     super({ ...defaults, ...config }, false);
 
     if (init) {

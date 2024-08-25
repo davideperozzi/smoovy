@@ -143,6 +143,17 @@ export interface ScrollerConfig {
    * @default false
    */
   lockAxis?: 'x' | 'y' | false;
+
+  /**
+   * How many decimals to keep for the output position.
+   * Since we're using a lerp and never really getexactly
+   * to the virtual position, this ensures the decimal space
+   * isn't growing too much. It determines, how many decimals
+   * to keep
+   *
+   * @default 4
+   */
+  precision?: number;
 }
 
 type LocksMap = {
@@ -197,6 +208,7 @@ export const defaults: ScrollerConfig = {
   lockAxis: false,
   lineHeight: 16,
   damping: 0.1,
+  precision: 4
 };
 
 export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEmitter<ScrollerEventMap> {
@@ -305,9 +317,10 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   tick(delta = 1) {
     const lockX = this.xAxisLocked;
     const lockY = this.yAxisLocked;
-    const diffX = lockX ? 0 : cutDec(Math.abs(this.virtual.x - this.output.x), 4);
-    const diffY = lockY ? 0 : cutDec(Math.abs(this.virtual.y - this.output.y), 4);
+    const diffX = lockX ? 0 : Math.abs(this.virtual.x - this.output.x);
+    const diffY = lockY ? 0 : Math.abs(this.virtual.y - this.output.y);
     const threshold = this.config.threshold;
+    const precision = this.config.precision;
 
     this.animating = diffX > threshold || diffY > threshold;
 
@@ -315,11 +328,17 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
       const damping = this.config.damping * this.config.frequency;
 
       if (!lockX) {
-        this.output.x = damp(this.output.x, this.virtual.x, damping, delta * 0.001);
+        this.output.x = cutDec(
+          damp(this.output.x, this.virtual.x, damping, delta * 0.001),
+          precision
+        );
       }
 
       if (!lockY) {
-        this.output.y = damp(this.output.y, this.virtual.y, damping, delta * 0.001);
+        this.output.y = cutDec(
+          damp(this.output.y, this.virtual.y, damping, delta * 0.001),
+          precision
+        );
       }
 
       this.handleScroll(this.output);
