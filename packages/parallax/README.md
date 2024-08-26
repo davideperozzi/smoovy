@@ -25,7 +25,7 @@ const item = parallax({
   context: 'custom-optional-context',
   element: document.querySelector('[data-parallax]'),
   onUpdate: (state, progress) => {
-    console.log('current progress', progress * 100);
+    console.log('current progress', progress.y * 100);
     console.log('current shift', state.shiftY);
   }
 });
