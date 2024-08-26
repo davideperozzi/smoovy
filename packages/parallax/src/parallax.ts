@@ -120,14 +120,8 @@ export class Parallax {
         });
       }
 
-      this.target.onDimChange((observable) => {
-        this.state.x = observable.left;
-        this.state.y = observable.top;
-        this.state.width = observable.width;
-        this.state.height = observable.height;
-
-        this.update(this.state);
-      });
+      this.target.onDimChange(() => this.updateTarget());
+      [0,10,50,100].forEach(ms => setTimeout(() => this.updateTarget(), ms));
     }
   }
 
@@ -197,6 +191,19 @@ export class Parallax {
     state.startY = this.resolvers.y.state.shiftStart;
     state.endX = this.resolvers.x.state.shiftEnd;
     state.endY = this.resolvers.y.state.shiftEnd;
+  }
+
+  private updateTarget() {
+    const target = this.target;
+
+    if (target) {
+      this.state.x = target.left;
+      this.state.y = target.top;
+      this.state.width = target.width;
+      this.state.height = target.height;
+
+      this.update(this.state);
+    }
   }
 
   private updateObservable() {
