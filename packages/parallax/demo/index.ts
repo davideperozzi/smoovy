@@ -64,6 +64,13 @@ const update = () => {
     viewWidth: window.innerWidth,
     viewHeight: window.innerHeight
   });
+
+  setTimeout(() => {
+    Parallax.lock('default', queryEl('.image-box .image-wrapper'));
+    setTimeout(() => {
+      Parallax.unlock('default', queryEl('.image-box .image-wrapper'));
+    }, 3000);
+  }, 3000);
 }
 
 window.addEventListener('scroll', () => update());

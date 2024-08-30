@@ -81,8 +81,14 @@ export function parallax(config: ParallaxConfig) {
   return new Parallax(config);
 }
 
+interface ParallaxLock {
+  ctx: string;
+  scope?: HTMLElement;
+}
+
 export class Parallax {
   private static registry = new Map<string, Parallax[]>();
+  private static locks: ParallaxLock[] = [];
   protected target?: Observable<HTMLElement>;
   protected parent?: Observable<HTMLElement>;
   protected state = createState();
@@ -135,6 +141,20 @@ export class Parallax {
       for (const entry of entries) {
         entry.update(state);
       }
+    }
+  }
+
+  static lock(ctx = 'default', scope?: HTMLElement) {
+    if (!this.locks.find(lock => lock.ctx === ctx && lock.scope === scope)) {
+      this.locks.push({ ctx, scope });
+    }
+  }
+
+  static unlock(ctx = 'default', scope?: HTMLElement) {
+    const index = this.locks.findIndex(lock => lock.ctx === ctx && lock.scope === scope);
+
+    if (index > -1) {
+      this.locks.splice(index, 1);
     }
   }
 
@@ -193,10 +213,22 @@ export class Parallax {
     state.endY = this.resolvers.y.state.shiftEnd;
   }
 
+  private isLocked() {
+    return !!Parallax.locks.find(lock => {
+      const contextMatch = lock.ctx === this.context;
+
+      if (lock.scope && this.target) {
+        return contextMatch && lock.scope.contains(this.target.ref);
+      }
+
+      return contextMatch;
+    })
+  }
+
   private updateTarget() {
     const target = this.target;
 
-    if (target) {
+    if (target && !this.isLocked()) {
       this.state.x = target.left;
       this.state.y = target.top;
       this.state.width = target.width;
@@ -243,6 +275,10 @@ export class Parallax {
   }
 
   update(newState: Partial<ParallaxState>) {
+    if (this.isLocked()) {
+      return;
+    }
+
     const state = this.state = { ...this.state, ...newState };
 
     this.updateResolvers();

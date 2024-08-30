@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/parallax",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Parallax effects library",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
