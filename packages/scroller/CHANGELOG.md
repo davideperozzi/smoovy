@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.1.2
+
+### Patch Changes
+
+- feat(scroller): added check for active element on key nav
+
 ## 2.1.1
 
 ### Patch Changes

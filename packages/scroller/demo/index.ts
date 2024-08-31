@@ -1,6 +1,6 @@
 import { NativeScroller, ElementScroller } from '../src';
 
-const scroller = new NativeScroller({ bypass: true });
+const scroller = new NativeScroller({ bypass: false });
 scroller.onScroll((pos) => console.log('pos', pos));
 scroller.onVirtual((pos) => console.log('virt', pos));
 

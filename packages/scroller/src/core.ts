@@ -373,6 +373,23 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
       return;
     }
 
+    const activeEl = document.activeElement as HTMLElement|undefined;
+    const editing = activeEl && (
+      activeEl.tagName == 'INPUT' ||
+      activeEl.tagName == 'TEXTAREA' ||
+      activeEl.isContentEditable
+    );
+
+    if (editing && (
+      event.key == 'ArrowUp' ||
+      event.key == 'ArrowDown' ||
+      event.key == 'ArrowLeft' ||
+      event.key == 'ArrowRight' ||
+      event.key == ' '
+    )) {
+      return;
+    }
+
     const mult = keyspaces[event.key];
 
     if ( ! mult) {
