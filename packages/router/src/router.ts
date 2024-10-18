@@ -9,6 +9,7 @@ import { BrowserUrl, parseUrl, queryEl } from '@smoovy/utils';
 import { Route } from './route';
 import { Trigger } from './trigger';
 import { createRouteFromPath, parseRouteHtml, routesMatch } from './utils';
+import { doc } from 'prettier';
 
 export interface RouterConfig {
   /**
@@ -168,8 +169,9 @@ export enum RouterEventType {
 
 interface ViewResult {
   title: string;
-  outlet?: HTMLElement;
+  doc?: Element;
   view?: HTMLElement;
+  outlet?: HTMLElement;
 }
 
 export class Router extends EventEmitter {
@@ -217,7 +219,8 @@ export class Router extends EventEmitter {
     const result: ViewResult = {
       title: document.title,
       outlet: this._outlet,
-      view: this._view
+      view: this._view,
+      doc: document.documentElement
     };
 
     this.viewCache.set(
@@ -547,6 +550,10 @@ export class Router extends EventEmitter {
     return cloned;
   }
 
+  getViewResult(route: Route) {
+    return this.viewCache.get(route.id);
+  }
+
   async findView(route: Route) {
     if (this.viewCache.has(route.id) && this.config.cache !== false) {
       const result = await this.viewCache.get(route.id) as ViewResult;
@@ -585,7 +592,7 @@ export class Router extends EventEmitter {
       : await result;
   }
 
-  async load(route: Route) {
+  async load(route: Route): Promise<ViewResult> {
     if (this.abortController) {
       this.abortController.abort();
 

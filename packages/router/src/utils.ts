@@ -2,6 +2,8 @@ import { BrowserUrl, parseUrl, serializeUrl } from "@smoovy/utils";
 
 import { Route } from "./route";
 
+const parser = new DOMParser();
+
 export function createRouteFromPath(url: string | BrowserUrl): Route {
   url = typeof url === 'string' ? parseUrl(url) : url;
 
@@ -14,13 +16,16 @@ export function createRouteFromPath(url: string | BrowserUrl): Route {
 }
 
 export function parseRouteHtml(html: string, selector: string) {
-  const element = document.createElement('div');
-  element.innerHTML = html;
+  const doc = parser.parseFromString(html, 'text/html').firstElementChild;
 
-  const title = element.querySelector('title')?.innerText || '';
-  const outlet = element.querySelector<HTMLElement>(selector) || undefined;
+  if (doc) {
+    const title = doc.querySelector('title')?.innerText || '';
+    const outlet = doc.querySelector<HTMLElement>(selector) || undefined;
 
-  return { outlet, title };
+    return { outlet, title, doc };
+  }
+
+  return { title: '' };
 }
 
 export function routesMatch(a: Route, b: Route) {

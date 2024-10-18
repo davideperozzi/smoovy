@@ -1,6 +1,6 @@
 import { animations } from '@smoovy/router';
 
-import { Router } from '../src/router';
+import { Router, RouterEventType, RouterSwapEvent } from '../src/router';
 
 const router = new Router({ forceTrailingSlash: false });
 
@@ -15,7 +15,7 @@ setTimeout(() => {
 // router.on(RouterEventType.NAV_START, () => { console.log('nav-start') });
 // router.on(RouterEventType.AFTER_ENTER, () => { console.log('after-enter') });
 // router.on(RouterEventType.AFTER_LEAVE, () => { console.log('after-leave') });
-// router.on(RouterEventType.BEFORE_ENTER, () => { console.log('before-enter') });
+//router.on(RouterEventType.BEFORE_ENTER, () => { console.log('before-enter') });
 // router.on(RouterEventType.BEFORE_LEAVE, () => { console.log('before-leave') });
 // router.on(RouterEventType.NAV_PROGRESS, () => { console.log('nav-progress') });
 // router.on(RouterEventType.NAV_CANCEL, () => { console.log('nav-cancel') });

@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.13
+
+### Patch Changes
+
+- feat(router): enabled access to route document
+
 ## 1.2.12
 
 ### Patch Changes
