@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.14
+
+### Patch Changes
+
+- fix(router): doc clone
+
 ## 1.2.13
 
 ### Patch Changes

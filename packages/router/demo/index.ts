@@ -21,3 +21,8 @@ setTimeout(() => {
 // router.on(RouterEventType.NAV_CANCEL, () => { console.log('nav-cancel') });
 // router.on(RouterEventType.NAV_END, () => { console.log('nav-end') });
 // router.on(RouterEventType.NAV_SETTLED, () => { console.log('nav-settled') });
+
+
+router.on(RouterEventType.BEFORE_ENTER, async (event: RouterSwapEvent) => {
+  console.log((await router.getViewResult(event.toRoute))?.doc?.classList.toString());
+});

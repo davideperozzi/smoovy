@@ -169,7 +169,7 @@ export enum RouterEventType {
 
 interface ViewResult {
   title: string;
-  doc?: Element;
+  doc?: HTMLElement;
   view?: HTMLElement;
   outlet?: HTMLElement;
 }
@@ -543,8 +543,16 @@ export class Router extends EventEmitter {
   private cloneResult(result: ViewResult) {
     const cloned = { ...result };
 
+    if (cloned.doc) {
+      cloned.doc = cloned.doc.cloneNode(true) as HTMLElement;
+    }
+
     if (cloned.view) {
-      cloned.view = cloned.view.cloneNode(true) as HTMLElement;
+      if (cloned.doc) {
+        cloned.view = this.queryView(cloned.doc);
+      } else {
+        cloned.view = cloned.view.cloneNode(true) as HTMLElement;
+      }
     }
 
     return cloned;

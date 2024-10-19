@@ -16,7 +16,7 @@ export function createRouteFromPath(url: string | BrowserUrl): Route {
 }
 
 export function parseRouteHtml(html: string, selector: string) {
-  const doc = parser.parseFromString(html, 'text/html').firstElementChild;
+  const doc = parser.parseFromString(html, 'text/html').firstElementChild as HTMLElement;
 
   if (doc) {
     const title = doc.querySelector('title')?.innerText || '';
