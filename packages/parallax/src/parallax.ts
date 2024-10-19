@@ -1,5 +1,5 @@
 import { Observable, observe, unobserve } from '@smoovy/observer';
-import { between, Coordinate, isFunc } from '@smoovy/utils';
+import { between, clamp, Coordinate, isFunc } from '@smoovy/utils';
 
 import { ParallaxResolver } from './resolver';
 import { createState, ParallaxState } from './state';
@@ -69,6 +69,19 @@ export interface ParallaxConfig {
   element?: HTMLElement | ParallaxElementConfig;
 
   /**
+   * Determines the clamp mode of the element. This can be useful as an
+   * alternative to css-sticky, in cases where you need more flexibility.
+   * Hovever it's recommended to use "position: sticky" wherever possible.
+   *
+   * Note: clamping ignores paddings and margins int the parent container.
+   * If you want to have spacings, you need to wrap the parent container
+   * accordingly. This is to simplify the position calculations
+   *
+   * 'parent' -> It uses the parent box to termine, how far to move the pos
+   */
+  clamp?: 'parent' | false;
+
+  /**
    * Simply notifies you about the current state of the item and only will
    * be triggered if the item position has changed. You can make modifications
    * to the state here. For example remap the y value to x so it moves
@@ -91,8 +104,8 @@ export class Parallax {
   private static locks: ParallaxLock[] = [];
   protected target?: Observable<HTMLElement>;
   protected parent?: Observable<HTMLElement>;
-  protected state = createState();
   protected resolvers: Coordinate<ParallaxResolver>;
+  protected state = createState();
 
   constructor(
     protected config: ParallaxConfig
@@ -120,7 +133,7 @@ export class Parallax {
         visibilityDetection: true
       });
 
-      if (config.masking && element.parentElement instanceof HTMLElement) {
+      if ((config.masking || config.clamp == 'parent') && element.parentElement instanceof HTMLElement) {
         this.parent = observe(element.parentElement, {
           visibilityDetection: true
         });
@@ -184,6 +197,7 @@ export class Parallax {
 
   private updateResolvers() {
     const state = this.state;
+    const config = this.config;
     const speed = this.speed;
     const culling = this.config.culling !== false && !this.config.masking;
 
@@ -211,6 +225,20 @@ export class Parallax {
     state.startY = this.resolvers.y.state.shiftStart;
     state.endX = this.resolvers.x.state.shiftEnd;
     state.endY = this.resolvers.y.state.shiftEnd;
+
+    if (config.clamp === 'parent' && this.parent && this.target) {
+      const minY = this.parent.y - this.target.y;
+      const maxY = this.parent.height - this.target.height + minY;
+      const minX = this.parent.x - this.target.x;
+      const maxX = this.parent.width - this.target.width + minX;
+
+      state.shiftX = clamp(state.shiftX, minX, maxX);
+      state.shiftY = clamp(state.shiftY, minY, maxY);
+      state.startX = clamp(state.startX, minX, maxX);
+      state.startY = clamp(state.startY, minY, maxY);
+      state.endX = clamp(state.endX, minX, maxX);
+      state.endY = clamp(state.endY, minY, maxY);
+    }
   }
 
   private isLocked() {

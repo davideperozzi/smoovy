@@ -1,5 +1,11 @@
 # @smoovy/parallax
 
+## 1.0.6
+
+### Patch Changes
+
+- feat(parallax): added clamping
+
 ## 1.0.5
 
 ### Patch Changes

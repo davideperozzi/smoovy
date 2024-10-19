@@ -9,6 +9,14 @@ parallax({
 });
 
 parallax({
+  speed: { y: 1 },
+  clamp: 'parent',
+  element: {
+    target: queryEl('.clamp-box'),
+  },
+});
+
+parallax({
   speed: { y: 0.1 },
   element: queryEl('.box1'),
   onUpdate: (state, progress) => {

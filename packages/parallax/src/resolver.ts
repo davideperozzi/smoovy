@@ -16,7 +16,6 @@ export interface ParallaxResolverConfig {
 }
 
 export class ParallaxResolver {
-  private lastChecksum = 0;
   public state: ParallaxResolverState = {
     pos: 0,
     size: 0,
