@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { request } from 'http';
 import { DOMTweenProps, TransformTweenProps } from './props';
 
 const transformCache = new WeakMap<HTMLElement, TransformTweenProps>();
@@ -84,87 +85,80 @@ export function getTransformValues(element: HTMLElement): TransformTweenProps {
 
 export function setTransformValues(
   element: HTMLElement,
-  inputValues: Partial<TransformTweenProps>,
+  values: Partial<TransformTweenProps>,
   units: Record<string, string> = {}
 ): void {
   let transform = '';
-  const values = { ...inputValues };
   const current = getDomProps(element);
 
-  values.rotateZ = values.rotateZ !== undefined
-    ? values.rotateZ
-    : (values.rotate !== undefined ? values.rotate : 0);
-  values.scaleX = values.scaleX !== undefined
-    ? values.scaleX
-    : (values.scale !== undefined ? values.scale : 1);
-  values.scaleY = values.scaleY !== undefined
-    ? values.scaleY
-    : (values.scale !== undefined ? values.scale : 1);
-  values.scaleZ = values.scaleZ !== undefined
-    ? values.scaleZ
-    : (values.scale !== undefined ? values.scale : 1);
-
-  if (
-    values.x !== undefined ||
-    values.y !== undefined ||
-    values.z !== undefined
-  ) {
-    const x = values.x !== undefined ? values.x : current.x;
-    const y = values.y !== undefined ? values.y : current.y;
-    const z = values.z !== undefined ? values.z : current.z;
-    const unitX = units.x || 'px';
-    const unitY = units.y || 'px';
-    const unitZ = units.z || 'px';
-
-    if (x !== 0 || y !== 0 || z !== 0) {
-      current.x = x;
-      current.y = y;
-      current.z = z;
-
-      transform += ` translate3d(${x}${unitX}, ${y}${unitY}, ${z}${unitZ})`;
-    }
+  if (values.x !== undefined) {
+    current.x = values.x;
   }
 
-  if (values.rotateX !== undefined && values.rotateX !== 0) {
-    const unit = units.rotateX || units.rotate || 'deg';
+  if (values.y !== undefined) {
+    current.y = values.y;
+  }
 
+  if (values.z !== undefined) {
+    current.z = values.z;
+  }
+
+  if (values.scale !== undefined) {
+    current.scaleX = values.scale;
+    current.scaleY = values.scale;
+    current.scaleZ = values.scale;
+  }
+
+  if (values.scaleX !== undefined) {
+    current.scaleX = values.scaleX;
+  }
+
+  if (values.scaleY !== undefined) {
+    current.scaleY = values.scaleY;
+  }
+
+  if (values.scaleZ !== undefined) {
+    current.scaleZ = values.scaleZ;
+  }
+
+  if (values.rotate !== undefined) {
+    current.rotateZ = values.rotate;
+  }
+
+  if (values.rotateX !== undefined) {
     current.rotateX = values.rotateX;
-
-    transform += ` rotateX(${values.rotateX}${unit})`;
   }
 
-  if (values.rotateY !== undefined && values.rotateY !== 0) {
-    const unit = units.rotateY || units.rotate || 'deg';
-
+  if (values.rotateY !== undefined) {
     current.rotateY = values.rotateY;
-
-    transform += ` rotateY(${values.rotateY}${unit})`;
   }
 
-  if (values.rotateZ !== undefined && values.rotateZ !== 0) {
-    const unit = units.rotateZ || units.rotate || 'deg';
-
+  if (values.rotateZ !== undefined) {
     current.rotateZ = values.rotateZ;
-
-    transform += ` rotateZ(${values.rotateZ}${unit})`;
   }
 
-  if (
-    values.scaleX !== undefined ||
-    values.scaleY !== undefined ||
-    values.scaleZ !== undefined
-  ) {
-    const scaleX = values.scaleX !== undefined ? values.scaleX : current.scaleX;
-    const scaleY = values.scaleY !== undefined ? values.scaleY : current.scaleY;
-    const scaleZ = values.scaleZ !== undefined ? values.scaleZ : current.scaleZ;
+  if (current.x != 0 || current.y != 0 || current.z != 0) {
+    transform += ` translate3d(
+      ${current.x}${units.x || 'px'},
+      ${current.y}${units.y || 'px'},
+      ${current.z}${units.z || 'px'}
+    )`;
+  }
 
-    if (scaleX !== 1 || scaleY !== 1 || scaleZ !== 1) {
-      current.scaleX = scaleX;
-      current.scaleY = scaleY;
-      current.scaleZ = scaleZ;
+  if (current.rotateX != 0) {
+    transform += ` rotateX(${current.rotateX}${units.rotateX || units.rotate || 'deg'})`;
+  }
 
-      transform += ` scale3d(${scaleX}, ${scaleY}, ${scaleZ})`;
-    }
+  if (current.rotateY != 0) {
+    transform += ` rotateY(${current.rotateY}${units.rotateY || units.rotate || 'deg'})`;
+  }
+
+  if (current.rotateZ != 0) {
+    transform += ` rotateZ(${current.rotateZ}${units.rotateZ || units.rotate || 'deg'})`;
+  }
+
+  if (current.scaleX != 1 || current.scaleY != 1 || current.scaleZ != 1) {
+    transform += ` scale3d(${current.scaleX}, ${current.scaleY}, ${current.scaleZ})`;
   }
 
   element.style.transform = transform.trim();

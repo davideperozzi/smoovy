@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.25
+
+### Patch Changes
+
+- fix(tween): proper transform
+
 ## 1.1.24
 
 ### Patch Changes
