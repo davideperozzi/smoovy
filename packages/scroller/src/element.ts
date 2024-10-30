@@ -49,7 +49,6 @@ const defaults: ElementScrollerConfig = {
 };
 
 export class ElementScroller<C extends ElementScrollerConfig = ElementScrollerConfig> extends Scroller<C> {
-  readonly limit: Size = { width: 0, height: 0 };
   private container!: Observable<HTMLElement>;
   private wrapper!: Observable<HTMLElement>;
 
@@ -166,13 +165,6 @@ export class ElementScroller<C extends ElementScrollerConfig = ElementScrollerCo
     });
   }
 
-  protected setVirtual(x?: number, y?: number) {
-    super.setVirtual(x, y);
-
-    this.virtual.x = clamp(this.virtual.x, 0, this.limit.width);
-    this.virtual.y = clamp(this.virtual.y, 0, this.limit.height);
-  }
-
   protected get wheelTarget() {
     return this.config.wheelTarget || this.container.ref || window;
   }
@@ -186,8 +178,9 @@ export class ElementScroller<C extends ElementScrollerConfig = ElementScrollerCo
   }
 
   protected handleResize() {
-    this.limit.width = this.wrapper.width - this.container.width;
-    this.limit.height = this.wrapper.height - this.container.height;
+    this.limit.minX = this.limit.minY = 0;
+    this.limit.maxX = this.wrapper.width - this.container.width;
+    this.limit.maxY = this.wrapper.height - this.container.height;
 
     this.emit(ScrollerEventType.RESIZE);
   }

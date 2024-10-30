@@ -55,7 +55,6 @@ const defaults: NativeScrollerConfig = {
 };
 
 export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfig> extends Scroller<C> {
-  readonly limit: Size = { width: 0, height: 0 };
   private container!: Observable<HTMLElement | Window>;
   private wrapper!: Observable<HTMLElement>;
 
@@ -198,8 +197,9 @@ export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfi
   }
 
   protected handleResize() {
-    this.limit.width = Math.max(this.wrapper.scrollWidth - this.container.width, 0);
-    this.limit.height = Math.max(this.wrapper.scrollHeight - this.container.height, 0);
+    this.limit.minX = this.limit.minY = 0;
+    this.limit.maxX = Math.max(this.wrapper.scrollWidth - this.container.width, 0);
+    this.limit.maxY = Math.max(this.wrapper.scrollHeight - this.container.height, 0);
 
     this.emit(ScrollerEventType.RESIZE);
   }
@@ -214,9 +214,6 @@ export class NativeScroller<C extends NativeScrollerConfig = NativeScrollerConfi
 
   protected setVirtual(x?: number, y?: number) {
     super.setVirtual(x, y);
-
-    this.virtual.x = clamp(this.virtual.x, 0, this.limit.width);
-    this.virtual.y = clamp(this.virtual.y, 0, this.limit.height);
 
     if (this.config.bypass) {
       this.output.x = this.virtual.x;

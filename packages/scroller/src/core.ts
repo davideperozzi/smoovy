@@ -1,7 +1,7 @@
 import { EventEmitter, EventListener } from "@smoovy/emitter";
 import { listen, listenCompose, Unlisten } from "@smoovy/listener";
 import { Ticker, TickerTask } from "@smoovy/ticker";
-import { Coordinate, cutDec, damp } from "@smoovy/utils";
+import { clamp, Coordinate, cutDec, damp, Size } from "@smoovy/utils";
 import { Inertia, InertiaEventType } from "./inertia";
 
 export interface ScrollerConfig {
@@ -25,7 +25,7 @@ export interface ScrollerConfig {
    * The threshold being used in order to determine
    * when the scroll animation has settled.
    *
-   * @default 0.001
+   * @default 0.005
    */
   threshold: number;
 
@@ -156,9 +156,28 @@ export interface ScrollerConfig {
   precision?: number;
 }
 
-type LocksMap = {
-  [K in keyof Scroller['locks']]: boolean;
-};
+interface Locks {
+  controls: { all: Set<string> };
+  position: { all: Set<string> };
+  keyboard: {
+    all: Set<string>;
+    Space: Set<string>;
+    ArrowLeft: Set<string>;
+    ArrowRight: Set<string>;
+    ArrowDown: Set<string>;
+    ArrowUp: Set<string>;
+    PageDown: Set<string>;
+    PageUp: Set<string>;
+    Homey: Set<string>;
+    End: Set<string>
+  };
+}
+
+interface LocksMap {
+  controls: boolean;
+  position: boolean;
+  keyboard: boolean | Partial<{ [K in keyof Locks['keyboard']]: boolean; }>;
+}
 
 export enum ScrollerEventType {
   SCROLL = 'scroll',
@@ -182,7 +201,7 @@ export interface ScrollerEventMap {
 }
 
 const keyspaces: Record<string, Partial<Coordinate>> = {
-  ' ': { y: 55.875 },
+  'Space': { y: 55.875 },
   'ArrowLeft': { x: -2.5 },
   'ArrowRight': { x: 2.5 },
   'ArrowDown': { y: 2.5 },
@@ -204,7 +223,7 @@ export const defaults: ScrollerConfig = {
   touchVelocity: 20,
   keyboardEvents: true,
   touchEvents: true,
-  threshold: 0.001,
+  threshold: 0.005,
   lockAxis: false,
   lineHeight: 16,
   damping: 0.1,
@@ -212,6 +231,7 @@ export const defaults: ScrollerConfig = {
 };
 
 export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEmitter<ScrollerEventMap> {
+  readonly limit = { minX: -Infinity, maxX: Infinity, minY: -Infinity, maxY: Infinity };
   readonly virtual: Coordinate = { x: 0, y: 0 };
   readonly output: Coordinate = { x: 0, y: 0 };
   readonly config: C;
@@ -219,8 +239,23 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   protected unlistenInertia?: Unlisten;
   private unlisten?: Unlisten;
   private ticker?: TickerTask;
-  private locks = { controls: new Set<string>(), position: new Set<string>() };
   private inertia!: Inertia;
+  private locks: Locks = {
+    controls: { all: new Set<string>() },
+    position: { all: new Set<string>() },
+    keyboard: {
+      all: new Set<string>(),
+      Space: new Set<string>(),
+      ArrowLeft: new Set<string>(),
+      ArrowRight: new Set<string>(),
+      ArrowDown: new Set<string>(),
+      ArrowUp: new Set<string>(),
+      PageDown: new Set<string>(),
+      PageUp: new Set<string>(),
+      Homey: new Set<string>(),
+      End: new Set<string>()
+    }
+  };
 
   constructor(config: Partial<C> = {}, init = true) {
     super();
@@ -332,10 +367,10 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   tick(delta = 1) {
     const lockX = this.xAxisLocked;
     const lockY = this.yAxisLocked;
-    const diffX = lockX ? 0 : Math.abs(this.virtual.x - this.output.x);
-    const diffY = lockY ? 0 : Math.abs(this.virtual.y - this.output.y);
     const threshold = this.config.threshold;
     const precision = this.config.precision;
+    const diffX = lockX ? 0 : Math.abs(this.virtual.x - this.output.x);
+    const diffY = lockY ? 0 : Math.abs(this.virtual.y - this.output.y);
 
     this.animating = diffX > threshold || diffY > threshold;
 
@@ -369,7 +404,17 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   }
 
   protected handleKeyboard(event: KeyboardEvent) {
-    if (this.locks.controls.size > 0) {
+    const { code } = event;
+    const locks = this.locks;
+    const subLock = event.code as keyof typeof locks.keyboard;
+
+    if (locks.controls.all.size > 0 || locks.keyboard.all.size > 0) {
+      return;
+    }
+
+    if (locks.keyboard[subLock] && locks.keyboard[subLock].size > 0) {
+      event.preventDefault();
+
       return;
     }
 
@@ -381,16 +426,16 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
     );
 
     if (editing && (
-      event.key == 'ArrowUp' ||
-      event.key == 'ArrowDown' ||
-      event.key == 'ArrowLeft' ||
-      event.key == 'ArrowRight' ||
-      event.key == ' '
+      code == 'ArrowUp' ||
+      code == 'ArrowDown' ||
+      code == 'ArrowLeft' ||
+      code == 'ArrowRight' ||
+      code == 'Space'
     )) {
       return;
     }
 
-    const mult = keyspaces[event.key];
+    const mult = keyspaces[code];
 
     if ( ! mult) {
       return;
@@ -411,7 +456,7 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
     event.preventDefault();
     event.stopPropagation();
 
-    if (this.locks.controls.size > 0) {
+    if (this.locks.controls.all.size > 0) {
       return;
     }
 
@@ -437,7 +482,7 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   }
 
   protected setVirtual(x?: number, y?: number) {
-    if (this.locks.position.size > 0) {
+    if (this.locks.position.all.size > 0) {
       return;
     }
 
@@ -448,6 +493,9 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
     if (typeof y !== 'undefined' && !this.yAxisLocked) {
       this.virtual.y = y;
     }
+
+    this.virtual.x = clamp(this.virtual.x, this.limit.minX, this.limit.maxX);
+    this.virtual.y = clamp(this.virtual.y, this.limit.minY, this.limit.maxY);
 
     this.emit(ScrollerEventType.VIRTUAL, this.virtual);
   }
@@ -463,17 +511,20 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
     }
   }
 
-  isLocked(name?: keyof LocksMap) {
+  isLocked(
+    name?: keyof LocksMap,
+    key: keyof Locks[NonNullable<typeof name>] = 'all'
+  ) {
     if (name) {
       if (this.locks[name]) {
-        return this.locks[name].size > 0;
+        return this.locks[name][key].size > 0;
       }
 
       return false;
     }
 
     return Object.values(this.locks)
-      .reduce((size, lock) => size + lock.size, 0) > 0;
+      .reduce((size, lock) => size + lock[key].size, 0) > 0;
   }
 
   lock(locked: boolean | Partial<LocksMap> = true, name = '_') {
@@ -483,15 +534,27 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
 
       if (typeof locked === 'boolean') {
         if (locked) {
-          lock.add(name)
+          lock.all.add(name)
         } else {
-          lock.delete(name);
+          lock.all.delete(name);
         }
-      } else {
-        if (locked[key] === true) {
-          lock.add(name);
-        } else if (locked[key] === false) {
-          lock.delete(name);
+      } else if (typeof locked == 'object' && typeof locked[key] == 'boolean') {
+        if (locked[key]) {
+          lock.all.add(name)
+        } else {
+          lock.all.delete(name);
+        }
+      } else if (typeof locked == 'object' && typeof locked[key] == 'object') {
+        const subLocks = locked[key] as Record<string, boolean>;
+
+        for (const subName in subLocks) {
+          const subKey = subName as keyof typeof lock;
+
+          if (subLocks[subName]) {
+            lock[subKey].add(name);
+          } else {
+            lock[subKey].delete(name);
+          }
         }
       }
     }

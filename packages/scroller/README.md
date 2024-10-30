@@ -9,7 +9,7 @@ npm i @smoovy/scroller
 ## Usage
 Smooth scrolling is split up into two different approaches: native and default. With "native", you get the best accessibility, since it just animates the scroll position of the window or container.
 
-If you want to have more control and use a CSS transform-based scrolling, you can use the `DefaultScroller`. It'll create necessary DOM elements (container and wrapper) and use those to move the content.
+If you want to have more control and use a CSS transform-based scrolling, you can use the `ElementScroller`. It'll create necessary DOM elements (container and wrapper) and use those to move the content.
 
 In order to use the native or default scroller you can just import it from the package and create a new instance. Here's how you can create both types:
 
@@ -31,12 +31,12 @@ const scroller = new NativeScroller({
 
 ### Using the default scroller
 ```ts
-import { DefaultScroller } from '@smoovy/scroller/default';
+import { ElementScroller } from '@smoovy/scroller/element';
 
-const scroller = new DefaultScroller();
+const scroller = new ElementScroller();
 
 // make it slower (all options at the bottom)
-const scroller = new DefaultScroller({
+const scroller = new ElementScroller({
   damping: 0.08
 });
 ```
@@ -51,7 +51,7 @@ import { Scroller } from '@smoovy/scroller/core';
 
 const scroller = new Scroller();
 ```
-> Note: DefaultScroller and NativeScroller are just variations of the Scroller.
+> Note: ElementScroller and NativeScroller are just variations of the Scroller.
 
 ### Listening to events
 There are two types of scroll positions: `output` and `virtual`. The output position is the current *animated position*. The virtual position is the *animated position* the output is animating towards. So the virtual is always in sync with the "native" scroll position, while output is where the animation is currently at. You can listen to both:
@@ -91,6 +91,9 @@ scroller.lock(true, 'other-component');
 
 scroller.lock(false, 'menu') // still locked because of other-component
 scroller.lock(false, 'other-component'); // full unlocked now
+
+// you can always go deepter and only lock a specific keyboard event
+scroller.lock({ keyboard: { Space: true } });
 
 // listening for locks
 scroller.onLock(({ locked }) => {
@@ -172,7 +175,7 @@ tween.fromTo({ y: scroller.output.y }, { y: 500 }, {
 ## Accessibility breakdown
 You should always be aware of the limitations when using scrolljacking to not worsen the user experience. Especially when optimizing for a lot of different devices. Sometimes it's better to remove smooth scrolling alltogether (e.g. on mobile) to ensure the user gets the same scrolling expericence he's familiar with.
 
-| Function | Native | Default
+| Function | Native | Element
 | -------- | ------ | -------
 | Scroll to focus element    |  ✅    | ✅
 | Keybard scroll controls | ✅ | ✅ 

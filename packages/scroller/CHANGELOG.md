@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.2.0
+
+### Minor Changes
+
+- feat(scroller): deep locks, limit abstractions
+
 ## 2.1.2
 
 ### Patch Changes
