@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.2.1
+
+### Patch Changes
+
+- feat(scroller): added wheel lock
+
 ## 2.2.0
 
 ### Minor Changes

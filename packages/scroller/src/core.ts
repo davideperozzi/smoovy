@@ -157,10 +157,12 @@ export interface ScrollerConfig {
 }
 
 interface Locks {
-  controls: { all: Set<string> };
   position: { all: Set<string> };
-  keyboard: {
+  controls: {
     all: Set<string>;
+    wheel: Set<string>;
+  };
+  keyboard: { all: Set<string>;
     Space: Set<string>;
     ArrowLeft: Set<string>;
     ArrowRight: Set<string>;
@@ -174,8 +176,8 @@ interface Locks {
 }
 
 interface LocksMap {
-  controls: boolean;
   position: boolean;
+  controls: boolean | Partial<{ [K in keyof Locks['controls']]: boolean; }>;
   keyboard: boolean | Partial<{ [K in keyof Locks['keyboard']]: boolean; }>;
 }
 
@@ -241,8 +243,11 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   private ticker?: TickerTask;
   private inertia!: Inertia;
   private locks: Locks = {
-    controls: { all: new Set<string>() },
     position: { all: new Set<string>() },
+    controls: {
+      all: new Set<string>(),
+      wheel: new Set<string>()
+    },
     keyboard: {
       all: new Set<string>(),
       Space: new Set<string>(),
@@ -449,7 +454,7 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   }
 
   protected handleWheel(event: WheelEvent) {
-    if (event.ctrlKey) {
+    if (event.ctrlKey || this.locks.controls.wheel.size > 0) {
       return;
     }
 
