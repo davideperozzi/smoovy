@@ -9,7 +9,6 @@ import { BrowserUrl, parseUrl, queryEl } from '@smoovy/utils';
 import { Route } from './route';
 import { Trigger } from './trigger';
 import { createRouteFromPath, parseRouteHtml, routesMatch } from './utils';
-import { doc } from 'prettier';
 
 export interface RouterConfig {
   /**
@@ -53,13 +52,9 @@ export interface RouterConfig {
    * clone from the original node. You can disable this if you
    * want to preserve the state for each view.
    *
-   * Note: If you pre-render a route with `render`, the pre-rendered
-   * route in the DOM will be automatically used, even if this is `true`
-   *
    * @default true
    */
   clone?: boolean;
-
 
   /**
    * If set to true, the router will preload the view when
@@ -177,8 +172,6 @@ interface ViewResult {
 export class Router extends EventEmitter {
   private abortController?: AbortController;
   private animations: RouterAnimation[] = [];
-  private keepViews: HTMLElement[] = [];
-  private renderedRoutes: Route['id'][] = [];
   private attachedViews = new Map<string, HTMLElement>();
   private _route: Route;
   private _outlet: HTMLElement;
@@ -203,7 +196,7 @@ export class Router extends EventEmitter {
     this.triggerSelector = config.trigger || 'a[href]:not([data-no-route])';
     this.allowClone = config.clone !== false;
     this.baseUrl = parseUrl(window.location.href);
-    this._route = createRouteFromPath(this.baseUrl);
+    this._route = this.createRoute(this.baseUrl);
     this._outlet = queryEl(this.outletSelector);
     this._view = this.queryView(this._outlet);
     this.unlisten = this.listen();
@@ -240,7 +233,7 @@ export class Router extends EventEmitter {
   }
 
   get route() {
-    return { ...this._route };
+    return this._route;
   }
 
   get outlet() {
@@ -274,19 +267,13 @@ export class Router extends EventEmitter {
     )[0];
   }
 
-  to(url: string, options?: RouteToOptions) {
-    const route = createRouteFromPath(url);
-    const method = options?.replace ? 'replaceState' : 'pushState';
+  to(route: string | Route, options?: RouteToOptions) {
+    route = typeof route == 'string' ? this.createRoute(route) : route;
 
-    if (this.config.forceTrailingSlash) {
-      const trailingSlash = route.url.endsWith('/') ? '' : '/';
-
-      route.url += trailingSlash;
-      route.load += trailingSlash;
-    }
-
-    window.history[method](route, '', route.url + (route.hash || ''));
+    this.updateHistory(route, options?.replace)
     this.navigate(route, { flags: options?.flags });
+
+    return this;
   }
 
   private animateCycle(
@@ -353,45 +340,13 @@ export class Router extends EventEmitter {
 
   async preload(route: Route | string) {
     if (typeof route === 'string') {
-      route = createRouteFromPath(route);
+      route = this.createRoute(route);
     }
 
-    return !!await this.findView(route);
+    return await this.findView(route);
   }
 
-  async render(route: Route | string, options?: RouterRenderOptions) {
-    if (typeof route === 'string') {
-      route = createRouteFromPath(route);
-    }
-
-    this.renderedRoutes.push(route.id);
-
-    const { view } = await this.findView(route);
-
-    if (view) {
-      if (options?.keep !== false) {
-        this.keepViews.push(view);
-      }
-
-      if (this.route.id !== route.id) {
-        for (const [prop, style] of Object.entries(options?.style || {})) {
-          view.style[prop as any] = style as any;
-        }
-      }
-
-      this.attachView(view, route);
-
-      return true;
-    }
-
-    return false;
-  }
-
-  async navigate(to: Route, options?: RouteNavigateOptions) {
-    if ( ! to) {
-      return;
-    }
-
+  private async navigate(to: Route, options?: RouteNavigateOptions) {
     const trigger = options?.trigger || 'user';
     const event: RouterEvent = {
       outlet: this._outlet,
@@ -457,14 +412,13 @@ export class Router extends EventEmitter {
 
     changeState.timeline = timeline;
 
-    this._route = to;
-
+    this.enableRoute(to);
     this.emit(RouterEventType.NAV_START, event);
     this.animateHook(event, 'start', timeline, animations);
 
     const { view: toElement, title } = await this.findView(to);
 
-    document.title = title;
+    this.updateTitle(title);
 
     for (const swapState of this.changeStates) {
       swapState.timeline?.stop();
@@ -481,8 +435,7 @@ export class Router extends EventEmitter {
     changeState.fromElement = fromElement;
     changeState.toElement = toElement;
 
-    this._view = toElement;
-
+    this.enableView(toElement);
     this.animateCycle(timeline, animations, swapEvent);
     this.trigger.update(toElement);
 
@@ -500,7 +453,48 @@ export class Router extends EventEmitter {
     return RouterNavResult.SUCESS;
   }
 
-  private attachView(view?: HTMLElement, route?: Route) {
+  createRoute(path: string | BrowserUrl) {
+    const route = createRouteFromPath(path);
+
+    if (this.config.forceTrailingSlash) {
+      const trailingSlash = route.url.endsWith('/') ? '' : '/';
+
+      route.url += trailingSlash;
+      route.load += trailingSlash;
+    }
+
+    return route;
+  }
+
+  updateHistory(route: Route, replace = false) {
+    window.history[replace ? 'replaceState' : 'pushState'](
+      route,
+      '',
+      route.url + (route.hash || '')
+    );
+
+    return this;
+  }
+
+  enableView(view: HTMLElement) {
+    this._view = view;
+
+    return this;
+  }
+
+  enableRoute(route: Route) {
+    this._route = route;
+
+    return this;
+  }
+
+  updateTitle(title: string) {
+    document.title = title;
+
+    return this;
+  }
+
+  attachView(view?: HTMLElement, route?: Route) {
     if (view) {
       this._outlet.append(view);
 
@@ -508,20 +502,20 @@ export class Router extends EventEmitter {
         this.attachedViews.set(route.id, view);
       }
     }
+
+    return this;
   }
 
-  private detachView(view?: HTMLElement, route?: Route) {
+  detachView(view?: HTMLElement, route?: Route) {
     if (view) {
-      if ( ! this.keepViews.includes(view)) {
-        view.remove();
-      } else {
-        view.style.display = 'none';
-      }
+      view.remove();
 
       if (route) {
         this.attachedViews.delete(route.id);
       }
     }
+
+    return this;
   }
 
   private clearChangeStates(activeElements: HTMLElement[], route?: Route) {
@@ -565,10 +559,6 @@ export class Router extends EventEmitter {
   async findView(route: Route) {
     if (this.viewCache.has(route.id) && this.config.cache !== false) {
       const result = await this.viewCache.get(route.id) as ViewResult;
-
-      if (this.renderedRoutes.includes(route.id)) {
-        return result;
-      }
 
       if (this.attachedViews.has(route.id)) {
         return {

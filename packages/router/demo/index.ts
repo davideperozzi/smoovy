@@ -6,6 +6,20 @@ const router = new Router({ forceTrailingSlash: false });
 
 router.animate(animations.fade());
 
+const route = router.createRoute('/sample.html');
+const { view, title } = await router.preload(route);
+
+view!.style.background = 'green';
+
+router
+  .detachView(router.view, router.route)
+  .attachView(view, route)
+  .enableView(view!)
+  .enableRoute(route)
+  .updateTitle(title)
+  .updateHistory(route)
+
+
 setTimeout(() => {
   // router.render('/', { style: { display: 'none' } });
   // router.render('/projects/', { style: { display: 'none' } });

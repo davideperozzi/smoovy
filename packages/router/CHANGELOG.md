@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.15
+
+### Patch Changes
+
+- feat(router): simplification
+
 ## 1.2.14
 
 ### Patch Changes
