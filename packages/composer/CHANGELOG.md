@@ -1,5 +1,11 @@
 # @smoovy/composer
 
+## 1.0.13
+
+### Patch Changes
+
+- feat(composer): improved collector
+
 ## 1.0.12
 
 ### Patch Changes

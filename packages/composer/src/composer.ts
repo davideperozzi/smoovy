@@ -321,7 +321,13 @@ export class Composer {
         return;
       }
 
-      scope.querySelectorAll(config.selector).forEach(element => {
+      const nodes = Array.from(scope.querySelectorAll(config.selector));
+
+      if (scope.matches(config.selector)) {
+        nodes.unshift(scope);
+      }
+
+      nodes.forEach(element => {
         if (
           filter(Clazz) &&
           element instanceof HTMLElement &&
