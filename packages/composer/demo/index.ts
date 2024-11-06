@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-constructor */
-import { component, Composer, composer, Service, service } from '../src';
+import { component, Composer, composer, parent, Service, service } from '../src';
 import { config } from '../src/config';
-import { query, queryAll } from '../src/query';
+import { query, queryAll, queryClosest, queryParent } from '../src/query';
 
 export class TestService extends Service<any, TestService> {
   get name() { return 'test'; }
@@ -48,6 +48,11 @@ export class SampleService extends Service<string, SampleService> {
   }
 }
 
+@component('parent-component')
+class ParentComponent {
+  onCreate() {}
+}
+
 @component('sample-component')
 class SampleComponent {
   @service(SampleService, true)
@@ -55,6 +60,9 @@ class SampleComponent {
 
   @service(SampleService)
   protected sampleService!: SampleService;
+
+  @queryClosest(ParentComponent)
+  private parent!: ParentComponent;
 
   @composer()
   protected composer!: Composer;
@@ -87,6 +95,7 @@ class SampleComponent {
     console.log('active:', this.active);
     console.log('test:', this.test);
     console.log('testArray:', this.testArray);
+    console.log('parent:', this.parent);
 
     const childService = this.sampleService.addChild('test-child');
 
@@ -94,7 +103,7 @@ class SampleComponent {
     await childService.init();
 
     console.log('child says -> ', await childService);
-    // console.log(this.uniq, this.selectMe);
+    console.log(this.uniq, this.selectMe);
   }
 
   onListen() {
@@ -108,7 +117,8 @@ class SampleComponent {
     new TestService()
   ],
   components: [
-    SampleComponent
+    SampleComponent,
+    ParentComponent
   ]
 })
 class App {

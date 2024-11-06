@@ -7,15 +7,17 @@
   <title>@smoovy/composer</title>
 </head>
 <body>
-  <div
-    data-sample-component='{ "message": 42 }'
-    data-sample-component-message="12"
-    data-sample-component-array='["test", "test2"]'
-    data-sample-component-is-active
-  >
-    <div class="select-me">Select Me</div>
-    <div class="select-me" id="imuniq">Select Me | Uniq</div>
-    <div class="select-me">Select Me</div>
+  <div data-parent-component="">
+    <div
+        data-sample-component='{ "message": 42 }'
+        data-sample-component-message="12"
+        data-sample-component-array='["test", "test2"]'
+        data-sample-component-is-active
+        >
+        <div class="select-me">Select Me</div>
+        <div class="select-me" id="imuniq">Select Me | Uniq</div>
+        <div class="select-me">Select Me</div>
+    </div>
   </div>
   <script async type="module" src="./index.ts"></script>
 </body>

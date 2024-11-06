@@ -28,7 +28,6 @@ const parseJson = (text?: string, defaultValue = {}, warn = false) => {
   return result;
 };
 
-
 export function composer(config?: ComposerConfig) {
   return (target: any, propertyKey?: string) => {
     if ( ! propertyKey) {
@@ -132,7 +131,15 @@ export class Composer {
         this.voidService
       ),
       inject(queryInjector, wrapper.component, async (name, config, target) => {
-        let result = wrapper.element.querySelector(config.selector);
+        const component = config.selector[componentConfigKey];
+        const selector = component ? component.selector : config.selector;
+        let result = config.closest
+          ? wrapper.element.closest(selector)
+          : wrapper.element.querySelector(selector);
+
+        if (component) {
+          result = this.components.find(({ element }) => element === result)?.component;
+        }
 
         if (typeof config.parse === 'function') {
           result = config.parse(result);
@@ -146,7 +153,17 @@ export class Composer {
         queryAllInjector,
         wrapper.component,
         async (name, config, target) => {
-          let result = wrapper.element.querySelectorAll(config.selector);
+          const componentCfg = config.selector[componentConfigKey];
+          const selector = componentCfg ? componentCfg.selector : config.selector;
+          let result: any = wrapper.element.querySelectorAll(selector);
+
+          if (componentCfg) {
+            const elements = Array.from(result);
+
+            result = this.components
+              .filter(({ element }) => elements.includes(element))
+              .map(({ component }) => component);
+          }
 
           if (typeof config.parse === 'function') {
             result = config.parse(result);
@@ -253,9 +270,11 @@ export class Composer {
     purge = true,
     filter: (cls: any) => boolean = () => true
   ) {
-    const results: ComponentWrapper[] = [];
+    const wrappers = this.collect(scope, filter, (wrapper) => {
+      this.components.push(wrapper);
+    });
 
-    this.collect(scope, filter, (wrapper) => {
+    for (const wrapper of wrappers) {
       this.injectComponent(wrapper).then(() => {
         let created = Promise.resolve();
 
@@ -279,16 +298,13 @@ export class Composer {
           });
         }
       });
-
-      results.push(wrapper);
-      this.components.push(wrapper);
-    });
+    }
 
     if (purge) {
       this.purge();
     }
 
-    return results;
+    return wrappers;
   }
 
   private collect(
@@ -296,6 +312,8 @@ export class Composer {
     filter: (cls: any) => boolean,
     cb: (wrapper: ComponentWrapper) => void
   ) {
+    const result: ComponentWrapper[] = [];
+
     (this.config.components || []).forEach((Clazz) => {
       const config = Clazz[componentConfigKey] || {};
 
@@ -312,15 +330,20 @@ export class Composer {
             wrapper.element === element
           ))
         ) {
-          cb({
+          const wrapper: ComponentWrapper = {
             ctor: Clazz,
             component: new Clazz(element),
             config,
             element
-          });
+          };
+
+          cb(wrapper)
+          result.push(wrapper);
         }
       });
     });
+
+    return result;
   }
 
   public purge() {
