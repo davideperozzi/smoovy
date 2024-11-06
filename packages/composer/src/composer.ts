@@ -387,22 +387,9 @@ export class Composer {
   }
 
   query<T>(ctor: new(...args: any[]) => T, scope?: HTMLElement) {
-    const results: ComponentWrapper<T>[] = [];
-
-    this.components.forEach(wrapper => {
-      if (
-        scope &&
-        ! scope.contains(wrapper.element) &&
-        wrapper.element !== scope
-      ) {
-        return;
-      }
-
-      if (wrapper.component instanceof (ctor as any)) {
-        results.push({ ...wrapper });
-      }
-    });
-
-    return results;
+    return this.components
+      .filter(wrapper => wrapper.component instanceof (ctor as any))
+      .filter(wrapper => scope ? scope.contains(wrapper.element) : true)
+      .map(wrapper => ({ ...wrapper }))
   }
 }

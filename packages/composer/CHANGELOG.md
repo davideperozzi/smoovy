@@ -1,5 +1,11 @@
 # @smoovy/composer
 
+## 1.0.12
+
+### Patch Changes
+
+- feat(composer): simplified query
+
 ## 1.0.11
 
 ### Patch Changes

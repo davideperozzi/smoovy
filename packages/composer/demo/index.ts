@@ -128,8 +128,7 @@ class App {
   @service(TestService2)
   private testService2!: TestService2;
 
-  async onCreate() {
-  }
+  async onCreate() {}
 }
 
 // eslint-disable-next-line no-new
