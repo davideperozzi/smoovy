@@ -346,7 +346,7 @@ export class Router extends EventEmitter {
 
     const result = await this.findView(route);
 
-    this.emit(RouterEventType.ROUTE_PRELOAD, result);
+    this.emit(RouterEventType.ROUTE_PRELOAD, { route, result });
 
     return result;
   }

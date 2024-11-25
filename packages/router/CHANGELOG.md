@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.17
+
+### Patch Changes
+
+- fix(router): preload event
+
 ## 1.2.16
 
 ### Patch Changes
