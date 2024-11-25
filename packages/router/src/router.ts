@@ -155,6 +155,7 @@ export enum RouterEventType {
   NAV_CANCEL = 'navcancel',
   NAV_SETTLED = 'navsettled',
   NAV_PROGRESS = 'navprogress',
+  ROUTE_PRELOAD = 'routepreload',
   BEFORE_ENTER = 'beforeenter',
   AFTER_ENTER = 'afterenter',
   BEFORE_LEAVE = 'beforeleave',
@@ -343,7 +344,11 @@ export class Router extends EventEmitter {
       route = this.createRoute(route);
     }
 
-    return await this.findView(route);
+    const result = await this.findView(route);
+
+    this.emit(RouterEventType.ROUTE_PRELOAD, result);
+
+    return result;
   }
 
   private async navigate(to: Route, options?: RouteNavigateOptions) {
