@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.26
+
+### Patch Changes
+
+- fix(tween): initial reset
+
 ## 1.1.25
 
 ### Patch Changes

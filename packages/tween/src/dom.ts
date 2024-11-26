@@ -1,14 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { request } from 'http';
 import { DOMTweenProps, TransformTweenProps } from './props';
 
 const transformCache = new WeakMap<HTMLElement, TransformTweenProps>();
+const transformInitCache = new WeakMap<HTMLElement, TransformTweenProps>();
 
-export function getTransformValues(element: HTMLElement): TransformTweenProps {
+export function getTransformValues(element: HTMLElement): {
+  initial: TransformTweenProps,
+  values: TransformTweenProps
+} {
   const cacheItem = transformCache.get(element);
 
   if (cacheItem) {
-    return cacheItem;
+    return {
+      values: cacheItem,
+      initial: transformInitCache.get(element)!
+    };
   }
 
   const style = getComputedStyle(element);
@@ -33,7 +39,7 @@ export function getTransformValues(element: HTMLElement): TransformTweenProps {
     const stringParts = transform.match(/matrix.*\((.+)\)/);
 
     if ( ! stringParts) {
-      return values;
+      return { values, initial: { ...values } };
     }
 
     const matrixValues = stringParts[1].split(', ').map(Number);
@@ -61,6 +67,7 @@ export function getTransformValues(element: HTMLElement): TransformTweenProps {
       values.scaleY = Math.sqrt(b1 * b1 + b2 * b2 + b3 * b3);
       values.scaleZ = Math.sqrt(c1 * c1 + c2 * c2 + c3 * c3);
       values.rotateY = Math.asin(-a3);
+
       if (Math.cos(values.rotateY) !== 0) {
         values.rotateX = Math.atan2(b3, c3);
         values.rotateZ = Math.atan2(a2, a1);
@@ -78,9 +85,12 @@ export function getTransformValues(element: HTMLElement): TransformTweenProps {
   values.scale = values.scaleX;
   values.rotate = values.rotateZ;
 
-  transformCache.set(element, values);
+  const initial = { ...values };
 
-  return values;
+  transformCache.set(element, values);
+  transformInitCache.set(element, initial);
+
+  return { initial, values };
 }
 
 export function setTransformValues(
@@ -89,7 +99,7 @@ export function setTransformValues(
   units: Record<string, string> = {}
 ): void {
   let transform = '';
-  const current = getDomProps(element);
+  const { values: current, initial } = getDomProps(element);
 
   if (values.x !== undefined) {
     current.x = values.x;
@@ -137,7 +147,7 @@ export function setTransformValues(
     current.rotateZ = values.rotateZ;
   }
 
-  if (current.x != 0 || current.y != 0 || current.z != 0) {
+  if (current.x != initial.x || current.y != initial.y || current.z != initial.z) {
     transform += ` translate3d(
       ${current.x}${units.x || 'px'},
       ${current.y}${units.y || 'px'},
@@ -145,19 +155,19 @@ export function setTransformValues(
     )`;
   }
 
-  if (current.rotateX != 0) {
+  if (current.rotateX != initial.rotateX) {
     transform += ` rotateX(${current.rotateX}${units.rotateX || units.rotate || 'deg'})`;
   }
 
-  if (current.rotateY != 0) {
+  if (current.rotateY != initial.rotateY) {
     transform += ` rotateY(${current.rotateY}${units.rotateY || units.rotate || 'deg'})`;
   }
 
-  if (current.rotateZ != 0) {
+  if (current.rotateZ != initial.rotateZ) {
     transform += ` rotateZ(${current.rotateZ}${units.rotateZ || units.rotate || 'deg'})`;
   }
 
-  if (current.scaleX != 1 || current.scaleY != 1 || current.scaleZ != 1) {
+  if (current.scaleX != initial.scaleX || current.scaleY != initial.scaleY || current.scaleZ != initial.scaleZ) {
     transform += ` scale3d(${current.scaleX}, ${current.scaleY}, ${current.scaleZ})`;
   }
 
@@ -184,12 +194,12 @@ export function mergeDomProps(
 }
 
 export function getDomProps(dom: HTMLElement) {
-  const values = getTransformValues(dom);
+  const { initial, values } = getTransformValues(dom);
   const opacity = parseFloat(dom.style.opacity);
 
   values.opacity = isNaN(opacity) ? 1 : opacity;
 
-  return values;
+  return { values, initial };
 }
 
 const noStyleProps = [

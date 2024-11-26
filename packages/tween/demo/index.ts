@@ -3,6 +3,8 @@ import { Tween, easings, tween } from '../src';
 const targets = document.querySelectorAll<HTMLElement>('.anim');
 const fromProps = { y: 0 };
 
+tween.fromTo(targets[0], { scale: 0.5 }, { scale: 1 }, { delay: 1500, duration: 500, initSeek: false });
+
 // tween.to(targets[0], { scaleY: .5 }, { duration: 1500 });
 // tween.fromTo(targets[0], { y: 0, rotate: 30 }, { y: 300, rotate: 360 }, { duration: 1500, overwrite: false });
 // tween.to(targets[0], { scaleX: .1 }, { duration: 3500, overwrite: false });

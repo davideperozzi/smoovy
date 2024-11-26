@@ -128,7 +128,7 @@ export class Tween<
     }
 
     if (this.domTarget) {
-      const currentState = getDomProps(this.domTarget);
+      const { values: currentState } = getDomProps(this.domTarget);
       const initialState = fromState instanceof HTMLElement
         ? { ...currentState }
         : mergeDomProps(currentState, fromState as any as DOMTweenProps);
