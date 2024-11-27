@@ -1,6 +1,5 @@
 import { listen, listenCompose } from '@smoovy/listener';
 import { Observable, observe, unobserve } from '@smoovy/observer';
-import { clamp, Size } from '@smoovy/utils';
 import { Scroller, ScrollerConfig, defaults as coreDefaults, ScrollerEventType } from './core';
 import { getFocusPosition } from './utils';
 

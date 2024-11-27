@@ -161,6 +161,7 @@ interface Locks {
   controls: {
     all: Set<string>;
     wheel: Set<string>;
+    touch: Set<string>;
   };
   keyboard: { all: Set<string>;
     Space: Set<string>;
@@ -241,12 +242,13 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   protected unlistenInertia?: Unlisten;
   private unlisten?: Unlisten;
   private ticker?: TickerTask;
-  private inertia!: Inertia;
+  private inertia?: Inertia;
   private locks: Locks = {
     position: { all: new Set<string>() },
     controls: {
       all: new Set<string>(),
-      wheel: new Set<string>()
+      wheel: new Set<string>(),
+      touch:  new Set<string>()
     },
     keyboard: {
       all: new Set<string>(),
@@ -310,7 +312,7 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
       this.unlisten();
     }
 
-    this.inertia = new Inertia({
+    this.inertia = this.config.touchEvents ? new Inertia({
       pointerEvents: this.config.pointerEvents,
       pointerDeltaMultiplier: this.config.pointerMultiplier,
       pointerVelocityMultiplier: this.config.pointerVelocity,
@@ -319,7 +321,7 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
       ...(this.config.inertiaTarget
         ? { eventTarget: this.config.inertiaTarget }
         : {})
-    });
+    }) : undefined;
 
     this.unlisten = this.listen();
 
@@ -340,8 +342,8 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
 
   protected attachInertia() {
     this.unlistenInertia = listenCompose(
-      this.inertia.listen(),
-      this.inertia.on(InertiaEventType.DELTA, (delta: Coordinate) => this.handleInertia(delta)),
+      this.inertia?.listen(),
+      this.inertia?.on(InertiaEventType.DELTA, (delta: Coordinate) => this.handleInertia(delta)),
     );
   }
 
@@ -562,6 +564,13 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
           }
         }
       }
+    }
+
+    if (this.inertia) {
+      this.inertia.lock(
+        this.locks.controls.touch.size > 0 ||
+        this.locks.controls.all.size > 0
+      );
     }
 
     this.emit(ScrollerEventType.LOCK, { locked: this.isLocked() });

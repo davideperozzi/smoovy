@@ -26,6 +26,7 @@ const defaults: IntertiaConfig = {
 
 export class Inertia extends EventEmitter {
   private down = false;
+  private locked = false;
   private config: IntertiaConfig;
   private velocity: Coordinate = { x: 0, y: 0 };
   private startPos: Coordinate = { x: 0, y: 0 };
@@ -59,8 +60,12 @@ export class Inertia extends EventEmitter {
     )
   }
 
+  lock(locked = true) {
+    this.locked = locked;
+  }
+
   handleStart(event: TouchEvent | MouseEvent, mouse = false) {
-    if (mouse && event instanceof MouseEvent && event.button !== 0) {
+    if (mouse && event instanceof MouseEvent && event.button !== 0 || this.locked) {
       return;
     }
 
@@ -87,7 +92,7 @@ export class Inertia extends EventEmitter {
   }
 
   handleMove(event: TouchEvent | MouseEvent, mouse = false) {
-    if (this.down) {
+    if (this.down && !this.locked) {
       event.preventDefault();
 
       const pos = this.getPosition(event);

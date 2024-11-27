@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.2.2
+
+### Patch Changes
+
+- fix(scroller): touchEvents
+
 ## 2.2.1
 
 ### Patch Changes
