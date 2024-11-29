@@ -3,7 +3,21 @@ import { Tween, easings, tween } from '../src';
 const targets = document.querySelectorAll<HTMLElement>('.anim');
 const fromProps = { y: 0 };
 
-tween.fromTo(targets[0], { scale: 0.5 }, { scale: 1 }, { delay: 1500, duration: 500, initSeek: false });
+const enter = tween.fromTo(targets[0], { opacity: 0 }, { opacity: 1 }, { initSeek: false, autoStart: false,
+onSeek: (ms) => console.log('seek', ms)
+
+});
+
+enter.seek(enter.duration*.5);
+
+const tl = tween.timeline({ autoStart: false })
+  .add(enter);
+
+
+setTimeout(() => {
+  tl.start();
+}, 1500);
+
 
 // tween.to(targets[0], { scaleY: .5 }, { duration: 1500 });
 // tween.fromTo(targets[0], { y: 0, rotate: 30 }, { y: 300, rotate: 360 }, { duration: 1500, overwrite: false });

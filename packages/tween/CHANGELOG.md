@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.27
+
+### Patch Changes
+
+- fix(tween): timeline controller seek on add
+
 ## 1.1.26
 
 ### Patch Changes

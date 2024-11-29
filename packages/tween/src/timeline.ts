@@ -93,7 +93,7 @@ export class Timeline extends TweenController<TimelineConfig> {
     const controllers = Array.isArray(item) ? item : [item];
 
     for (let i = 0, len = controllers.length; i < len; i++) {
-      const controller = controllers[i].override().pause().reset();
+      const controller = controllers[i].override().pause();
       const itemConfig = { ...config };
 
       if (this.timelineReversed && ! controller.reversed) {
