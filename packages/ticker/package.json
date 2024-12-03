@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/ticker",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Simple and easy-to-use ticker",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",

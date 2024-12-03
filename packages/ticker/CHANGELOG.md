@@ -1,5 +1,11 @@
 # @smoovy/ticker
 
+## 1.0.3
+
+### Patch Changes
+
+- fix(ticker): invalid splice
+
 ## 1.0.2
 
 ### Patch Changes

@@ -33,14 +33,20 @@ export class Ticker {
   }
 
   tick(passed: number) {
-    for (let i = 0, len = this.tasks.length; i < len; i++) {
-      const task = this.tasks[i];
+    let deadTask: TickerTask | undefined;
 
-      if ( ! task || task.dead) {
+    for (const task of this.tasks) {
+      if (task.dead) {
+        deadTask = task;
+
         continue;
       }
 
       task.update(passed - this.time, this.time - task.start, task.kill);
+    }
+
+    if (deadTask) {
+      this.tasks.splice(this.tasks.indexOf(deadTask), 1);
     }
 
     this.time = passed;
@@ -67,9 +73,7 @@ export class Ticker {
       start: this.time,
       dead: false,
       kill: () => {
-        task.dead = true;
-
-        this.tasks.splice(this.tasks.indexOf(task), 1);
+        task.dead = true
       }
     };
 
