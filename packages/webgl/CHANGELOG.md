@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.2.10
+
+### Patch Changes
+
+- fix(webgl): video texture cross origin
+
 ## 1.2.9
 
 ### Patch Changes

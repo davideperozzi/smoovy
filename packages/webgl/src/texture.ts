@@ -139,6 +139,7 @@ export class VideoTexture extends Texture<VideoTextureConfig> {
       this.video.src = config.src;
     }
 
+    this.video.crossOrigin = 'anonymous';
     this.rvfcSupported = 'requestVideoFrameCallback' in this.video;
     this.updateVideoCbRVFC = this.updateVideoRVFC.bind(this);
 
