@@ -48,7 +48,18 @@ const element12 = log(observe(
   {
     resizeDetection: true,
     visibilityDetection: {
-      threshold: 0.2
+      root: document.body,
+      rootMargin: '500px'
+    }
+  }
+), true);
+
+const element13 = log(observe(
+  document.querySelector('[data-sample-element-1]') as HTMLElement,
+  {
+    resizeDetection: true,
+    visibilityDetection: {
+      root: document.body,
     }
   }
 ), true);
@@ -63,5 +74,4 @@ const element2 = log(observe(
 ));
 
 const viewport = log(observe(window, { resizeDetection: true }));
-
 

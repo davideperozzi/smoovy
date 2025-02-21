@@ -1,5 +1,11 @@
 # @smoovy/observer
 
+## 1.0.8
+
+### Patch Changes
+
+- fix(observer): invalid key generation
+
 ## 1.0.7
 
 ### Patch Changes

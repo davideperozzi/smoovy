@@ -112,6 +112,7 @@ export class Observable<
   public static readonly items = new Map<ObservableTarget, Observable<any>[]>();
   private static intersecObservers = new Map<string, IntersectionObserver>();
   private static resizeObserver?: ResizeObserver;
+  private static intersecId = 0;
   private intersecObserver?: IntersectionObserver;
   private lastResize = 0;
   private visibilityTimer = -1;
@@ -427,17 +428,34 @@ export class Observable<
     this.emit(ObservableEventType.VISIBILITY_CHANGE, this);
   }
 
-  private getIntersectionObserverConfig() {
-    return {
-      ...(typeof this.config.visibilityDetection === 'object'
-        ? this.config.visibilityDetection
-        : {}
-      )
-    } as IntersectionObserverInit;
+  private getIntersectionObserverConfig(): IntersectionObserverInit {
+    const config = this.config.visibilityDetection;
+
+    if (typeof config === 'object') {
+      return config;
+    }
+
+    return {};
   }
 
-  private getIdFromConfig<C>(config: C) {
-    return JSON.stringify(config);
+  private getIdFromConfig<C extends IntersectionObserverInit>(config: C) {
+    const secConfig: Partial<{ rt: string, rm: string, th: number|number[] }> = {
+      rt: undefined,
+      rm: config.rootMargin,
+      th: config.threshold,
+    }
+
+    if (config.root instanceof HTMLElement) {
+      if (config.root.dataset.observerId) {
+        secConfig.rt = config.root.dataset.observerId;
+      } else {
+        const nextId = ++Observable.intersecId;
+
+        secConfig.rt = config.root.dataset.observerId = nextId.toString();
+      }
+    }
+
+    return JSON.stringify(secConfig);
   }
 
   private getElementOffset(element: HTMLElement) {
