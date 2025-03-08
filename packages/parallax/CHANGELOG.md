@@ -1,5 +1,11 @@
 # @smoovy/parallax
 
+## 1.0.7
+
+### Patch Changes
+
+- fix(parallax): remove state update lock
+
 ## 1.0.6
 
 ### Patch Changes

@@ -256,7 +256,7 @@ export class Parallax {
   private updateTarget() {
     const target = this.target;
 
-    if (target && !this.isLocked()) {
+    if (target) {
       this.state.x = target.left;
       this.state.y = target.top;
       this.state.width = target.width;
