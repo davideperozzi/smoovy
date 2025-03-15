@@ -32,6 +32,10 @@ export function routesMatch(a: Route, b: Route) {
   return a.url === b.url && a.hash === b.hash;
 }
 
+export function routesHashChanged(a: Route, b: Route) {
+  return a.url == b.url && a.hash !== b.hash;
+}
+
 export function generatRouteId(url: BrowserUrl) {
   return window.btoa(`${url.host}${url.pathname}${url.search}${url.hash}`);
 }

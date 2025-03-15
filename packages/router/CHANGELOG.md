@@ -1,5 +1,11 @@
 # @smoovy/router
 
+## 1.2.18
+
+### Patch Changes
+
+- feat(router): improved hash handling
+
 ## 1.2.17
 
 ### Patch Changes

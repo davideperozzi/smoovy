@@ -2,22 +2,31 @@ import { animations } from '@smoovy/router';
 
 import { Router, RouterEventType, RouterSwapEvent } from '../src/router';
 
-const router = new Router({ forceTrailingSlash: false });
+const router = new Router({ forceTrailingSlash: false, noHashNav: true });
 
 router.animate(animations.fade());
 
-const route = router.createRoute('/sample.html');
-const { view, title } = await router.preload(route);
+setTimeout(() => {
+  router.to('/projects/#loooool', { replace: true });
+}, 1000);
 
-view!.style.background = 'green';
 
-router
-  .detachView(router.view, router.route)
-  .attachView(view, route)
-  .enableView(view!)
-  .enableRoute(route)
-  .updateTitle(title)
-  .updateHistory(route)
+router.on(RouterEventType.HASH_CHANGE, (event) => {
+  console.log(event);
+});
+
+// const route = router.createRoute('/sample.html');
+// const { view, title } = await router.preload(route);
+//
+// view!.style.background = 'green';
+//
+// router
+//   .detachView(router.view, router.route)
+//   .attachView(view, route)
+//   .enableView(view!)
+//   .enableRoute(route)
+//   .updateTitle(title)
+//   .updateHistory(route)
 
 
 setTimeout(() => {
@@ -37,6 +46,6 @@ setTimeout(() => {
 // router.on(RouterEventType.NAV_SETTLED, () => { console.log('nav-settled') });
 
 
-router.on(RouterEventType.BEFORE_ENTER, async (event: RouterSwapEvent) => {
-  console.log((await router.getViewResult(event.toRoute))?.doc?.classList.toString());
-});
+// router.on(RouterEventType.BEFORE_ENTER, async (event: RouterSwapEvent) => {
+//   console.log((await router.getViewResult(event.toRoute))?.doc?.classList.toString());
+// });

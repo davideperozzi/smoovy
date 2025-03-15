@@ -8,7 +8,7 @@ import { BrowserUrl, parseUrl, queryEl } from '@smoovy/utils';
 
 import { Route } from './route';
 import { Trigger } from './trigger';
-import { createRouteFromPath, parseRouteHtml, routesMatch } from './utils';
+import { createRouteFromPath, parseRouteHtml, routesHashChanged, routesMatch } from './utils';
 
 export interface RouterConfig {
   /**
@@ -72,10 +72,19 @@ export interface RouterConfig {
    * @default false
    */
   forceTrailingSlash?: boolean;
+
+  /**
+   * This disables the hash navigation and will treat hash
+   * changes as regular route changes. This also disables
+   * the event `HASH_CHANGE`
+   *
+   * @default false
+   */
+  noHashNav?: boolean;
 }
 
 export enum RouterNavResult {
-  SUCESS = 1,
+  SUCCESS = 1,
   CANCELED = 2,
   ERROR = 4,
   NO_VIEW = 8,
@@ -155,6 +164,7 @@ export enum RouterEventType {
   NAV_CANCEL = 'navcancel',
   NAV_SETTLED = 'navsettled',
   NAV_PROGRESS = 'navprogress',
+  HASH_CHANGE = 'hashchange',
   ROUTE_PRELOAD = 'routepreload',
   BEFORE_ENTER = 'beforeenter',
   AFTER_ENTER = 'afterenter',
@@ -363,9 +373,14 @@ export class Router extends EventEmitter {
     };
 
     if (routesMatch(this._route, to)) {
-      this.emit(RouterEventType.NAV_SAME);
+      this.emit(RouterEventType.NAV_SAME, event);
 
       return RouterNavResult.SAME;
+    } else if (routesHashChanged(this._route, to) && this.config.noHashNav !== true) {
+      this.enableRoute(to);
+      this.emit(RouterEventType.HASH_CHANGE, event);
+
+      return RouterNavResult.SUCCESS;
     }
 
     const fromElement = event.fromElement;
@@ -455,7 +470,7 @@ export class Router extends EventEmitter {
 
     this.clearChangeStates([ fromElement, toElement ], to);
 
-    return RouterNavResult.SUCESS;
+    return RouterNavResult.SUCCESS;
   }
 
   createRoute(path: string | BrowserUrl) {
