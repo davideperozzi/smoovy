@@ -17,13 +17,26 @@ export interface TickerTask {
 export class Ticker {
   static main = new Ticker();
   ticking = false;
+  offset = 0;
   private tasks: TickerTask[] = [];
   private time = 0;
+  private pauseStart = -1;
 
   constructor(
     public override = false
   ) {
     if ( ! this.override) {
+      if (document && document instanceof Document) {
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            this.pauseStart = performance.now();
+          } else if (this.pauseStart >= -1) {
+            this.offset += performance.now() - this.pauseStart;
+            this.pauseStart = -1;
+          }
+        });
+      }
+
       this.loop();
     }
   }
@@ -56,7 +69,7 @@ export class Ticker {
     this.ticking = true;
 
     window.requestAnimationFrame((time) => {
-      this.tick(time);
+      this.tick(time - this.offset);
 
       if ( ! this.override) {
         this.loop();

@@ -1,5 +1,11 @@
 # @smoovy/ticker
 
+## 1.0.4
+
+### Patch Changes
+
+- feat: added document.hidden check
+
 ## 1.0.3
 
 ### Patch Changes
