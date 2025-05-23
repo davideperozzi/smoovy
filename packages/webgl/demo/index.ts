@@ -16,16 +16,37 @@ const light = gl.plane({
   screen: true,
 });
 
-const plane1 = gl.plane({
-  x: 0,
-  y: 0,
-  density: 30,
-  width: 1,
-  height: 1,
-  vertex: lightVertex,
-  fragment: lightFragment,
-  uniforms: { u_light: light.position }
-});
+//const plane1 = gl.plane({
+//  x: 0,
+//  y: 0,
+//  density: 30,
+//  width: 1,
+//  height: 1,
+//  vertex: lightVertex,
+//  fragment: lightFragment,
+//  uniforms: { u_light: light.position }
+//});
+
+const plane5 = gl.plane({
+  x: window.innerWidth/2,
+  y: window.innerHeight/2,
+  screen: true,
+  width: 500,
+  height: 500,
+  z: 0.1,
+  texture: gl.image({ src, transparent: true }),
+  uniforms: {
+    u_alpha: 0.8,
+  }
+})
+
+const plane6 = gl.plane({
+  x: window.innerWidth/2,
+  y: window.innerHeight/2,
+  screen: true,
+  width: 300,
+  height: 300,
+})
 
 const mouse = { x: 0, y: 0, z: 0 };
 
@@ -45,7 +66,7 @@ window.onmousemove = (event) => {
 }
 
 window.onwheel = (event) => {
-  mouse.z += event.deltaY * 0.01;
+  //mouse.z += event.deltaY * 0.01;
 }
 
 requestAnimationFrame(render);

@@ -92,6 +92,15 @@ export interface MeshConfig {
   hideOnLoad?: boolean;
 
   /**
+   * Whether this mesh is considered transparent. If set to true,
+   * it will be rendered after the opqaue elements and sorted by
+   * distance to the camera
+   *
+   * @default false
+   */
+  transparent?: boolean;
+
+  /**
    * The initial translated x-position
    */
   x?: number;
@@ -144,7 +153,6 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
       const uploads: Promise<boolean>[] = [];
 
       if (texture instanceof Texture) {
-        //texture.location = this.program.uniform('u_texture');
         this.textures.set(texture, [this.program.uniform('u_texture'), 0]);
         uploads.push(texture.uploaded);
       } else {
@@ -154,9 +162,6 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
           const key = k.charAt(0).toUpperCase() + k.slice(1);
           const apx = k.toLowerCase() !== 'default' ? `${key}` : '';
           const name = `u_texture${apx}`;
-
-          //tex.slot = slot++;
-          //tex.location = this.program.uniform(name);
 
           this.textures.set(tex, [this.program.uniform(name), slot++]);
           uploads.push(tex.uploaded);
@@ -181,8 +186,16 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     return this.config.uniforms || {};
   }
 
+  get transparent() {
+    return this.config.transparent;
+  }
+
   get camera() {
     return this.config.camera;
+  }
+
+  get camDist() {
+    return Math.abs(this.z - this.camera.z);
   }
 
   get centerX() { return 0; }

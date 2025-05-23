@@ -6,6 +6,7 @@ export interface TextureConfig {
   wrapT?: number;
   minFilter?: number;
   unpackFlip?: boolean;
+  transparent?: boolean;
 }
 
 export interface ImageTextureConfig extends TextureConfig {
@@ -98,6 +99,10 @@ export class Texture<C extends TextureConfig = TextureConfig> {
     return this.resolver.promise;
   }
 
+  get transparent() {
+    return this.config.transparent;
+  }
+
   destroy() {}
 }
 
@@ -145,7 +150,7 @@ export class VideoTexture extends Texture<VideoTextureConfig> {
 
     if (this.rvfcSupported) {
       this.video.requestVideoFrameCallback(() => this.updateVideoRVFC());
-      Ticker.main.add((delta, time, kill) => {
+      Ticker.main.add((_, __, kill) => {
         if (this.video.readyState >= this.video.HAVE_CURRENT_DATA) {
           this.updateVideo();
           kill();

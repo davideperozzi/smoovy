@@ -3,6 +3,7 @@ import { Coordinate, mapRange } from '@smoovy/utils';
 import { Mesh, MeshConfig } from '../mesh';
 import colorShader from '../shaders/color.glsl';
 import textureShader from '../shaders/texture.glsl';
+import { Texture } from '../texture';
 import { triangulate } from '../utils';
 
 export interface PlaneConfig extends MeshConfig {
@@ -21,7 +22,7 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
     const uniforms = config.uniforms || {};
 
     if (typeof uniforms.u_color === 'undefined') {
-      uniforms.u_color = [1, 0, 0, 1];
+      uniforms.u_color = [0, 0, 0, 1];
     }
 
     if (typeof uniforms.u_alpha === 'undefined') {
@@ -86,6 +87,24 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
     return typeof density === 'number'
       ? { x: density, y: density }
       : density || { x: 1, y: 1  }
+  }
+
+  get transparent() {
+    const texture = this.config.texture;
+
+    if (typeof super.transparent == "boolean") {
+      return super.transparent;
+    }
+
+    if (texture instanceof Texture) {
+      return !!texture.transparent;
+    }
+
+    if (typeof texture === 'object') {
+       return !!Object.values(texture).find(tex => tex.transparent);
+    }
+
+    return false;
   }
 
   set width(width: number) {

@@ -22,13 +22,13 @@ export default {
     uniform vec3 u_light;
 
     void main() {
-      vec3 normal = normalize(v_normal);
-      vec3 light = normalize(u_light);
-
-      float intensity = dot(normal, light);
+      //vec3 normal = normalize(v_normal);
+      //vec3 light = normalize(u_light);
+      //
+      //float intensity = dot(normal, light);
 
       fragColor = u_color;
-      fragColor.rgb *= intensity;
+      //fragColor.rgb *= intensity;
     }
   `
 }

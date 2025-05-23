@@ -79,10 +79,32 @@ export class Renderer {
       camera.draw();
     }
 
-    for (const mesh of this.meshes.filter(m => !m.disabled)) {
+    const meshes = this.meshes.filter(m => !m.disabled);
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthMask(true);
+    gl.disable(gl.BLEND);
+
+    for (const mesh of meshes.filter(m => !m.transparent)) {
       mesh.bind();
       mesh.draw(time, this.uniforms);
       mesh.unbind();
     }
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.depthMask(false);
+
+    const transparentMeshes = meshes
+      .filter(m => m.transparent)
+      .sort((a, b) => a.camDist - b.camDist);
+
+    for (const mesh of transparentMeshes) {
+      mesh.bind();
+      mesh.draw(time, this.uniforms);
+      mesh.unbind();
+    }
+
+    gl.depthMask(true);
   }
 }

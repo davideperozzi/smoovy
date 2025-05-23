@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.2.11
+
+### Patch Changes
+
+- feat(webgl): added transparency
+
 ## 1.2.10
 
 ### Patch Changes
