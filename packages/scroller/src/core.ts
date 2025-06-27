@@ -65,6 +65,16 @@ export interface ScrollerConfig {
   wheelMultiplier: number;
 
   /**
+   * Whether to allow wheel event propagation on wheel events
+   * Enabling this will cause the event to bubble up to other
+   * elements or scrollers that might need it. When it's disabled
+   * parent scrollers will not receive the wheel event
+   *
+   * @default false
+   */
+  wheelPropagation?: boolean;
+
+  /**
    * Whether to allow the poibter to drag the content
    * and simulate touch events with the mouse. This
    * will also add a slight inertia effect, so you
@@ -461,7 +471,10 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
     }
 
     event.preventDefault();
-    event.stopPropagation();
+
+    if (this.config.wheelPropagation !== true) {
+      event.stopPropagation();
+    }
 
     if (this.locks.controls.all.size > 0) {
       return;

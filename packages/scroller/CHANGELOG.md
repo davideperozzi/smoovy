@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.2.3
+
+### Patch Changes
+
+- feat(scroller): added wheel propagation control
+
 ## 2.2.2
 
 ### Patch Changes
