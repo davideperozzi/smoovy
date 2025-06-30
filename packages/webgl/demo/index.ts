@@ -90,7 +90,6 @@ requestAnimationFrame(render);
      // plane2.y = Math.sin(time * .001);
 
      plane2.width = Math.sin(time * 0.001) * 500;
-
      camera.y = camera.ch(window.scrollY);
 
      requestAnimationFrame(render);

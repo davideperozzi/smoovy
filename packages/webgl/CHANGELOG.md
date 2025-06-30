@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.2.12
+
+### Patch Changes
+
+- fix(webgl): shader precision mismatch
+
 ## 1.2.11
 
 ### Patch Changes

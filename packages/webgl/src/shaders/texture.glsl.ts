@@ -1,5 +1,7 @@
 export default {
   vertex: `#version 300 es
+    precision mediump float;
+
     in vec4 a_position;
     in vec2 a_texcoord;
     uniform float u_time;
