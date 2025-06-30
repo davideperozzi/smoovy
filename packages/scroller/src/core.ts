@@ -75,6 +75,16 @@ export interface ScrollerConfig {
   wheelPropagation?: boolean;
 
   /**
+   * Whether to prevent the default behavior on wheel events.
+   * Setting this to `true` will allow default behavior.
+   * This is useful for controlling multiple scrollers that
+   * are active at the same time. Especially on mobile devices
+   *
+   * @default false
+   */
+  wheelDefault?: boolean;
+
+  /**
    * Whether to allow the poibter to drag the content
    * and simulate touch events with the mouse. This
    * will also add a slight inertia effect, so you
@@ -474,7 +484,9 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
       return;
     }
 
-    event.preventDefault();
+    if (this.config.wheelDefault !== true) {
+      event.preventDefault();
+    }
 
     if (this.config.wheelPropagation !== true) {
       event.stopPropagation();

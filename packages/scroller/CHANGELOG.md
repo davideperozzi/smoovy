@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.2.5
+
+### Patch Changes
+
+- feat(scroller): added wheelDefault option
+
 ## 2.2.4
 
 ### Patch Changes
