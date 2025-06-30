@@ -149,6 +149,16 @@ export interface ScrollerConfig {
   inertiaTarget?: Window | HTMLElement;
 
   /**
+   * Whether to prevent the default behavior on touch/drag events.
+   * Setting this to `true` will allow default behavior.
+   * This is useful for controlling multiple scrollers that
+   * are active at the same time. Especially on mobile devices
+   *
+   * @default false
+   */
+  inertiaDefault?: boolean;
+
+  /**
    * The target element or window used to track events
    * for the mouse wheel events
    *
@@ -338,6 +348,7 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
       pointerVelocityMultiplier: this.config.pointerVelocity,
       touchDeltaMultiplier: this.config.touchMultiplier,
       touchVelocityMultiplier: this.config.touchVelocity,
+      inertiaDefault: this.config.inertiaDefault,
       ...(this.config.inertiaTarget
         ? { eventTarget: this.config.inertiaTarget }
         : {})

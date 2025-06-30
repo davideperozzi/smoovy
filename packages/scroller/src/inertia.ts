@@ -9,6 +9,7 @@ export interface IntertiaConfig {
   touchVelocityMultiplier: number,
   pointerDeltaMultiplier: number,
   pointerVelocityMultiplier: number,
+  inertiaDefault: boolean;
 }
 
 export enum InertiaEventType {
@@ -22,6 +23,7 @@ const defaults: IntertiaConfig = {
   touchVelocityMultiplier: 20,
   pointerDeltaMultiplier: 1,
   pointerVelocityMultiplier: 25,
+  inertiaDefault: false,
 }
 
 export class Inertia extends EventEmitter {
@@ -93,16 +95,20 @@ export class Inertia extends EventEmitter {
 
   handleMove(event: TouchEvent | MouseEvent, mouse = false) {
     if (this.down && !this.locked) {
-      event.preventDefault();
-
-      const pos = this.getPosition(event);
-      const delta = { x: 0, y: 0 };
       const {
         touchDeltaMultiplier,
         touchVelocityMultiplier,
         pointerDeltaMultiplier,
-        pointerVelocityMultiplier
+        pointerVelocityMultiplier,
+        inertiaDefault
       } = this.config;
+
+      if (inertiaDefault !== true) {
+        event.preventDefault();
+      }
+
+      const pos = this.getPosition(event);
+      const delta = { x: 0, y: 0 };
 
       const deltaMultiplier = mouse ? pointerDeltaMultiplier : touchDeltaMultiplier;
       const velocityMultiplier = mouse ? pointerVelocityMultiplier : touchVelocityMultiplier;

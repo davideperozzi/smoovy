@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.2.6
+
+### Patch Changes
+
+- feat(scroller): added inertiaDefault option
+
 ## 2.2.5
 
 ### Patch Changes
