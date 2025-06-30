@@ -421,6 +421,10 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   }
 
   protected handleKeyboard(event: KeyboardEvent) {
+    if (this.config.keyboardEvents === false) {
+      return;
+    }
+
     const { code } = event;
     const locks = this.locks;
     const subLock = event.code as keyof typeof locks.keyboard;
@@ -502,7 +506,13 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
   }
 
   protected setVirtual(x?: number, y?: number) {
-    if (this.locks.position.all.size > 0) {
+    if (
+      this.locks.position.all.size > 0 ||
+      (x === -Infinity && this.limit.minX === -Infinity) ||
+      (x ===  Infinity && this.limit.maxX ===  Infinity) ||
+      (y === -Infinity && this.limit.minY === -Infinity) ||
+      (y ===  Infinity && this.limit.maxY ===  Infinity)
+    ) {
       return;
     }
 
