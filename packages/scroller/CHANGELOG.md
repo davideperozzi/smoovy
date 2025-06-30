@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.2.4
+
+### Patch Changes
+
+- fix(scroller): keyboard events + scroll jumps
+
 ## 2.2.3
 
 ### Patch Changes
