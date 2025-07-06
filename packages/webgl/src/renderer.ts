@@ -18,7 +18,7 @@ export class Renderer {
     initialSize: Size = { width: 0, height: 0 },
     private uniforms?: Record<string, UniformValue>
   ) {
-    this.cameras.main = new Camera(camera, initialSize);
+    this.cameras.main = new Camera(this.gl, camera || {}, initialSize);
   }
 
   get camera() {
@@ -58,6 +58,9 @@ export class Renderer {
 
       for (const camera of Object.values(this.cameras)) {
         camera.updateView(width, height);
+        if (camera.framebuffer) {
+          camera.framebuffer.resize(width, height);
+        }
       }
 
       for (const mesh of this.meshes) {
@@ -73,38 +76,46 @@ export class Renderer {
 
     this.handleResize();
 
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
     for (const camera of Object.values(this.cameras)) {
+      const camMeshes = this.meshes.filter(m => !m.disabled && m.camera === camera);
+
+      const drawMeshes = () => {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthMask(true);
+        gl.disable(gl.BLEND);
+
+        for (const mesh of camMeshes.filter(m => !m.transparent)) {
+          mesh.bind();
+          mesh.draw(time, this.uniforms);
+          mesh.unbind();
+        }
+
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.depthMask(false);
+
+        const transparentMeshes = camMeshes
+          .filter(m => m.transparent)
+          .sort((a, b) => a.camDist - b.camDist);
+
+        for (const mesh of transparentMeshes) {
+          mesh.bind();
+          mesh.draw(time, this.uniforms);
+          mesh.unbind();
+        }
+
+        gl.depthMask(true);
+      };
+
       camera.draw();
+
+      if (camera.framebuffer) {
+        camera.framebuffer.use(drawMeshes);
+      } else {
+        drawMeshes();
+      }
     }
-
-    const meshes = this.meshes.filter(m => !m.disabled);
-
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthMask(true);
-    gl.disable(gl.BLEND);
-
-    for (const mesh of meshes.filter(m => !m.transparent)) {
-      mesh.bind();
-      mesh.draw(time, this.uniforms);
-      mesh.unbind();
-    }
-
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.depthMask(false);
-
-    const transparentMeshes = meshes
-      .filter(m => m.transparent)
-      .sort((a, b) => a.camDist - b.camDist);
-
-    for (const mesh of transparentMeshes) {
-      mesh.bind();
-      mesh.draw(time, this.uniforms);
-      mesh.unbind();
-    }
-
-    gl.depthMask(true);
   }
 }

@@ -57,6 +57,10 @@ export class Texture<C extends TextureConfig = TextureConfig> {
     this.texture = gl.createTexture()!;
   }
 
+  get handle() {
+    return this.texture;
+  }
+
   bind(slot = 0, location?: WebGLUniformLocation) {
     const gl = this.gl;
 

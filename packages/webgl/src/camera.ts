@@ -1,5 +1,8 @@
 import { mapRange, Size } from '@smoovy/utils';
 
+import { Framebuffer, FramebufferConfig } from './framebuffer';
+import { FramebufferTexture } from './texture';
+
 import { Mat4, mat4, mat4p } from './math';
 import { Model } from './model';
 
@@ -8,6 +11,7 @@ export interface CameraConfig {
   near: number;
   far: number;
   posZ: number;
+  framebuffer?: boolean | Partial<FramebufferConfig>;
 }
 
 export class Camera extends Model {
@@ -15,12 +19,24 @@ export class Camera extends Model {
   readonly view: Size = { width: 1, height: 1 };
   private _projection: Mat4 = mat4();
   private config: CameraConfig;
+  readonly framebuffer?: Framebuffer;
+  readonly texture?: FramebufferTexture;
 
-  constructor(config: Partial<CameraConfig> = {}, view?: Partial<Size>) {
+  constructor(
+    private gl: WebGLRenderingContext,
+    config: Partial<CameraConfig> = {},
+    view?: Partial<Size>
+  ) {
     super();
 
     this.config = { near: .1, far: 100, fov: 45, posZ: -3, ...config };
     this.position.z = this.config.posZ;
+
+    if (config.framebuffer) {
+      const fbConfig = config.framebuffer === true ? {} : config.framebuffer;
+      this.framebuffer = new Framebuffer(gl, fbConfig);
+      this.texture = this.framebuffer.texture;
+    }
 
     this.updateView(view?.width, view?.height);
   }

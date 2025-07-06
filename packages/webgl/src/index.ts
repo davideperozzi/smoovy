@@ -4,6 +4,7 @@ export * as math from './math';
 export * from './mesh';
 export * from './model';
 export * from './program';
+export * from './framebuffer';
 export * from './renderer';
 export * from './texture';
 export * from './uniform';

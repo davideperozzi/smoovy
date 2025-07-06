@@ -211,7 +211,7 @@ export class WebGL extends EventEmitter {
 
     return this.renderer.addCamera(
       name,
-      new Camera(config, this.observable.size)
+      new Camera(this.context, config, this.observable.size)
     );
   }
 
