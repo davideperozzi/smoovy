@@ -194,4 +194,32 @@ export class VideoTexture extends Texture<VideoTextureConfig> {
   }
 }
 
-export class FramebufferTexture extends Texture<FramebufferTextureConfig> {}
+export class FramebufferTexture extends Texture<FramebufferTextureConfig> {
+  allocate(width: number, height: number) {
+    const gl = this.gl;
+    const wrapS = this.config.wrapS || gl.CLAMP_TO_EDGE;
+    const wrapT = this.config.wrapT || gl.CLAMP_TO_EDGE;
+    const minFilter = this.config.minFilter || gl.LINEAR;
+
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      width,
+      height,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null
+    );
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+    if (!this.resolver.completed) {
+      this.resolver.resolve(true);
+    }
+  }
+}
