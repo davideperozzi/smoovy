@@ -58,6 +58,12 @@ const camera1 = webgl.camera({ fov: 30});
 const camera2 = webgl.camera({ fov: 30, near: .5, far: 50 });
 ```
 
+Render into a framebuffer texture:
+```js
+const cam1 = webgl.camera('cam1', { framebuffer: true });
+webgl.plane({ textures: cam1.framebuffer.texture });
+```
+
 #### Assign a camera to a mesh
 Meshes will fallback to the default camera. You can overwrite it with the `camera` option:
 

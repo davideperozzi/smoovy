@@ -195,7 +195,7 @@ export class WebGL extends EventEmitter {
 
   plane(config: Partial<PlaneConfig> = {}) {
     const plane = new Plane(this.context, {
-      camera: this.renderer.camera,
+      camera: this.renderer.findCamera('main')!,
       ...config
     });
 
@@ -204,14 +204,13 @@ export class WebGL extends EventEmitter {
     return plane;
   }
 
-  camera(name: string, config?: Partial<CameraConfig>) {
-    if ( ! config) {
-      return this.renderer.getCamera(name);
-    }
+  toggleCamera(nameOrCamera: string | Camera) {
+    this.renderer.toggleCamera(nameOrCamera);
+  }
 
+  camera(config: CameraConfig = {}) {
     return this.renderer.addCamera(
-      name,
-      new Camera(config, this.observable.size)
+      new Camera(this.context, { ...config }, this.observable.size)
     );
   }
 

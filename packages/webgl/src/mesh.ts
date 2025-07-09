@@ -6,6 +6,7 @@ import { Model } from './model';
 import { Program } from './program';
 import { Texture } from './texture';
 import { UniformType, UniformValue } from './uniform';
+import { warnOnce } from './utils';
 
 export interface MeshConfig {
   /**
@@ -82,7 +83,7 @@ export interface MeshConfig {
    * an object with multiple textures. The key will be used as the
    * uniform name and the value as the texture.
    */
-  texture?: Texture | Record<string, Texture>;
+  texture?: Texture | Camera | Record<string, Texture | Camera>;
 
   /**
    * Hide the mesh as long as e.g. a texture is loading
@@ -143,7 +144,9 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
   }
 
   private initTextures() {
-    const texture = this.config.texture;
+    const texture = this.config.texture instanceof Camera
+      ? this.config.texture.texture
+      : this.config.texture;
 
     if (texture) {
       if (this.config.hideOnLoad !== false) {
@@ -159,12 +162,19 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
         let slot = 0;
 
         for (const [k, tex] of Object.entries(texture)) {
+          const currTex = tex instanceof Camera ? tex.texture : tex;
+
+          if (!currTex) {
+            warnOnce(`invalid texture ${k}: ${currTex}`);
+            continue;
+          }
+
           const key = k.charAt(0).toUpperCase() + k.slice(1);
           const apx = k.toLowerCase() !== 'default' ? `${key}` : '';
           const name = `u_texture${apx}`;
 
-          this.textures.set(tex, [this.program.uniform(name), slot++]);
-          uploads.push(tex.uploaded);
+          this.textures.set(currTex, [this.program.uniform(name), slot++]);
+          uploads.push(currTex.uploaded);
         }
       }
 

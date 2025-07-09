@@ -135,7 +135,7 @@ export class Program {
     offset = 0
   ) {
     this.attribs[name] = {
-      location: this.gl.getAttribLocation(this._program, name),
+      location: this.attribLoc(name),
       buffer: data instanceof Float32Array ? this.bufferData(name, data) : data,
       count,
       norm,
@@ -144,6 +144,14 @@ export class Program {
       size,
       type
     };
+  }
+
+  attribLoc(name: string) {
+    return this.gl.getAttribLocation(this._program, name);
+  }
+
+  attribExists(name: string) {
+    return this.attribLoc(name) !== -1;
   }
 
   bufferData(name: string, data: Float32Array) {
