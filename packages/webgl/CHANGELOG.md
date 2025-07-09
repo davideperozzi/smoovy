@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.3.0
+
+### Minor Changes
+
+- feat(webgl): added framebuffer support
+
 ## 1.2.12
 
 ### Patch Changes

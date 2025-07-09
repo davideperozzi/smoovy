@@ -178,9 +178,16 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
     const normals = this.parseNormals(new Float32Array(vertices));
 
     program.attribute('a_position', positions, 3);
-    program.attribute('a_normal', normals, 3, 0);
 
-    if (this.config.texture) {
+    if (program.attribExists('a_normal')) {
+      program.attribute('a_normal', normals, 3, 0);
+    }
+
+    if (this.config.texture || program.attribExists('a_texcoord')) {
+      // Set the size to 3 instead of 2, so we can just us the triangulate function
+      // WebGL will strip away the Z value when it reaches the shader, which is
+      // irrelevant for uvs anyway. Alternatively create a new Flaot32Array with
+      // the z value remvoed
       program.attribute('a_texcoord', triangulate(this.density, false), 3, 0);
     }
   }

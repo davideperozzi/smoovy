@@ -7,7 +7,7 @@ import { UniformValue } from './uniform';
 
 export class Renderer {
   private _resize?: Size;
-  private cameras: Record<string, Camera> = {};
+  private cameras: Camera[] = [];
 
   constructor(
     private gl: WebGLRenderingContext,
@@ -18,29 +18,69 @@ export class Renderer {
     initialSize: Size = { width: 0, height: 0 },
     private uniforms?: Record<string, UniformValue>
   ) {
-    this.cameras.main = new Camera(this.gl, camera || {}, initialSize);
-  }
-
-  get camera() {
-    return this.cameras.main;
+    this.cameras.push(
+      new Camera(this.gl, { name: 'main', active: true, ...camera }, initialSize)
+    );
   }
 
   start() {
     this.ticker.add((_, time) => this.render(time / 1000), this.order);
   }
 
-  addCamera(name: string, camera: Camera) {
-    this.cameras[name] = camera;
+  toggleCamera(nameOrCamera: string | Camera) {
+    let camera = typeof nameOrCamera === 'string'
+      ? this.findCamera(nameOrCamera)
+      : nameOrCamera;
+
+    for (const c of this.cameras) {
+      if (c.framebuffer) {
+        continue;
+      }
+
+      c.active = c === camera;
+    }
+  }
+
+  addCamera(camera: Camera, toggle = false) {
+    this.cameras.push(camera);
+
+    if (toggle) {
+      this.toggleCamera(camera);
+    }
 
     return camera;
   }
 
-  getCamera(name: string) {
-    return this.cameras[name];
+  findCamera(name: string) {
+    return this.cameras.find(camera => camera.name === name);
   }
 
-  removeCamera(name: string) {
-    delete this.cameras[name];
+  hasCamera(nameOrCamera: string) {
+    if (typeof nameOrCamera === 'string') {
+      return !!this.findCamera(nameOrCamera);
+    }
+
+    return this.cameras.includes(nameOrCamera);
+  }
+
+  removeCamera(nameOrCamera: string | Camera) {
+    let camera: Camera | undefined;
+
+    if (typeof nameOrCamera === 'string') {
+      camera = this.findCamera(nameOrCamera);
+    } else {
+      camera = nameOrCamera;
+    }
+
+    const index = this.cameras.findIndex(c => c.name === camera?.name);
+
+    if (index > -1) {
+      this.cameras.splice(index, 1);
+
+      return true;
+    }
+
+    return false;
   }
 
   resize(width: number, height: number, ratio = 1) {
@@ -56,11 +96,8 @@ export class Renderer {
       gl.canvas.height = height;
       gl.viewport(0, 0, width, height);
 
-      for (const camera of Object.values(this.cameras)) {
-        camera.updateView(width, height);
-        if (camera.framebuffer) {
-          camera.framebuffer.resize(width, height);
-        }
+      for (const camera of this.cameras) {
+        camera.resize(width, height);
       }
 
       for (const mesh of this.meshes) {
@@ -71,51 +108,61 @@ export class Renderer {
     }
   }
 
-  render(time = Ticker.now()) {
+  private clearScene() {
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+  }
+
+  private drawMeshes(meshes: Mesh[], time = Ticker.now()) {
     const gl = this.gl;
 
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthMask(true);
+    gl.disable(gl.BLEND);
+
+    for (const mesh of meshes.filter(m => !m.transparent)) {
+      mesh.bind();
+      mesh.draw(time, this.uniforms);
+      mesh.unbind();
+    }
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.depthMask(false);
+
+    const transparentMeshes = meshes
+      .filter(m => m.transparent)
+      .sort((a, b) => a.camDist - b.camDist);
+
+    for (const mesh of transparentMeshes) {
+      mesh.bind();
+      mesh.draw(time, this.uniforms);
+      mesh.unbind();
+    }
+
+    gl.depthMask(true);
+  }
+
+  render(time = Ticker.now()) {
     this.handleResize();
+    this.clearScene();
 
-    for (const camera of Object.values(this.cameras)) {
-      const camMeshes = this.meshes.filter(m => !m.disabled && m.camera === camera);
+    for (const camera of this.cameras) {
+      if (!camera.active) {
+        continue;
+      }
 
-      const drawMeshes = () => {
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        gl.enable(gl.DEPTH_TEST);
-        gl.depthMask(true);
-        gl.disable(gl.BLEND);
-
-        for (const mesh of camMeshes.filter(m => !m.transparent)) {
-          mesh.bind();
-          mesh.draw(time, this.uniforms);
-          mesh.unbind();
-        }
-
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        gl.depthMask(false);
-
-        const transparentMeshes = camMeshes
-          .filter(m => m.transparent)
-          .sort((a, b) => a.camDist - b.camDist);
-
-        for (const mesh of transparentMeshes) {
-          mesh.bind();
-          mesh.draw(time, this.uniforms);
-          mesh.unbind();
-        }
-
-        gl.depthMask(true);
-      };
+      const meshes = this.meshes.filter(m => !m.disabled && m.camera === camera);
 
       camera.draw();
+      camera.bind();
 
       if (camera.framebuffer) {
-        camera.framebuffer.use(drawMeshes);
-      } else {
-        drawMeshes();
+        this.clearScene();
       }
+
+      this.drawMeshes(meshes, time);
+
+      camera.unbind();
     }
   }
 }

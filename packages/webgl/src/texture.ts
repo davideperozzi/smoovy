@@ -61,6 +61,14 @@ export class Texture<C extends TextureConfig = TextureConfig> {
     return this.texture;
   }
 
+  get uploaded() {
+    return this.resolver.promise;
+  }
+
+  get transparent() {
+    return this.config.transparent;
+  }
+
   bind(slot = 0, location?: WebGLUniformLocation) {
     const gl = this.gl;
 
@@ -97,14 +105,6 @@ export class Texture<C extends TextureConfig = TextureConfig> {
     if ( ! this.resolver.completed) {
       this.resolver.resolve(true);
     }
-  }
-
-  get uploaded() {
-    return this.resolver.promise;
-  }
-
-  get transparent() {
-    return this.config.transparent;
   }
 
   destroy() {}
@@ -216,6 +216,7 @@ export class FramebufferTexture extends Texture<FramebufferTextureConfig> {
       gl.UNSIGNED_BYTE,
       null
     );
+
     gl.bindTexture(gl.TEXTURE_2D, null);
 
     if (!this.resolver.completed) {
