@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.3.2
+
+### Patch Changes
+
+- fix(webgl): primitive export
+
 ## 1.3.1
 
 ### Patch Changes

@@ -11,5 +11,6 @@ export * from './uniform';
 export * from './utils';
 export * from './webgl';
 export * from './geometry/plane';
+export * from './geometry/primitive';
 export * from './shaders/color.glsl';
 export * from './shaders/texture.glsl';
