@@ -1,8 +1,9 @@
 import { Ticker } from '@smoovy/ticker';
-import { Size } from '@smoovy/utils';
+import { isStr, Size } from '@smoovy/utils';
 
 import { Camera, CameraConfig } from './camera';
 import { Mesh } from './mesh';
+import { Model } from './model';
 import { UniformValue } from './uniform';
 
 export class Renderer {
@@ -11,12 +12,12 @@ export class Renderer {
 
   constructor(
     private gl: WebGLRenderingContext,
-    private meshes: Mesh[],
+    private models: Model[],
     private ticker = Ticker.main,
     private order = 100,
     camera?: Partial<CameraConfig>,
     initialSize: Size = { width: 0, height: 0 },
-    private uniforms?: Record<string, UniformValue>
+    private uniforms: Record<string, UniformValue> = {}
   ) {
     this.cameras.push(
       new Camera(this.gl, { name: 'main', active: true, ...camera }, initialSize)
@@ -28,7 +29,7 @@ export class Renderer {
   }
 
   toggleCamera(nameOrCamera: string | Camera) {
-    let camera = typeof nameOrCamera === 'string'
+    let camera = isStr(nameOrCamera)
       ? this.findCamera(nameOrCamera)
       : nameOrCamera;
 
@@ -37,7 +38,7 @@ export class Renderer {
         continue;
       }
 
-      c.active = c === camera;
+      c.enable('_', c === camera);
     }
   }
 
@@ -56,7 +57,7 @@ export class Renderer {
   }
 
   hasCamera(nameOrCamera: string) {
-    if (typeof nameOrCamera === 'string') {
+    if (isStr(nameOrCamera)) {
       return !!this.findCamera(nameOrCamera);
     }
 
@@ -66,7 +67,7 @@ export class Renderer {
   removeCamera(nameOrCamera: string | Camera) {
     let camera: Camera | undefined;
 
-    if (typeof nameOrCamera === 'string') {
+    if (isStr(nameOrCamera)) {
       camera = this.findCamera(nameOrCamera);
     } else {
       camera = nameOrCamera;
@@ -100,8 +101,10 @@ export class Renderer {
         camera.resize(width, height);
       }
 
-      for (const mesh of this.meshes) {
-        mesh.updateGeometry();
+      for (const model of this.models) {
+        if (model instanceof Mesh) {
+          model.updateGeometry();
+        }
       }
 
       delete this._resize;
@@ -112,34 +115,49 @@ export class Renderer {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
   }
 
-  private drawMeshes(meshes: Mesh[], time = Ticker.now()) {
+  private draw(camera: Camera, models: Model[], time = Ticker.now()) {
     const gl = this.gl;
+    const uniforms = this.uniforms;
+
+    uniforms.u_view = camera.worldView;
+    uniforms.u_proj = camera.projection;
+    uniforms.u_res = camera.view;
 
     gl.enable(gl.DEPTH_TEST);
     gl.depthMask(true);
     gl.disable(gl.BLEND);
 
-    for (const mesh of meshes.filter(m => !m.transparent)) {
-      mesh.bind();
-      mesh.draw(time, this.uniforms);
-      mesh.unbind();
+    for (const model of models.filter(m => m.opaque)) {
+      if (model instanceof Mesh) {
+        model.updateMesh(camera);
+      }
+
+      model.updateModel();
+      model.draw(time, this.uniforms);
     }
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.depthMask(false);
 
-    const transparentMeshes = meshes
-      .filter(m => m.transparent)
-      .sort((a, b) => a.camDist - b.camDist);
+    const transparentModels = models
+      .filter(m => !m.opaque)
+      .sort((a, b) => Math.abs(a.z - camera.z) - Math.abs(b.z - camera.z));
 
-    for (const mesh of transparentMeshes) {
-      mesh.bind();
-      mesh.draw(time, this.uniforms);
-      mesh.unbind();
+    for (const model of transparentModels) {
+      if (model instanceof Mesh) {
+        model.updateMesh(camera);
+      }
+
+      model.updateModel();
+      model.draw(time, this.uniforms);
     }
 
     gl.depthMask(true);
+
+    delete uniforms.u_view;
+    delete uniforms.u_proj;
+    delete uniforms.u_res;
   }
 
   render(time = Ticker.now()) {
@@ -147,20 +165,22 @@ export class Renderer {
     this.clearScene();
 
     for (const camera of this.cameras) {
-      if (!camera.active) {
+      if (camera.disabled) {
         continue;
       }
 
-      const meshes = this.meshes.filter(m => !m.disabled && m.camera === camera);
+      const models = this.models.filter(({ disabled, scopes }) => {
+        return !disabled && camera.scopes.some(scope => scopes.includes(scope));
+      });
 
-      camera.draw();
       camera.bind();
+      camera.draw();
 
       if (camera.framebuffer) {
         this.clearScene();
       }
 
-      this.drawMeshes(meshes, time);
+      this.draw(camera, models, time);
 
       camera.unbind();
     }

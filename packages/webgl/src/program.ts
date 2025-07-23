@@ -10,9 +10,11 @@ export interface ProgramAttrib {
   offset: number;
   location: number;
   buffer: WebGLBuffer;
+  target: GLenum;
 }
 
 export class Program {
+  private indicesLen = 0;
   private buffers: Record<string, WebGLBuffer> = {};
   private attribs: Record<string, ProgramAttrib> = {};
   private uniforms: Record<string, WebGLUniformLocation> = {};
@@ -58,9 +60,13 @@ export class Program {
     this.bound = false;
   }
 
-  enableAttribs() {
+  hasIndices() {
+    return this.indicesLen > 0 && 'indices' in this.buffers;
+  }
+
+  bindAttribs() {
     const gl = this.gl;
-    let vertices = 0;
+    let total = 0;
 
     for (const name in this.attribs) {
       const {
@@ -71,7 +77,8 @@ export class Program {
         type,
         stride,
         norm,
-        offset
+        offset,
+        target
       } = this.attribs[name];
 
       if (location === -1) {
@@ -79,15 +86,15 @@ export class Program {
         continue;
       }
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bindBuffer(target, buffer);
       gl.enableVertexAttribArray(location);
       gl.vertexAttribPointer(location, size, type, norm, stride, offset);
-      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      gl.bindBuffer(target, null);
 
-      vertices += count;
+      total += count;
     }
 
-    return vertices;
+    return total;
   }
 
   uniform(name: string, value?: UniformValue, type?: UniformType, warn = true) {
@@ -124,25 +131,65 @@ export class Program {
     return this.uniforms[name];
   }
 
+  bindIndices() {
+    this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers.indices);
+
+    return this.indicesLen;
+  }
+
+  setIndices(data: number[] | Uint16Array) {
+    const gl = this.gl;
+    let bufferData = Array.isArray(data) ? new Uint16Array(data) : data;
+
+    this.indicesLen = bufferData.length;
+
+    this.bufferData('indices', bufferData, gl.ELEMENT_ARRAY_BUFFER);
+  }
+
+  setPositions(data: number[] | Float32Array, size = 3, count = true, name = 'a_position') {
+    if (this.attribExists(name)) {
+      const positions = Array.isArray(data) ? new Float32Array(data) : data;
+
+      this.attribute(name, positions, size, count);
+    }
+  }
+
+  setNormals(data: number[] | Float32Array, size = 3, name = 'a_normal') {
+    if (this.attribExists(name)) {
+      this.attribute(name, data, size, false);
+    }
+  }
+
+  setTextureCoords(data: number[] | Float32Array, size = 2, name = 'a_texcoord') {
+    if (this.attribExists(name)) {
+      this.attribute(name, data, size, false);
+    }
+  }
+
   attribute(
     name: string,
-    data: WebGLBuffer | Float32Array,
+    data: WebGLBuffer | Float32Array | Uint16Array,
     size = 3,
-    count = data instanceof Float32Array ? data.length / size : 0,
+    count = false,
     norm = false,
+    target = this.gl.ARRAY_BUFFER,
     type = this.gl.FLOAT,
     stride = 0,
     offset = 0
   ) {
+    const dataIsArray = data instanceof Float32Array || data instanceof Uint16Array;
+    const sizeLength = dataIsArray ? data.length / size : 0;
+
     this.attribs[name] = {
       location: this.attribLoc(name),
-      buffer: data instanceof Float32Array ? this.bufferData(name, data) : data,
-      count,
+      buffer: dataIsArray ? this.bufferData(name, data) : data,
+      count: count ? sizeLength : 0,
       norm,
       offset,
       stride,
       size,
-      type
+      type,
+      target,
     };
   }
 
@@ -154,14 +201,18 @@ export class Program {
     return this.attribLoc(name) !== -1;
   }
 
-  bufferData(name: string, data: Float32Array) {
+  bufferData(
+    name: string,
+    data: ArrayBufferView | ArrayBuffer,
+    target: GLenum = this.gl.ARRAY_BUFFER
+  ) {
     const gl = this.gl;
 
     this.buffers[name] = this.buffers[name] || gl.createBuffer()!;
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers[name]);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(target, this.buffers[name]);
+    gl.bufferData(target, data, gl.STATIC_DRAW);
+    gl.bindBuffer(target, null);
 
     return this.buffers[name];
   }

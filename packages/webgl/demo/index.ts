@@ -2,15 +2,20 @@ import { WebGL } from '../src/index';
 
 const src = '/1000x1000.jpg';
 const gl = new WebGL();
-const c1 = gl.camera({ name: 'fbo', fbo: true });
+const c1 = gl.camera({
+  fbo: true,
+  name: 'fbo',
+  scopes: ['fbo'],
+});
 
 const p1 = gl.plane({
   x: 0,
   y: 0,
   width: 2,
   height: 2,
-  camera: c1,
-  uniforms: { u_color: [0,0,0,1] }
+  density: 100,
+  uniforms: { u_color: [0,0,0,1] },
+  scopes: ['fbo'],
 });
 
 //
@@ -66,14 +71,14 @@ const p0 = gl.plane({
       gl_Position = u_proj * u_view * u_model *  pos;
     }`
 });
-
-window.onresize = () => {
-  p0.x = window.innerWidth*.5;
-  p0.y = window.innerHeight*.5;
-  p0.width = window.innerWidth*.5;
-  p0.height = window.innerHeight*.5;
-}
-
+//
+//window.onresize = () => {
+//  p0.x = window.innerWidth*.5;
+//  p0.y = window.innerHeight*.5;
+//  p0.width = window.innerWidth*.5;
+//  p0.height = window.innerHeight*.5;
+//}
+//
 //const camera = gl.renderer.camera;
 //
 //gl.ctx.disable(gl.ctx.CULL_FACE);

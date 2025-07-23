@@ -1,4 +1,5 @@
-import { Coordinate, mapRange } from '@smoovy/utils';
+import { Coordinate, isDef, isNum, isObj, isStr, mapRange } from '@smoovy/utils';
+import { Camera } from '../camera';
 
 import { Mesh, MeshConfig } from '../mesh';
 import colorShader from '../shaders/color.glsl';
@@ -21,11 +22,11 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   ) {
     const uniforms = config.uniforms || {};
 
-    if (typeof uniforms.u_color === 'undefined') {
+    if (!isDef(uniforms.u_color)) {
       uniforms.u_color = [0, 0, 0, 1];
     }
 
-    if (typeof uniforms.u_alpha === 'undefined') {
+    if (!isDef(uniforms.u_alpha)) {
       uniforms.u_alpha = 1;
     }
 
@@ -52,7 +53,7 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   get originX() {
     const { originX } = this.config;
 
-    return typeof originX === 'number' ? originX : .5;
+    return isNum(originX) ? originX : .5;
   }
 
   set originY(origin: number) {
@@ -63,7 +64,7 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   get originY() {
     const { originY } = this.config;
 
-    return typeof originY === 'number' ? originY : .5;
+    return isNum(originY) ? originY : .5;
   }
 
   get centerX() {
@@ -92,6 +93,10 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   get transparent() {
     const texture = this.config.texture;
 
+    if (texture instanceof Camera) {
+      return false;
+    }
+
     if (typeof super.transparent == "boolean") {
       return super.transparent;
     }
@@ -100,8 +105,14 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
       return !!texture.transparent;
     }
 
-    if (typeof texture === 'object') {
-       return !!Object.values(texture).find(tex => tex.transparent);
+    if (isObj(texture)) {
+      return !!Object.values(texture).find(tex => {
+        if (tex instanceof Camera) {
+          return false;
+        }
+
+        return tex.transparent;
+      });
     }
 
     return false;
@@ -119,10 +130,10 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
     const width = this.config.width;
 
     if (this.config.screen) {
-      return this.camera.cw(width || 0);
+      return this.camera ? this.camera.cw(width || 0) : 0;
     }
 
-    return typeof width === 'number' ? width : 1;
+    return isNum(width) ? width : 1;
   }
 
   set height(height: number) {
@@ -137,10 +148,10 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
     const height = this.config.height;
 
     if (this.config.screen) {
-      return this.camera.ch(height || 0);
+      return this.camera ? this.camera.ch(height || 0) : 0;
     }
 
-    return typeof height === 'number' ? height : 1;
+    return isNum(height) ? height : 1;
   }
 
   private scaleVertices(verts: Float32Array, width: number, height: number) {
@@ -172,23 +183,22 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
   updateGeometry() {
     super.updateGeometry();
 
-    const program = this.program;
-    const vertices = triangulate(this.density);
-    const positions = this.scaleVertices(vertices, this.width, this.height);
-    const normals = this.parseNormals(new Float32Array(vertices));
-
-    program.attribute('a_position', positions, 3);
-
-    if (program.attribExists('a_normal')) {
-      program.attribute('a_normal', normals, 3, 0);
+    if (this.width === 0 || this.height === 0) {
+      return;
     }
 
-    if (this.config.texture || program.attribExists('a_texcoord')) {
+    const program = this.program;
+    const vertices = triangulate(this.density);
+
+    program.setPositions(this.scaleVertices(vertices, this.width, this.height));
+    program.setNormals(this.parseNormals(new Float32Array(vertices)));
+
+    if (this.config.texture) {
       // Set the size to 3 instead of 2, so we can just us the triangulate function
       // WebGL will strip away the Z value when it reaches the shader, which is
       // irrelevant for uvs anyway. Alternatively create a new Flaot32Array with
-      // the z value remvoed
-      program.attribute('a_texcoord', triangulate(this.density, false), 3, 0);
+      // the z value removed
+      program.setTextureCoords(triangulate(this.density, false), 3);
     }
   }
 

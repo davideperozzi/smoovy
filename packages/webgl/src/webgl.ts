@@ -7,6 +7,7 @@ import { Size } from '@smoovy/utils';
 import { Camera, CameraConfig } from './camera';
 import { Plane, PlaneConfig } from './geometry/plane';
 import { Mesh } from './mesh';
+import { Model } from './model';
 import { Renderer } from './renderer';
 import {
   ImageTexture, ImageTextureConfig, VideoTexture, VideoTextureConfig,
@@ -45,8 +46,8 @@ export interface WebGLConfig extends WebGLContextAttributes {
   autoSize?: boolean;
 
   /**
-   * Global uniforms that will be passed to all meshes. This is useful if
-   * you want to pass some values to all meshes without setting them
+   * Global uniforms that will be passed to all models. This is useful if
+   * you want to pass some values to all models without setting them
    * manually. You can still override them on each mesh. The values will
    * be passed to the shader as a uniform with the name of the key.
    *
@@ -73,7 +74,7 @@ export interface WebGLConfig extends WebGLContextAttributes {
   /**
    * Config for the main camera
    *
-   * @default { posZ: -3, fov: 45, near: 0.1, far: 100  }
+   * @default { posZ: 5, fov: 45, near: 0.1, far: 100  }
    */
   camera?: Partial<CameraConfig>;
 }
@@ -85,7 +86,7 @@ export enum WebGLEvent {
 
 export class WebGL extends EventEmitter {
   readonly renderer: Renderer;
-  protected readonly meshes: Mesh[] = [];
+  protected readonly models: Model[] = [];
   protected canvas: HTMLCanvasElement;
   protected observable: Observable<Window>;
   protected ticker: Ticker;
@@ -118,7 +119,7 @@ export class WebGL extends EventEmitter {
     ) as WebGLRenderingContext;
     this.renderer = new Renderer(
       this.context,
-      this.meshes,
+      this.models,
       this.config.ticker,
       this.config.taskOrder,
       this.config.camera,
@@ -184,11 +185,17 @@ export class WebGL extends EventEmitter {
   }
 
   remove(mesh: Mesh) {
-    const index = this.meshes.indexOf(mesh);
+    const index = this.models.indexOf(mesh);
 
     if (index > -1) {
-      this.meshes.splice(index, 1).forEach(m => m.destroy());
+      this.models.splice(index, 1).forEach(m => m.destroy());
     }
+
+    return this;
+  }
+
+  add(...models: Model[]) {
+    this.models.push(...models);
 
     return this;
   }
@@ -199,7 +206,7 @@ export class WebGL extends EventEmitter {
       ...config
     });
 
-    this.meshes.push(plane);
+    this.models.push(plane);
 
     return plane;
   }
@@ -208,7 +215,7 @@ export class WebGL extends EventEmitter {
     this.renderer.toggleCamera(nameOrCamera);
   }
 
-  camera(config: CameraConfig = {}) {
+  camera(config: Partial<CameraConfig> = {}) {
     return this.renderer.addCamera(
       new Camera(this.context, { ...config }, this.observable.size)
     );

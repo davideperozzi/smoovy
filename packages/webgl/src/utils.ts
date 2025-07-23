@@ -1,4 +1,4 @@
-import { Coordinate, isObj } from '@smoovy/utils';
+import { Coordinate, isNum, isObj, isStr } from '@smoovy/utils';
 
 import { Color, Size, UniformType, UniformValue } from './uniform';
 
@@ -7,7 +7,7 @@ export function createCanvas(canvas?: HTMLCanvasElement | string) {
     return canvas;
   }
 
-  if (typeof canvas === 'string') {
+  if (isStr(canvas)) {
     return document.querySelector(canvas) as HTMLCanvasElement;
   }
 
@@ -52,11 +52,11 @@ export function uniformValue(value: UniformValue) {
       const oldValue = value as Coordinate & { z?: number, w?: number };
       const newValue = [ oldValue.x, oldValue.y ];
 
-      if (typeof oldValue.z === 'number') {
+      if (isNum(oldValue.z)) {
         newValue.push(oldValue.z);
       }
 
-      if (typeof oldValue.w === 'number') {
+      if (isNum(oldValue.w)) {
         newValue.push(oldValue.w);
       }
 
@@ -86,7 +86,7 @@ export function uniformMethod(
   value: number | number[] | Float32Array,
   type?: UniformType
   ) {
-  if (typeof value === 'number') {
+  if (isNum(value)) {
     return `1${type === 'i' ? 'i' : 'f'}`;
   } else if (Array.isArray(value) || value instanceof Float32Array) {
     const length = value.length;

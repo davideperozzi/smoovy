@@ -25,10 +25,10 @@ export interface MeshConfig {
   mode?: number;
 
   /**
-   * The camera to use for the mesh. This is required if you want to use
-   * the mesh in a scene.
+   * The scopes to assign this mesh to. This can be used to render by groups.
+   * You can use the `only` option for a camera to target a specific scope
    */
-  camera: Camera;
+  scopes?: (string|number)[];
 
   /**
    * The vertex shader for the program of the mesh
@@ -118,12 +118,11 @@ export interface MeshConfig {
 }
 
 export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
-  private static defaultViewProj = mat4();
-  private disables = new Set<string>();
   private screenPosition: Partial<Vec2> = {};
   private textures = new Map<Texture, [WebGLUniformLocation, number]>();
   protected rawPosition: Vec2 = { x: 0, y: 0 };
   protected program: Program;
+  protected camera?: Camera;
 
   constructor(
     protected gl: WebGLRenderingContext,
@@ -135,12 +134,18 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
       throw new Error('vertex and fragment shader required');
     }
 
+    if (config.scopes) {
+      this.scopes.length = 0;
+      this.scopes.push(...config.scopes);
+    }
+
     this.x = config.x || 0;
     this.y = config.y || 0;
     this.z = config.z || 0;
     this.program = new Program(gl, config.vertex, config.fragment);
 
     this.initTextures();
+    this.updateGeometry();
   }
 
   private initTextures() {
@@ -184,10 +189,6 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     }
   }
 
-  get disabled() {
-    return this.disables.size > 0;
-  }
-
   get mode() {
     return this.config.mode || this.gl.TRIANGLES;
   }
@@ -200,22 +201,26 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     return this.config.transparent;
   }
 
-  get camera() {
-    return this.config.camera;
-  }
-
-  get camDist() {
-    return Math.abs(this.z - this.camera.z);
+  get opaque() {
+    return !this.transparent;
   }
 
   get centerX() { return 0; }
   get centerY() { return 0; }
 
   protected screenX(x = 0) {
+    if (!this.camera) {
+      return 0;
+    }
+
     return this.camera.cx(x, this.z) + this.camera.cw(this.centerX);
   }
 
   protected screenY(y = 0) {
+    if (!this.camera) {
+      return 0;
+    }
+
     return this.camera.cy(y, this.z) - this.camera.ch(this.centerY);
   }
 
@@ -253,6 +258,16 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     this.program.bind();
   }
 
+  updateMesh(camera: Camera) {
+    const changed = camera !== this.camera;
+
+    this.camera = camera;
+
+    if (changed) {
+      this.updateGeometry();
+    }
+  }
+
   updateModel() {
     // In order to save performance, we're updating the screen position with a delay.
     // This allows us to control when the screen position gets calculated.
@@ -266,13 +281,13 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
       const { x, y } = this.screenPosition;
 
       if (isNum(x)) {
-        this.position.x = this.screenX(x);
+        this.x = this.screenX(x);
 
         delete this.screenPosition.x;
       }
 
       if (isNum(y)) {
-        this.position.y = this.screenY(y);
+        this.y = this.screenY(y);
 
         delete this.screenPosition.y;
       }
@@ -282,19 +297,13 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
   }
 
   draw(time = 0, uniforms: Record<string, UniformValue> = {}) {
-    this.updateModel();
+    this.bind();
 
     const program = this.program;
-    const camera = this.config.camera;
-    const view = camera?.model || Mesh.defaultViewProj;
-    const proj = camera?.projection || Mesh.defaultViewProj;
 
     // apply built-in uniforms
     program.uniform('u_time', time, 'f', false);
-    program.uniform('u_res', camera.view, 'v2', false);
-    program.uniform('u_proj', proj, 'm4', false);
-    program.uniform('u_view', view, 'm4', false);
-    program.uniform('u_model', this.model, 'm4', false);
+    program.uniform('u_model', this.world, 'm4', false);
 
     // apply uniforms defined from outside
     uniforms = { ...uniforms, ...this.config.uniforms };
@@ -311,14 +320,23 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
       }
     }
 
-    // bind textures
     for (const [texture, [ location, slot ]] of this.textures) {
       texture.bind(slot, location);
     }
 
-    // draw all vertices
     this.beforeDraw();
-    this.gl.drawArrays(this.mode, 0, this.program.enableAttribs());
+
+    if (this.program.hasIndices()) {
+      this.program.bindAttribs();
+
+      const count = this.program.bindIndices();
+
+      this.gl.drawElements(this.mode, count, this.gl.UNSIGNED_INT, 0);
+    } else {
+      this.gl.drawArrays(this.mode, 0, this.program.bindAttribs());
+    }
+
+    this.unbind();
     this.afterDraw();
   }
 
@@ -327,20 +345,6 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
 
   unbind() {
     this.program.unbind();
-  }
-
-  disable(ref = '_') {
-    if ( ! this.disables.has(ref)) {
-      this.disables.add(ref);
-    }
-  }
-
-  enable(ref = '_', enabled = true) {
-    if (enabled) {
-      this.disables.delete(ref);
-    } else {
-      this.disable(ref);
-    }
   }
 
   destroy() {
