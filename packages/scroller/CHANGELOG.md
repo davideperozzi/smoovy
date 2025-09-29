@@ -1,5 +1,11 @@
 # @smoovy/scroller
 
+## 2.2.7
+
+### Patch Changes
+
+- feat(scroller): added inertia events
+
 ## 2.2.6
 
 ### Patch Changes

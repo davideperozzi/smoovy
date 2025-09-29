@@ -2,7 +2,7 @@ import { EventEmitter, EventListener } from "@smoovy/emitter";
 import { listen, listenCompose, Unlisten } from "@smoovy/listener";
 import { Ticker, TickerTask } from "@smoovy/ticker";
 import { clamp, Coordinate, cutDec, damp, Size } from "@smoovy/utils";
-import { Inertia, InertiaEventType } from "./inertia";
+import { Inertia, InertiaEventMap, InertiaEventType } from "./inertia";
 
 export interface ScrollerConfig {
   /**
@@ -263,7 +263,9 @@ export const defaults: ScrollerConfig = {
   precision: 4
 };
 
-export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEmitter<ScrollerEventMap> {
+type EventMap = ScrollerEventMap & InertiaEventMap;
+
+export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEmitter<EventMap> {
   readonly limit = { minX: -Infinity, maxX: Infinity, minY: -Infinity, maxY: Infinity };
   readonly virtual: Coordinate = { x: 0, y: 0 };
   readonly output: Coordinate = { x: 0, y: 0 };
@@ -355,6 +357,8 @@ export class Scroller<C extends ScrollerConfig = ScrollerConfig> extends EventEm
     }) : undefined;
 
     this.unlisten = this.listen();
+
+    this.inertia?.reflectEvents(this);
 
     return this;
   }
