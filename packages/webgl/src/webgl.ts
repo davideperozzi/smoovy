@@ -201,10 +201,7 @@ export class WebGL extends EventEmitter {
   }
 
   plane(config: Partial<PlaneConfig> = {}) {
-    const plane = new Plane(this.context, {
-      camera: this.renderer.findCamera('main')!,
-      ...config
-    });
+    const plane = new Plane(this.context, config);
 
     this.models.push(plane);
 

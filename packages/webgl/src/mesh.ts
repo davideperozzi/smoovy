@@ -149,8 +149,8 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
   }
 
   private initTextures() {
-    const texture = this.config.texture instanceof Camera
-      ? this.config.texture.texture
+    const texture = this.config.texture instanceof Camera && this.config.texture.fbo
+      ? this.config.texture.fbo.texture
       : this.config.texture;
 
     if (texture) {
@@ -167,7 +167,7 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
         let slot = 0;
 
         for (const [k, tex] of Object.entries(texture)) {
-          const currTex = tex instanceof Camera ? tex.texture : tex;
+          const currTex = tex instanceof Camera && tex.fbo ? tex.fbo.texture : tex;
 
           if (!currTex) {
             warnOnce(`invalid texture ${k}: ${currTex}`);
@@ -233,6 +233,7 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     } else {
       this.position.y = y - this.centerY;
       this.config.y = y - this.centerY;
+      this._dirty = true;
     }
   }
 
@@ -247,6 +248,7 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     } else {
       this.position.x = x - this.centerX;
       this.config.x = this.position.x;
+      this._dirty = true;
     }
   }
 
@@ -281,13 +283,15 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
       const { x, y } = this.screenPosition;
 
       if (isNum(x)) {
-        this.x = this.screenX(x);
+        this.position.x = this.screenX(x);
+        this._dirty = true;
 
         delete this.screenPosition.x;
       }
 
       if (isNum(y)) {
-        this.y = this.screenY(y);
+        this.position.y = this.screenY(y);
+        this._dirty = true;
 
         delete this.screenPosition.y;
       }
@@ -342,6 +346,9 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
 
   protected beforeDraw() {}
   protected afterDraw() {}
+  protected getCloneArgs() {
+    return [this.gl, structuredClone(this.config)];
+  }
 
   unbind() {
     this.program.unbind();
@@ -349,5 +356,15 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
 
   destroy() {
     this.program.destroy();
+  }
+
+  clone(recursive = true) {
+    const mesh = super.clone(recursive);
+
+    mesh.camera = this.camera;
+    mesh.rawPosition = this.rawPosition;
+    mesh.screenPosition = this.screenPosition;
+
+    return mesh;
   }
 }

@@ -193,13 +193,11 @@ export class Plane<C extends PlaneConfig = PlaneConfig> extends Mesh<C> {
     program.setPositions(this.scaleVertices(vertices, this.width, this.height));
     program.setNormals(this.parseNormals(new Float32Array(vertices)));
 
-    if (this.config.texture) {
-      // Set the size to 3 instead of 2, so we can just us the triangulate function
-      // WebGL will strip away the Z value when it reaches the shader, which is
-      // irrelevant for uvs anyway. Alternatively create a new Flaot32Array with
-      // the z value removed
-      program.setTextureCoords(triangulate(this.density, false), 3);
-    }
+    // Set the size to 3 instead of 2, so we can just us the triangulate function
+    // WebGL will strip away the Z value when it reaches the shader, which is
+    // irrelevant for uvs anyway. Alternatively create a new Float32Array with
+    // the z value removed
+    program.setTextureCoords(triangulate(this.density, false), 3);
   }
 
   beforeDraw() {

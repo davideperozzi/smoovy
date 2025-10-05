@@ -2,21 +2,20 @@ import { WebGL } from '../src/index';
 
 const src = '/1000x1000.jpg';
 const gl = new WebGL();
-const c1 = gl.camera({
-  fbo: true,
-  name: 'fbo',
-  scopes: ['fbo'],
-});
-
-const p1 = gl.plane({
-  x: 0,
-  y: 0,
-  width: 2,
-  height: 2,
-  density: 100,
-  uniforms: { u_color: [0,0,0,1] },
-  scopes: ['fbo'],
-});
+//const c1 = gl.camera({
+//  //fbo: true,
+//  name: 'fbo',
+//  type: 'orthographic',
+//  scopes: ['fbo'],
+//});
+//
+//const p1 = gl.plane({
+//  width: 2,
+//  height: 2,
+//  density: 10,
+//  uniforms: { u_color: [0,0,0,1] },
+//  scopes: ['fbo'],
+//});
 
 //
 //const p2 = gl.plane({
@@ -37,40 +36,40 @@ const p1 = gl.plane({
 //  uniforms: { u_color: [0,0,1,1] }
 //})
 
-const p0 = gl.plane({
-  x: window.innerWidth*.5,
-  y: window.innerHeight*.5,
-  screen: true,
-  density: 50,
-  width: window.innerWidth*.5,
-  height: window.innerHeight*.5,
-  uniforms: { u_color: [1,0,0,1] },
-  //camera: c1,
-  //texture: gl.image({ src }),
-  //texture: c1,
-  vertex: `#version 300 es
-    precision mediump float;
-
-    in vec4 a_position;
-    in vec2 a_texcoord;
-    uniform float u_time;
-    uniform mat4 u_proj;
-    uniform mat4 u_view;
-    uniform mat4 u_model;
-
-    out vec2 v_texcoord;
-    out vec3 v_normal;
-
-    void main() {
-      v_texcoord = a_texcoord;
-
-      vec4 pos = a_position;
-
-      pos.z = cos(pos.x*5.5 + u_time)*.2;
-
-      gl_Position = u_proj * u_view * u_model *  pos;
-    }`
-});
+//const p0 = gl.plane({
+//  x: window.innerWidth*.5,
+//  y: window.innerHeight*.5,
+//  screen: true,
+//  density: 30,
+//  width: window.innerWidth*.5,
+//  height: window.innerHeight*.5,
+//  uniforms: { u_color: [1,0,0,1] },
+//  //camera: c1,
+//  //texture: gl.image({ src }),
+//  texture: c1,
+//  vertex: `#version 300 es
+//    precision mediump float;
+//
+//    in vec4 a_position;
+//    in vec2 a_texcoord;
+//    uniform float u_time;
+//    uniform mat4 u_proj;
+//    uniform mat4 u_view;
+//    uniform mat4 u_model;
+//
+//    out vec2 v_texcoord;
+//    out vec3 v_normal;
+//
+//    void main() {
+//      v_texcoord = a_texcoord;
+//
+//      vec4 pos = a_position;
+//
+//      pos.z = cos(pos.x*5.5 + u_time)*.2;
+//
+//      gl_Position = u_proj * u_view * u_model *  pos;
+//    }`
+//});
 //
 //window.onresize = () => {
 //  p0.x = window.innerWidth*.5;
@@ -145,16 +144,17 @@ const p0 = gl.plane({
 //
 //requestAnimationFrame(render);
 //
-// const plane2 = gl.plane({
-//   x: 0,
-//   y: 1000,
-//   width: 500,
-//   height: 500,
-//   originX: 0,
-//   originY: 0,
-//   screen: true,
-//   texture: gl.video({ src: '/meltdown.mp4' }),
-// });
+const plane2 = gl.plane({
+  x: 0,
+  z: 0,
+  y: 500,
+  width: 500,
+  height: 500,
+  originX: 0,
+  originY: 0,
+  screen: true,
+  texture: gl.video({ src: '/meltdown.mp4' }),
+});
 //
 // gl.ctx.disable(gl.ctx.CULL_FACE);
 //
@@ -175,24 +175,24 @@ const p0 = gl.plane({
 // let lastX = window.scrollX;
 // let lastY = window.scrollY;
 //
-// window.history.scrollRestoration = 'manual';
+window.history.scrollRestoration = 'manual';
+
+const handleScroll = () => {
+  const x = window.scrollX;
+  const y = window.scrollY;
+  const cam = gl.renderer.findCamera('main');
+
+  if (cam) {
+    cam.y = cam.ch(-y);
+  }
+
+  // camera.projection[13] = camera.ch(y);
+
+  //lastX = x;
+  //lastY = y;
+}
 //
-// const handleScroll = () => {
-//   const x = window.scrollX;
-//   const y = window.scrollY;
-//
-//   camera.y = camera.ch(window.scrollY);
-//
-//   // camera.updateModel();
-//   // camera.y = camera.ch(y);
-//
-//   // camera.projection[13] = camera.ch(y);
-//
-//   lastX = x;
-//   lastY = y;
-// }
-////
-// window.onscroll = () => handleScroll();
+ window.onscroll = () => handleScroll();
 // handleScroll();
 //// // // settings uniforms
 //// // gl.uniforms.mouse = [ 0.5, 0.5 ];
