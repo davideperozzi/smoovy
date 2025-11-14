@@ -6,6 +6,7 @@ interface PrimitiveConfig extends MeshConfig {
     normals?: Float32Array;
     indices?: Uint16Array;
     texcoord?: Float32Array;
+    indexType?: 5121 | 5123 | 5125;
   };
 }
 
@@ -17,7 +18,8 @@ export class Primitive<C extends PrimitiveConfig = PrimitiveConfig> extends Mesh
       positions,
       normals,
       indices,
-      texcoord
+      texcoord,
+      indexType
     } = this.config.geometry;
 
     this.program.setPositions(positions);
@@ -28,6 +30,10 @@ export class Primitive<C extends PrimitiveConfig = PrimitiveConfig> extends Mesh
 
     if (indices) {
       this.program.setIndices(indices);
+
+      if (indexType) {
+        this.program.setIndexType(indexType);
+      }
     }
 
     if (texcoord) {

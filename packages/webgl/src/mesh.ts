@@ -310,18 +310,16 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     program.uniform('u_model', this.world, 'm4', false);
 
     // apply uniforms defined from outside
-    uniforms = { ...uniforms, ...this.config.uniforms };
+    Object.assign(uniforms, this.config.uniforms);
 
-    if (uniforms) {
-      const uniformTypes = this.config.uniformTypes || {};
-      const uniformOptionals = this.config.uniformOptionals || {};
+    const uniformTypes = this.config.uniformTypes || {};
+    const uniformOptionals = this.config.uniformOptionals || {};
 
-      for (const [name, value] of Object.entries(uniforms)) {
-        const type = uniformTypes[name];
-        const warn = !uniformOptionals[name];
+    for (const [name, value] of Object.entries(uniforms)) {
+      const type = uniformTypes[name];
+      const warn = !uniformOptionals[name];
 
-        program.uniform(name, value, type, warn);
-      }
+      program.uniform(name, value, type, warn);
     }
 
     for (const [texture, [ location, slot ]] of this.textures) {
@@ -334,8 +332,9 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
       this.program.bindAttribs();
 
       const count = this.program.bindIndices();
+      const type = this.program.indexType();
 
-      this.gl.drawElements(this.mode, count, this.gl.UNSIGNED_INT, 0);
+      this.gl.drawElements(this.mode, count, type, 0);
     } else {
       this.gl.drawArrays(this.mode, 0, this.program.bindAttribs());
     }

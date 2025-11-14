@@ -85,8 +85,21 @@ export class Camera extends Model {
     return this.config.type;
   }
 
-  cw(width: number) { return (width / this.view.width) * this.size.width; }
-  ch(height: number) { return (height / this.view.height) * this.size.height; }
+  pw(width: number) {
+    return (width / this.size.width) * this.view.width;
+  }
+
+  ph(height: number) {
+    return (height / this.size.height) * this.view.height;
+  }
+
+  cw(width: number) {
+    return (width / this.view.width) * this.size.width;
+  }
+
+  ch(height: number) {
+    return (height / this.view.height) * this.size.height;
+  }
 
   cx(x: number, z = 0) {
     const fov = this.config.fov * Math.PI / 180;

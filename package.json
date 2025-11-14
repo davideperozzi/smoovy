@@ -1,5 +1,5 @@
 {
-  "name": "smoovy-v2",
+  "name": "smoovy",
   "packageManager": "yarn@3.3.0",
   "private": true,
   "workspaces": [

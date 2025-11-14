@@ -18,6 +18,7 @@ export class Program {
   private buffers: Record<string, WebGLBuffer> = {};
   private attribs: Record<string, ProgramAttrib> = {};
   private uniforms: Record<string, WebGLUniformLocation> = {};
+  private _indexType: number;
   private vertex: WebGLShader;
   private fragment: WebGLShader;
   private _program: WebGLProgram;
@@ -31,6 +32,7 @@ export class Program {
     this.vertex = createShader(gl, gl.VERTEX_SHADER, vertex);
     this.fragment = createShader(gl, gl.FRAGMENT_SHADER, fragment);
     this._program = gl.createProgram()!;
+    this._indexType = gl.UNSIGNED_INT;
 
     gl.attachShader(this._program, this.vertex);
     gl.attachShader(this._program, this.fragment);
@@ -146,6 +148,10 @@ export class Program {
     this.bufferData('indices', bufferData, gl.ELEMENT_ARRAY_BUFFER);
   }
 
+  setIndexType(type: number) {
+    this._indexType = type;
+  }
+
   setPositions(data: number[] | Float32Array, size = 3, count = true, name = 'a_position') {
     if (this.attribExists(name)) {
       const positions = Array.isArray(data) ? new Float32Array(data) : data;
@@ -164,6 +170,10 @@ export class Program {
     if (this.attribExists(name)) {
       this.attribute(name, data, size, false);
     }
+  }
+
+  indexType() {
+    return this._indexType;
   }
 
   attribute(

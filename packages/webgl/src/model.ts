@@ -8,11 +8,13 @@ export class Model {
   readonly scopes: (string|number)[] = [0];
   protected disables = new Set<string>();
   protected quaternion: Vec4 = Object.seal({ x: 0, y: 0, z: 0, w: 1 });
+  protected _uniforms: Record<string, UniformValue> = {};
   protected _children: Model[] = [];
   protected _model: Mat4 = mat4();
   protected _world: Mat4 = mat4();
   protected _parent?: Model;
   protected _dirty = true;
+
 
   set x(x: number) { this._dirty = this._dirty || x !== this.position.x; this.position.x = x; }
   get x() { return this.position.x; }
@@ -52,6 +54,10 @@ export class Model {
 
   get children() {
     return this._children;
+  }
+
+  get uniforms() {
+    return this._uniforms;
   }
 
   get disabled() {
@@ -165,8 +171,12 @@ export class Model {
   protected getCloneArgs(): any[] { return []; }
 
   draw(time = 0, uniforms: Record<string, UniformValue> = {}) {
+    Object.assign(uniforms, this._uniforms);
+
     for (const child of this._children) {
-      child.draw(time, uniforms);
+      if (!child.disabled) {
+        child.draw(time, uniforms);
+      }
     }
   }
 
@@ -189,7 +199,6 @@ export class Model {
       this.disable(ref);
     }
   }
-
 
   clone(recursive = true): this {
     this.updateModel();

@@ -34,7 +34,7 @@ export class Renderer {
       : nameOrCamera;
 
     for (const c of this.cameras) {
-      if (c.framebuffer) {
+      if (c.fbo) {
         continue;
       }
 
