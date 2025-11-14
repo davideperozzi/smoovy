@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { DOMTweenProps, TransformTweenProps } from './props';
 
-const transformCache = new WeakMap<HTMLElement, TransformTweenProps>();
-const transformInitCache = new WeakMap<HTMLElement, TransformTweenProps>();
+const transformCache = new WeakMap<HTMLElement | SVGElement, TransformTweenProps>();
+const transformInitCache = new WeakMap<HTMLElement | SVGElement, TransformTweenProps>();
 
-export function getTransformValues(element: HTMLElement): {
+export function getTransformValues(element: HTMLElement | SVGElement): {
   initial: TransformTweenProps,
   values: TransformTweenProps
 } {
@@ -94,7 +94,7 @@ export function getTransformValues(element: HTMLElement): {
 }
 
 export function setTransformValues(
-  element: HTMLElement,
+  element: HTMLElement | SVGElement,
   values: Partial<TransformTweenProps>,
   units: Record<string, string> = {}
 ): void {
@@ -193,7 +193,7 @@ export function mergeDomProps(
   return result;
 }
 
-export function getDomProps(dom: HTMLElement) {
+export function getDomProps(dom: HTMLElement | SVGElement) {
   const { initial, values } = getTransformValues(dom);
   const opacity = parseFloat(dom.style.opacity);
 
@@ -209,7 +209,7 @@ const noStyleProps = [
 ];
 
 export function setDomProps(
-  dom: HTMLElement,
+  dom: HTMLElement | SVGElement,
   props: Partial<DOMTweenProps & Omit<CSSStyleDeclaration, 'opacity'>>,
   units: Record<string, string> = {}
 ) {

@@ -1,5 +1,11 @@
 # @smoovy/tween
 
+## 1.1.28
+
+### Patch Changes
+
+- feat: added svgelement support
+
 ## 1.1.27
 
 ### Patch Changes

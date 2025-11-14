@@ -28,6 +28,10 @@ export interface TweenConfig<
 export type SimpleTweenConfig<V extends (TweenProps | object)>
   = Omit<TweenConfig<V>, 'from' | 'to'>;
 
+function isTargetValid(target: any): target is HTMLElement | SVGElement {
+  return target instanceof HTMLElement || target instanceof SVGElement
+}
+
 function getChanges<T extends (TweenProps | object)>(from: T, to: Partial<T>) {
   const changes = {} as typeof to;
 
@@ -56,7 +60,7 @@ export class Tween<
   private originState: Partial<T> = {};
   private changedState: Partial<T> = {};
   private resultState: Partial<T> = {};
-  private domTarget?: HTMLElement;
+  private domTarget?: HTMLElement | SVGElement;
 
   constructor(
     protected config: TweenConfig<T>
@@ -121,9 +125,9 @@ export class Tween<
     const config = this.config;
     const fromState = config.from;
 
-    if (config.target && config.target instanceof HTMLElement) {
+    if (config.target && isTargetValid(config.target)) {
       this.domTarget = config.target;
-    } else if (fromState instanceof HTMLElement) {
+    } else if (isTargetValid(fromState)) {
       this.domTarget = fromState;
     }
 
@@ -155,7 +159,7 @@ export class Tween<
       this.originState = { ...initialState };
       this.changedState = getChanges<T>(this.originState as T, desiredState);
 
-      if (config.target && ! (config.target instanceof HTMLElement)) {
+      if (config.target && !isTargetValid(config.target)) {
         this.resultState = config.target;
       } else {
         this.resultState = config.mutate !== false
