@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.3.4
+
+### Patch Changes
+
+- fix(webgl): camera order
+
 ## 1.3.3
 
 ### Patch Changes
