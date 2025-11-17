@@ -13,7 +13,19 @@ export interface IntertiaConfig {
 }
 
 export enum InertiaEventType {
-  DELTA = 'delta'
+  DELTA = 'inertiadelta',
+  VELOCITY = 'inertiavelocity',
+  START = 'inertiastart',
+  MOVE = 'inertiamove',
+  END = 'inertiaend'
+}
+
+export interface InertiaEventMap {
+  'inertiadelta': Coordinate;
+  'inertiavelocity': Coordinate;
+  'inertiastart': Coordinate;
+  'inertiamove': Coordinate;
+  'inertiaend': undefined;
 }
 
 const defaults: IntertiaConfig = {
@@ -29,6 +41,7 @@ const defaults: IntertiaConfig = {
 export class Inertia extends EventEmitter {
   private down = false;
   private locked = false;
+  private moved = false;
   private config: IntertiaConfig;
   private velocity: Coordinate = { x: 0, y: 0 };
   private startPos: Coordinate = { x: 0, y: 0 };
@@ -57,6 +70,7 @@ export class Inertia extends EventEmitter {
       pointerEvents ? listenCompose(
         listen(eventTarget, 'mousedown', (event) => this.handleStart(event, true)),
         listen(eventTarget, 'mousemove', (event) => this.handleMove(event, true)),
+        listen(eventTarget, 'mouseleave', () => this.handleEnd()),
         listen(eventTarget, ['mouseup', 'mousecancel'], () => this.handleEnd()),
       ) : undefined
     )
@@ -76,6 +90,8 @@ export class Inertia extends EventEmitter {
     this.startPos.x = pos.pageX;
     this.startPos.y = pos.pageY;
     this.down = true;
+
+    this.emit(InertiaEventType.START, this.startPos);
   }
 
   handleEnd() {
@@ -90,7 +106,12 @@ export class Inertia extends EventEmitter {
       });
     }
 
+    if (this.moved) {
+      this.emit(InertiaEventType.END);
+    }
+
     this.down = false;
+    this.moved = false;
   }
 
   handleMove(event: TouchEvent | MouseEvent, mouse = false) {
@@ -112,15 +133,20 @@ export class Inertia extends EventEmitter {
 
       const deltaMultiplier = mouse ? pointerDeltaMultiplier : touchDeltaMultiplier;
       const velocityMultiplier = mouse ? pointerVelocityMultiplier : touchVelocityMultiplier;
+      const diffX = this.startPos.x - pos.pageX;
+      const diffY = this.startPos.y - pos.pageY;
 
-      delta.x = (this.startPos.x - pos.pageX) * deltaMultiplier;
-      delta.y = (this.startPos.y - pos.pageY) * deltaMultiplier;
+      delta.x = diffX * deltaMultiplier;
+      delta.y = diffY * deltaMultiplier;
 
-      this.velocity.x = (this.startPos.x - pos.pageX) * velocityMultiplier;
-      this.velocity.y = (this.startPos.y - pos.pageY) * velocityMultiplier;
+      this.velocity.x = delta.x * velocityMultiplier;
+      this.velocity.y = delta.y * velocityMultiplier;
       this.startPos.x = pos.pageX;
       this.startPos.y = pos.pageY;
+      this.moved = true;
 
+      this.emit(InertiaEventType.MOVE, { x: pos.pageX, y: pos.pageY });
+      this.emit(InertiaEventType.VELOCITY, this.velocity);
       this.emit(InertiaEventType.DELTA, delta);
     }
   }

@@ -5,6 +5,7 @@ export interface TextureConfig {
   wrapS?: number;
   wrapT?: number;
   minFilter?: number;
+  magFilter?: number;
   unpackFlip?: boolean;
   transparent?: boolean;
 }
@@ -18,7 +19,11 @@ export interface VideoTextureConfig extends TextureConfig {
   src: string | HTMLVideoElement;
 }
 
-export type FramebufferTextureConfig = TextureConfig;
+export type FramebufferTextureConfig = TextureConfig & {
+  depth?: boolean;
+};
+
+export type DepthTextureConfig = TextureConfig;
 
 export class TextureMediaLoader {
   static readonly images = new Map<string, Promise<HTMLImageElement>>();
@@ -93,18 +98,30 @@ export class Texture<C extends TextureConfig = TextureConfig> {
     const wrapS = config.wrapS || gl.CLAMP_TO_EDGE;
     const wrapT = config.wrapT || gl.CLAMP_TO_EDGE;
     const minFilter = config.minFilter || gl.LINEAR;
+    const magFilter = config.magFilter || gl.LINEAR;
 
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, config.unpackFlip !== false);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, config.unpackFlip !== false);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, data);
+
+    this.write(data);
+
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     gl.bindTexture(gl.TEXTURE_2D, null);
 
-    if ( ! this.resolver.completed) {
+    if (!this.resolver.completed) {
       this.resolver.resolve(true);
     }
+  }
+
+  protected write(data: any) {
+    const gl = this.gl;
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, data);
   }
 
   destroy() {}
@@ -194,7 +211,45 @@ export class VideoTexture extends Texture<VideoTextureConfig> {
   }
 }
 
+export class DepthTexture extends Texture<DepthTextureConfig> {
+  private width = 0;
+  private height = 0;
+
+  allocate(width: number, height: number) {
+    this.width = width;
+    this.height = height;
+
+    this.upload(null);
+  }
+
+  write(data = null) {
+    const gl = this.gl;
+
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      (gl as any).DEPTH_COMPONENT24,
+      this.width,
+      this.height,
+      0,
+      gl.DEPTH_COMPONENT,
+      gl.UNSIGNED_INT,
+      data
+    );
+
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.DEPTH_ATTACHMENT,
+      gl.TEXTURE_2D,
+      this.texture,
+      0
+    );
+  }
+}
+
 export class FramebufferTexture extends Texture<FramebufferTextureConfig> {
+  depth?: DepthTexture;
+
   allocate(width: number, height: number) {
     const gl = this.gl;
     const wrapS = this.config.wrapS || gl.CLAMP_TO_EDGE;
@@ -216,6 +271,27 @@ export class FramebufferTexture extends Texture<FramebufferTextureConfig> {
       gl.UNSIGNED_BYTE,
       null
     );
+
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      this.texture,
+      0
+    );
+
+    if (this.config.depth) {
+      if (!this.depth) {
+        this.depth = new DepthTexture(this.gl, {
+          minFilter: gl.NEAREST,
+          magFilter: gl.NEAREST,
+          wrapS: gl.CLAMP_TO_EDGE,
+          wrapT: gl.CLAMP_TO_EDGE
+        });
+      }
+
+      this.depth.allocate(width, height);
+    }
 
     gl.bindTexture(gl.TEXTURE_2D, null);
 

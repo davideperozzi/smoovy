@@ -7,12 +7,12 @@ export interface FramebufferConfig extends FramebufferTextureConfig {
 }
 
 export class Framebuffer {
-  readonly texture: FramebufferTexture;
   private framebuffer: WebGLFramebuffer;
+  readonly texture: FramebufferTexture;
   readonly size: Size = { width: 0, height: 0 };
 
   constructor(private gl: WebGLRenderingContext, config: Partial<FramebufferConfig> = {}) {
-    this.texture = new FramebufferTexture(gl, config);
+    this.texture = new FramebufferTexture(gl, { depth: true, ...config });
     this.framebuffer = gl.createFramebuffer()!;
 
     this.resize(
@@ -22,20 +22,11 @@ export class Framebuffer {
   }
 
   resize(width = this.size.width, height = this.size.height) {
-    const gl = this.gl;
-
     this.size.width = width;
     this.size.height = height;
 
-    this.texture.allocate(width, height);
     this.bind();
-    gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      this.texture.handle,
-      0
-    );
+    this.texture.allocate(width, height);
     this.unbind();
   }
 

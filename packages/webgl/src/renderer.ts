@@ -34,7 +34,7 @@ export class Renderer {
       : nameOrCamera;
 
     for (const c of this.cameras) {
-      if (c.framebuffer) {
+      if (c.fbo) {
         continue;
       }
 
@@ -123,8 +123,10 @@ export class Renderer {
     uniforms.u_proj = camera.projection;
     uniforms.u_res = camera.view;
 
-    gl.enable(gl.DEPTH_TEST);
     gl.depthMask(true);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LESS);
+
     gl.disable(gl.BLEND);
 
     for (const model of models.filter(m => m.opaque)) {
@@ -136,13 +138,15 @@ export class Renderer {
       model.draw(time, this.uniforms);
     }
 
+    gl.depthMask(false);
+    gl.depthFunc(gl.LEQUAL);
+
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.depthMask(false);
 
     const transparentModels = models
       .filter(m => !m.opaque)
-      .sort((a, b) => Math.abs(a.z - camera.z) - Math.abs(b.z - camera.z));
+      .sort((a, b) => Math.abs(b.z - camera.z) - Math.abs(a.z - camera.z));
 
     for (const model of transparentModels) {
       if (model instanceof Mesh) {
@@ -174,9 +178,9 @@ export class Renderer {
       });
 
       camera.bind();
-      camera.draw();
+      camera.updateModel();
 
-      if (camera.framebuffer) {
+      if (camera.fbo) {
         this.clearScene();
       }
 

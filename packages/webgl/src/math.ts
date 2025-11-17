@@ -121,22 +121,22 @@ export function mat4inv(m: Mat4, out = m): Mat4 {
 
   det = 1.0 / det;
 
-  out[0]  = ( a11 * b11 - a12 * b10 + a13 * b09) * det;
-  out[1]  = (-a01 * b11 + a02 * b10 - a03 * b09) * det;
-  out[2]  = ( a31 * b05 - a32 * b04 + a33 * b03) * det;
-  out[3]  = (-a21 * b05 + a22 * b04 - a23 * b03) * det;
-  out[4]  = (-a10 * b11 + a12 * b08 - a13 * b07) * det;
-  out[5]  = ( a00 * b11 - a02 * b08 + a03 * b07) * det;
-  out[6]  = (-a30 * b05 + a32 * b02 - a33 * b01) * det;
-  out[7]  = ( a20 * b05 - a22 * b02 + a23 * b01) * det;
-  out[8]  = ( a10 * b10 - a11 * b08 + a13 * b06) * det;
-  out[9]  = (-a00 * b10 + a01 * b08 - a03 * b06) * det;
-  out[10] = ( a30 * b04 - a31 * b02 + a33 * b00) * det;
-  out[11] = (-a20 * b04 + a21 * b02 - a23 * b00) * det;
-  out[12] = (-a10 * b09 + a11 * b07 - a12 * b06) * det;
-  out[13] = ( a00 * b09 - a01 * b07 + a02 * b06) * det;
-  out[14] = (-a30 * b03 + a31 * b01 - a32 * b00) * det;
-  out[15] = ( a20 * b03 - a21 * b01 + a22 * b00) * det;
+  out[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+  out[1] = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+  out[2] = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+  out[3] = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+  out[4] = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+  out[5] = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+  out[6] = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+  out[7] = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+  out[8] = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+  out[9] = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+  out[10] = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+  out[11] = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+  out[12] = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+  out[13] = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+  out[14] = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+  out[15] = (a20 * b03 - a21 * b01 + a22 * b00) * det;
 
   return out;
 }
@@ -253,10 +253,10 @@ export function mat4ToQuat(m: Mat4, out: Vec4): void {
 
 export function quatToEuler(q: Vec4, out: Vec3): void {
   const x = q.x, y = q.y, z = q.z, w = q.w;
-  const sinr_cosp = 2 * (w * x + y * z);
-  const cosr_cosp = 1 - 2 * (x * x + y * y);
+  const sinrCosp = 2 * (w * x + y * z);
+  const cosrCosp = 1 - 2 * (x * x + y * y);
 
-  out.x = Math.atan2(sinr_cosp, cosr_cosp);
+  out.x = Math.atan2(sinrCosp, cosrCosp);
 
   const sinp = 2 * (w * y - z * x);
 
@@ -266,10 +266,10 @@ export function quatToEuler(q: Vec4, out: Vec3): void {
     out.y = Math.asin(sinp);
   }
 
-  const siny_cosp = 2 * (w * z + x * y);
-  const cosy_cosp = 1 - 2 * (y * y + z * z);
+  const sinyCosp = 2 * (w * z + x * y);
+  const cosyCosp = 1 - 2 * (y * y + z * z);
 
-  out.z = Math.atan2(siny_cosp, cosy_cosp);
+  out.z = Math.atan2(sinyCosp, cosyCosp);
 }
 
 /**

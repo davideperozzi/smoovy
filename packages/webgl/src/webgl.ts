@@ -12,6 +12,7 @@ import { Renderer } from './renderer';
 import {
   ImageTexture, ImageTextureConfig, VideoTexture, VideoTextureConfig,
 } from './texture';
+import { UniformValue } from './uniform';
 import { createCanvas } from './utils';
 
 export interface WebGLConfig extends WebGLContextAttributes {
@@ -53,7 +54,7 @@ export interface WebGLConfig extends WebGLContextAttributes {
    *
    * @default {}
    */
-  uniforms?: Record<string, any>;
+  uniforms?: Record<string, UniformValue>;
 
   /**
    * The pixel ratio of the canvas. This will be multiplied with the
@@ -79,13 +80,9 @@ export interface WebGLConfig extends WebGLContextAttributes {
   camera?: Partial<CameraConfig>;
 }
 
-export enum WebGLEvent {
-  BEFORE_RENDER = 'beforerender',
-  AFTER_RENDER = 'afterrender'
-}
-
 export class WebGL extends EventEmitter {
   readonly renderer: Renderer;
+  readonly uniforms: Record<string, UniformValue> = {};
   protected readonly models: Model[] = [];
   protected canvas: HTMLCanvasElement;
   protected observable: Observable<Window>;
@@ -109,6 +106,7 @@ export class WebGL extends EventEmitter {
       ...config
     } as WebGLConfig;
 
+    this.uniforms = { ...this.uniforms, ...(this.config.uniforms || {}) };
     this.ticker = config.ticker || Ticker.main;
     this.canvas = createCanvas(config.canvas);
     this.observable = observe(window, { resizeDetection: true });
@@ -120,19 +118,15 @@ export class WebGL extends EventEmitter {
     this.renderer = new Renderer(
       this.context,
       this.models,
-      this.config.ticker,
+      this.ticker,
       this.config.taskOrder,
       this.config.camera,
       this.observable.size,
-      this.config.uniforms
+      this.uniforms
     );
 
     this.init();
     this.start();
-  }
-
-  get uniforms() {
-    return this.config.uniforms || {};
   }
 
   get ctx() {
@@ -201,10 +195,7 @@ export class WebGL extends EventEmitter {
   }
 
   plane(config: Partial<PlaneConfig> = {}) {
-    const plane = new Plane(this.context, {
-      camera: this.renderer.findCamera('main')!,
-      ...config
-    });
+    const plane = new Plane(this.context, config);
 
     this.models.push(plane);
 
