@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.3.3
+
+### Patch Changes
+
+- feat(webgl): added lots of sugar
+
 ## 1.3.2
 
 ### Patch Changes

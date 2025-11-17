@@ -1,6 +1,6 @@
 {
   "name": "@smoovy/webgl",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Easier WebGL animations for websites",
   "main": "./src/index.ts",
   "homepage": "https://github.com/davideperozzi/smoovy",
