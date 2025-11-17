@@ -1,7 +1,19 @@
 import { WebGL } from '../src/index';
+import { ElementScroller } from '../../scroller';
+import { queryEl } from '@smoovy/utils';
 
 const src = '/1000x1000.jpg';
-const gl = new WebGL();
+const gl = new WebGL({ taskOrder: 0 });
+const scroller = new ElementScroller({
+  container: queryEl('main')
+})
+
+scroller.onScroll(({ y }) => {
+  const cam = gl.renderer.findCamera('main')!;
+
+  cam.y = -cam.ch(y);
+});
+
 //const c1 = gl.camera({
 //  //fbo: true,
 //  name: 'fbo',
@@ -145,14 +157,14 @@ const gl = new WebGL();
 //requestAnimationFrame(render);
 //
 const plane2 = gl.plane({
-  x: 0,
+  x: -1.5,
   z: 0,
-  y: 500,
-  width: 500,
-  height: 500,
+  y: 0,
+  width: 3,
+  height: 3,
   originX: 0,
   originY: 0,
-  screen: true,
+  // screen: true,
   texture: gl.video({ src: '/meltdown.mp4' }),
 });
 //
@@ -177,22 +189,22 @@ const plane2 = gl.plane({
 //
 window.history.scrollRestoration = 'manual';
 
-const handleScroll = () => {
-  const x = window.scrollX;
-  const y = window.scrollY;
-  const cam = gl.renderer.findCamera('main');
-
-  if (cam) {
-    cam.y = cam.ch(-y);
-  }
-
-  // camera.projection[13] = camera.ch(y);
-
-  //lastX = x;
-  //lastY = y;
-}
+// const handleScroll = () => {
+//   const x = window.scrollX;
+//   const y = window.scrollY;
+//   const cam = gl.renderer.findCamera('main');
 //
- window.onscroll = () => handleScroll();
+//   if (cam) {
+//     cam.y = cam.ch(-y);
+//   }
+//
+//   // camera.projection[13] = camera.ch(y);
+//
+//   //lastX = x;
+//   //lastY = y;
+// }
+// //
+//  window.onscroll = () => handleScroll();
 // handleScroll();
 //// // // settings uniforms
 //// // gl.uniforms.mouse = [ 0.5, 0.5 ];

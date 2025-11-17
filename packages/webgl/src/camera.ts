@@ -1,11 +1,9 @@
 import { isNum, mapRange, Size } from '@smoovy/utils';
 
 import { Framebuffer, FramebufferConfig } from './framebuffer';
-import { FramebufferTexture } from './texture';
 
 import { Mat4, mat4, mat4inv, mat4o, mat4p } from './math';
 import { Model } from './model';
-import { warnOnce } from './utils';
 
 export interface CameraOrthographicConfig {
   type: 'orthographic';
@@ -143,10 +141,7 @@ export class Camera extends Model {
     this.size.width = this.size.height * aspect;
 
     this.updateProjection();
-
-    if (this.fbo) {
-      this.fbo.resize(width, height);
-    }
+    this.fbo?.resize(width, height);
   }
 
   set viewScale(scale: number) {
