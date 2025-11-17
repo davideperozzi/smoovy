@@ -4,14 +4,28 @@ import { queryEl } from '@smoovy/utils';
 
 const src = '/1000x1000.jpg';
 const gl = new WebGL({ taskOrder: 0 });
+const cam = gl.camera({ type: 'orthographic' });
 const scroller = new ElementScroller({
   container: queryEl('main')
 })
 
-scroller.onScroll(({ y }) => {
-  const cam = gl.renderer.findCamera('main')!;
+gl.renderer.toggleCamera(cam);
+gl.canvas.style.zIndex = '100';
 
+scroller.onScroll(({ y }) => {
   cam.y = -cam.ch(y);
+});
+
+const plane2 = gl.plane({
+  x: -2.5,
+  z: 0,
+  y: -10,
+  width: 3,
+  height: 3,
+  originX: 0,
+  originY: 0,
+  // screen: true,
+  texture: gl.video({ src: '/meltdown.mp4' }),
 });
 
 //const c1 = gl.camera({
@@ -156,17 +170,6 @@ scroller.onScroll(({ y }) => {
 //
 //requestAnimationFrame(render);
 //
-const plane2 = gl.plane({
-  x: -1.5,
-  z: 0,
-  y: 0,
-  width: 3,
-  height: 3,
-  originX: 0,
-  originY: 0,
-  // screen: true,
-  texture: gl.video({ src: '/meltdown.mp4' }),
-});
 //
 // gl.ctx.disable(gl.ctx.CULL_FACE);
 //

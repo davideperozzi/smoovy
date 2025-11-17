@@ -20,7 +20,12 @@ export class Renderer {
     private uniforms: Record<string, UniformValue> = {}
   ) {
     this.cameras.push(
-      new Camera(this.gl, { name: 'main', active: true, ...camera }, initialSize)
+      new Camera(this.gl, {
+        name: 'main',
+        active: true,
+        order: 100,
+        ...camera
+      }, initialSize)
     );
   }
 
@@ -48,6 +53,8 @@ export class Renderer {
     if (toggle) {
       this.toggleCamera(camera);
     }
+
+    this.cameras.sort((a, b) => a.order - b.order);
 
     return camera;
   }
@@ -77,6 +84,7 @@ export class Renderer {
 
     if (index > -1) {
       this.cameras.splice(index, 1);
+      this.cameras.sort((a, b) => a.order - b.order);
 
       return true;
     }

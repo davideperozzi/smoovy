@@ -22,6 +22,7 @@ export type CameraConfig = (CameraOrthographicConfig | { type: 'perspective' }) 
   active: boolean;
   fbo: boolean | Partial<FramebufferConfig>;
   scopes: (string|number)[];
+  order: number;
 }
 
 export class Camera extends Model {
@@ -32,6 +33,7 @@ export class Camera extends Model {
   private _projection: Mat4 = mat4();
   private _worldView: Mat4 = mat4();
   private _viewScale = 1;
+  private _order = 0;
   private config: CameraConfig;
 
   constructor(
@@ -44,6 +46,10 @@ export class Camera extends Model {
     if (config.scopes) {
       this.scopes.length = 0;
       this.scopes.push(...config.scopes);
+    }
+
+    if (config.order) {
+      this._order = config.order;
     }
 
     const defaults = { fov: 45, posZ: 5, active: true };
@@ -77,6 +83,10 @@ export class Camera extends Model {
 
   get worldView() {
     return this._worldView;
+  }
+
+  get order() {
+    return this._order;
   }
 
   get type() {
