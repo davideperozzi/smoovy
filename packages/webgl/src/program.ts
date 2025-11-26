@@ -102,12 +102,8 @@ export class Program {
   uniform(name: string, value?: UniformValue, type?: UniformType, warn = true) {
     const gl = this.gl;
 
-    if ( ! this.uniforms[name]) {
+    if (!this.uniforms[name]) {
       this.uniforms[name] = gl.getUniformLocation(this._program, name)!;
-
-      if ( ! this.uniforms[name]) {
-        warnOnce(`couldn't find uniform ${name}`, warn);
-      }
     }
 
     if (value && this.bound) {

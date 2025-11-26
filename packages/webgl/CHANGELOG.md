@@ -1,5 +1,11 @@
 # @smoovy/webgl
 
+## 1.3.5
+
+### Patch Changes
+
+- feat(webgl): updated texture handling
+
 ## 1.3.4
 
 ### Patch Changes

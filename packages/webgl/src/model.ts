@@ -171,7 +171,9 @@ export class Model {
   protected getCloneArgs(): any[] { return []; }
 
   draw(time = 0, uniforms: Record<string, UniformValue> = {}) {
-    Object.assign(uniforms, this._uniforms);
+    if (Object.keys(this._uniforms).length > 0) {
+      Object.assign(uniforms, this._uniforms);
+    }
 
     for (const child of this._children) {
       if (!child.disabled) {
@@ -183,6 +185,20 @@ export class Model {
   destroy(){
     for (const child of this._children) {
       child.destroy();
+    }
+  }
+
+  findChild(matcher: (child: Model) => boolean): Model | undefined {
+    for (const child of this._children) {
+      if (matcher(child)) {
+        return child;
+      }
+
+      const result = child.findChild(matcher);
+
+      if (result) {
+        return result;
+      }
     }
   }
 

@@ -117,9 +117,16 @@ export interface MeshConfig {
   z?: number;
 }
 
+function parseTextureName(name: string) {
+  const key = name.charAt(0).toUpperCase() + name.slice(1);
+  const apx = name.toLowerCase() !== 'default' ? `${key}` : '';
+
+  return `u_texture${apx}`;
+}
+
 export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
   private screenPosition: Partial<Vec2> = {};
-  private textures = new Map<Texture, [WebGLUniformLocation, number]>();
+  private _textures = new Map<string, [Texture, WebGLUniformLocation, number]>();
   protected rawPosition: Vec2 = { x: 0, y: 0 };
   protected program: Program;
   protected camera?: Camera;
@@ -148,6 +155,23 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
     this.updateGeometry();
   }
 
+  setTexture(name: string, tex: Texture | Camera) {
+    const texture = tex instanceof Camera && tex.fbo ? tex.fbo.texture : tex as Texture;
+    const texName = parseTextureName(name);
+    let slot = this._textures.size+1;
+
+    if (this._textures.has(texName)) {
+      slot = this._textures.get(texName)![2];
+    }
+
+    this._textures.set(
+      texName,
+      [texture, this.program.uniform(texName), slot]
+    );
+
+    console.log(this._textures.keys())
+  }
+
   private initTextures() {
     const texture = this.config.texture instanceof Camera && this.config.texture.fbo
       ? this.config.texture.fbo.texture
@@ -161,7 +185,7 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
       const uploads: Promise<boolean>[] = [];
 
       if (texture instanceof Texture) {
-        this.textures.set(texture, [this.program.uniform('u_texture'), 0]);
+        this._textures.set('u_texture', [ texture, this.program.uniform('u_texture'), 0]);
         uploads.push(texture.uploaded);
       } else {
         let slot = 0;
@@ -174,11 +198,9 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
             continue;
           }
 
-          const key = k.charAt(0).toUpperCase() + k.slice(1);
-          const apx = k.toLowerCase() !== 'default' ? `${key}` : '';
-          const name = `u_texture${apx}`;
+          const name = parseTextureName(k);
 
-          this.textures.set(currTex, [this.program.uniform(name), slot++]);
+          this._textures.set(name, [currTex, this.program.uniform(name), slot++]);
           uploads.push(currTex.uploaded);
         }
       }
@@ -322,7 +344,7 @@ export class Mesh<C extends MeshConfig = MeshConfig> extends Model {
       program.uniform(name, value, type, warn);
     }
 
-    for (const [texture, [ location, slot ]] of this.textures) {
+    for (const [_, [ texture,  location, slot ]] of this._textures) {
       texture.bind(slot, location);
     }
 

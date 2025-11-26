@@ -247,8 +247,24 @@ export class DepthTexture extends Texture<DepthTextureConfig> {
   }
 }
 
+
 export class FramebufferTexture extends Texture<FramebufferTextureConfig> {
   depth?: DepthTexture;
+  errors: Record<number, string> = {}
+
+  constructor(
+    protected gl: WebGLRenderingContext,
+    protected config: FramebufferTextureConfig
+  ) {
+    super(gl, config);
+
+    this.errors = {
+      [gl.FRAMEBUFFER_UNSUPPORTED]: 'UNSUPPORTED',
+      [gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT]: 'INCOMPLETE_ATTACHMENT',
+      [gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS]: 'INCOMPLETE_DIMENSIONS',
+      [gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT]: 'INCOMPLETE_MISSING_ATTACHMENT',
+    }
+  }
 
   allocate(width: number, height: number) {
     const gl = this.gl;
@@ -280,6 +296,7 @@ export class FramebufferTexture extends Texture<FramebufferTextureConfig> {
       0
     );
 
+
     if (this.config.depth) {
       if (!this.depth) {
         this.depth = new DepthTexture(this.gl, {
@@ -291,6 +308,12 @@ export class FramebufferTexture extends Texture<FramebufferTextureConfig> {
       }
 
       this.depth.allocate(width, height);
+    }
+
+    const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+
+    if (status !== gl.FRAMEBUFFER_COMPLETE) {
+      console.error(`failed to upload framebuffer texture`, this.errors[status]);
     }
 
     gl.bindTexture(gl.TEXTURE_2D, null);
